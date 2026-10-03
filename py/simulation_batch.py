@@ -82,9 +82,9 @@ def evolve_cluster(cluster_name, simulation, number_of_orbits, xyzv_file, json_f
             io_manager.record_json_snapshot(simulation, json_file)
             next_snapshot += 0.1
 
-        if simulation.simulation.t >= next_cleanup:
-            next_cleanup += 1.0
-            try_to_clean_stars(cluster_name, simulation)
+#        if simulation.simulation.t >= next_cleanup:
+#            next_cleanup += 1.0
+#            try_to_clean_stars(cluster_name, simulation)
 
         simulation.cluster_diagnostics.update_orbital_angle()
 
