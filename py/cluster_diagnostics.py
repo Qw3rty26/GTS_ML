@@ -24,7 +24,53 @@ class ClusterDiagnostics:
         self.orbits = 0
 
     def get_center_of_mass(self):
-       return self.rebound_simulation.com()
+
+        particles = self.rebound_simulation.particles
+
+        if len(particles) == 0:
+            return self.rebound_simulation.com()
+
+        pos = np.array([[p.x, p.y, p.z] for p in particles])
+        vel = np.array([[p.vx, p.vy, p.vz] for p in particles])
+        masses = np.array([p.m for p in particles])
+
+        total_mass = np.sum(masses)
+
+        com_pos = np.sum(pos * masses[:, np.newaxis], axis=0) / total_mass
+        com_vel = np.sum(vel * masses[:, np.newaxis], axis=0) / total_mass
+
+        percentiles = [80, 65, 50, 35, 20]
+
+        for perc in percentiles:
+
+            distances = np.linalg.norm(pos - com_pos, axis=1)
+
+            cutoff = np.percentile(distances, perc)
+
+            mask = distances <= cutoff
+
+            if np.sum(mask) < 5:
+                break
+
+            sub_pos = pos[mask]
+            sub_vel = vel[mask]
+            sub_masses = masses[mask]
+
+            sub_total_mass = np.sum(sub_masses)
+
+            com_pos = np.sum(sub_pos * sub_masses[:, np.newaxis], axis=0) / sub_total_mass
+            com_vel = np.sum(sub_vel * sub_masses[:, np.newaxis], axis=0) / sub_total_mass
+
+        class BoundCoM:
+            def __init__(self, p, v):
+                self.x = p[0]
+                self.y = p[1]
+                self.z = p[2]
+                self.vx = v[0]
+                self.vy = v[1]
+                self.vz = v[2]
+
+        return BoundCoM(com_pos, com_vel)
 
     def _cache_center_of_mass(self):
         self._cached_center_of_mass = self.get_center_of_mass()
@@ -110,10 +156,10 @@ class ClusterDiagnostics:
         return total_energy
 
     def set_initial_total_energy(self):
-       self.initial_total_energy = self.get_total_energy()
+        self.initial_total_energy = self.get_total_energy()
 
     def get_initial_total_energy(self):
-       return self.initial_total_energy
+        return self.initial_total_energy
 
     def get_total_energy_relative_error(self):
 
@@ -146,7 +192,7 @@ class ClusterDiagnostics:
 
         # L_internal = sum((r_i - r_COM) x m_i * (v_i - v_COM))
 
-        center_of_mass = self.rebound_simulation.com()
+        center_of_mass = self.get_center_of_mass()
 
         total_angular_momentum = np.zeros(3)
 
@@ -188,6 +234,8 @@ class ClusterDiagnostics:
 
         denominator = np.linalg.norm(self.initial_angular_momentum)
 
+        if denominator == 0.0:
+            return 0.0
 
         total_angular_momentum_error = numerator / denominator
 
@@ -220,71 +268,159 @@ class ClusterDiagnostics:
     def _cache_half_mass_radius(self):
         self._cached_half_mass_radius = self.get_half_mass_radius()
 
+    def get_cluster_kinetic_energy(self):
+
+        #                    1
+        # kinetic_energy = --- * sum_i ( m_i * |v_i - v_COM|^2 )
+        #                    2
+
+        center_of_mass = self.get_center_of_mass()
+
+        total_kinetic_energy = 0.0
+
+        for entity in self.rebound_simulation.particles:
+
+            relative_velocity_x = entity.vx - center_of_mass.vx
+            relative_velocity_y = entity.vy - center_of_mass.vy
+            relative_velocity_z = entity.vz - center_of_mass.vz
+
+            relative_velocity_squared = (
+                relative_velocity_x**2 +
+                relative_velocity_y**2 +
+                relative_velocity_z**2
+            )
+
+            total_kinetic_energy += 0.5 * entity.m * relative_velocity_squared
+
+        return total_kinetic_energy
+
+    def get_cluster_potential_energy(self):
+
+        #                      G * m_i * m_j
+        # U_cluster = - sum ( ----------------- )
+        #               i<j      distance_ij
+
+        total_potential_energy = 0.0
+
+        particles = self.rebound_simulation.particles
+
+        number_of_particles = len(particles)
+
+        for index_i in range(number_of_particles):
+
+            entity_i = particles[index_i]
+
+            for index_j in range(index_i + 1, number_of_particles):
+
+                entity_j = particles[index_j]
+
+                distance_x = entity_i.x - entity_j.x
+                distance_y = entity_i.y - entity_j.y
+                distance_z = entity_i.z - entity_j.z
+
+                softened_distance = np.sqrt(
+                    distance_x**2 +
+                    distance_y**2 +
+                    distance_z**2 +
+                    self.rebound_simulation.softening**2
+                )
+
+                total_potential_energy += (
+                    entity_i.m * entity_j.m / softened_distance
+                )
+
+        total_potential_energy *= -self.rebound_simulation.G
+
+        return total_potential_energy
+
+    def get_virial_ratio(self):
+
+#TODO mettere K_total e U_total
+
+        #     2 * K_internal
+        # Q = --------------
+        #     |U_internal|
+
+        kinetic_energy = self.get_cluster_kinetic_energy()
+
+        potential_energy = self.get_cluster_potential_energy()
+
+        if potential_energy == 0:
+            return 0.0
+
+        numerator = 2.0 * kinetic_energy
+
+        denominator = abs(potential_energy)
+
+        virial_ratio = numerator / denominator
+
+        return virial_ratio
+
     def get_entity_kinetic_energy(self, entity):
 
-       #                     1
-       # kinetic_energy_i = --- m_i v_i^2
-       #                     2
+        #                     1
+        # kinetic_energy_i = --- m_i v_i^2
+        #                     2
 
-       v_rel_x = entity.vx - self._cached_center_of_mass.vx
-       v_rel_y = entity.vy - self._cached_center_of_mass.vy
-       v_rel_z = entity.vz - self._cached_center_of_mass.vz
+        v_rel_x = entity.vx - self._cached_center_of_mass.vx
+        v_rel_y = entity.vy - self._cached_center_of_mass.vy
+        v_rel_z = entity.vz - self._cached_center_of_mass.vz
 
-       entity_kinetic_energy = 0.5 * entity.m * (
-          v_rel_x**2 +
-          v_rel_y**2 +
-          v_rel_z**2
-       )
+        entity_kinetic_energy = 0.5 * entity.m * (
+            v_rel_x**2 +
+            v_rel_y**2 +
+            v_rel_z**2
+        )
 
-       return entity_kinetic_energy
+        return entity_kinetic_energy
 
     def get_entity_potential_energy(self, entity_i):
 
-       #                                        m_i * m_j
-       # potential_energy_i = - G * sum_j!=i( ------------- )
-       #                                       distance_ij
+        #                                        m_i * m_j
+        # potential_energy_i = - G * sum_j!=i( ------------- )
+        #                                       distance_ij
 
-       entity_potential_energy = 0.0
+        entity_potential_energy = 0.0
 
-       for entity_j in self.rebound_simulation.particles:
-          if entity_j is entity_i: # j != i
-             continue
+        for entity_j in self.rebound_simulation.particles:
+           if entity_j is entity_i: # j != i
+               continue
 
-          distance_x = entity_i.x - entity_j.x
-          distance_y = entity_i.y - entity_j.y
-          distance_z = entity_i.z - entity_j.z
+           distance_x = entity_i.x - entity_j.x
+           distance_y = entity_i.y - entity_j.y
+           distance_z = entity_i.z - entity_j.z
 
-          softened_distance = np.sqrt(
-             distance_x**2 +
-             distance_y**2 +
-             distance_z**2 +
-             self.rebound_simulation.softening**2
-          )
+           softened_distance = np.sqrt(
+               distance_x**2 +
+               distance_y**2 +
+               distance_z**2 +
+               self.rebound_simulation.softening**2
+           )
 
-          entity_potential_energy += (
-             entity_i.m *
-             entity_j.m /
-             softened_distance
-          )
+           entity_potential_energy += (
+               entity_i.m *
+               entity_j.m /
+               softened_distance
+           )
 
-       entity_potential_energy = - self.rebound_simulation.G * entity_potential_energy
+        entity_potential_energy = - self.rebound_simulation.G * entity_potential_energy
 
-       return entity_potential_energy
+        return entity_potential_energy
 
     def get_entity_total_energy(self, entity):
 
-       #
-       # total_energy_i = kinetic_energy_i + potential_energy_i
-       #
+        #
+        # total_energy_i = kinetic_energy_i + potential_energy_i
+        #
 
-       entity_kinetic_energy = self.get_entity_kinetic_energy(entity)
-       entity_potential_energy = self.get_entity_potential_energy(entity)
+        entity_kinetic_energy = self.get_entity_kinetic_energy(entity)
+        entity_potential_energy = self.get_entity_potential_energy(entity)
 
-       entity_total_energy = entity_kinetic_energy + entity_potential_energy
+        entity_total_energy = entity_kinetic_energy + entity_potential_energy
 
-       return entity_total_energy
+        return entity_total_energy
 
-    def _is_entity_escaped(self, entity, distance_factor = 5.0):
+    def _is_entity_escaped(self, entity, distance_factor = 15.0):
 
         relative_x = entity.x - self._cached_center_of_mass.x
         relative_y = entity.y - self._cached_center_of_mass.y
@@ -301,15 +437,15 @@ class ClusterDiagnostics:
 
     def get_escaped_entity_ids(self):
 
-       escaped_entity_ids = []
-       self._cache_center_of_mass()
-       self._cache_half_mass_radius()
+        escaped_entity_indices = []
+        self._cache_center_of_mass()
+        self._cache_half_mass_radius()
 
-       for entity in self.rebound_simulation.particles:
-          if self._is_entity_escaped(entity):
-             escaped_entity_ids.append(entity.name)
+        for i, entity in enumerate(self.rebound_simulation.particles):
+            if self._is_entity_escaped(entity):
+                escaped_entity_indices.append(i)
 
-       return escaped_entity_ids
+        return escaped_entity_indices
 
     def get_snapshot(self):
 

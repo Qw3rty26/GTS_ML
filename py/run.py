@@ -1,50 +1,21 @@
 import argparse
 import logging
 import time
-import json
 import os
+import io_manager
 from multiprocessing import Pool
 
 from simulation_batch import run_cluster_generation as run_gen
 from simulation_batch import run_galaxy_tidal_stripping as run_gts
 from logger_settings import configure_logging
-
+from verify_physics import verify_simulation
 
 def run_gen_wrapper(args):
-
     return run_gen(*args)
 
 
 def run_gts_wrapper(args):
-
     return run_gts(*args)
-
-
-def load_configuration_JSON(file_path):
-
-    with open(file_path, "r") as file:
-        return json.load(file)
-
-def create_run_directory(output_path, create_clst, create_gts):
-
-    run_id = 1
-
-    while os.path.exists(os.path.join(output_path, f"run_{run_id:03d}")):
-        run_id += 1
-
-    if create_clst.lower() == "y"  or create_gts.lower() == "y":
-        run_path = os.path.join(output_path, f"run_{run_id:03d}")
-
-    if create_clst.lower() == "y":
-        os.makedirs(os.path.join(run_path, "GEN", "JSON"))
-        os.makedirs(os.path.join(run_path, "GEN", "XYZV"))
-
-    if create_gts.lower() == "y":
-        os.makedirs(os.path.join(run_path, "GTS", "JSON"))
-        os.makedirs(os.path.join(run_path, "GTS", "XYZV"))
-
-    return run_path
-
 
 def _generate_clusters(logger, configuration, simulation_args):
 
@@ -158,7 +129,7 @@ def main():
 
     args = parser.parse_args()
 
-    configuration = load_configuration_JSON(args.config)
+    configuration = io_manager.load_json_file(args.config)
 
     configure_logging(args.verbose, args.debug)
 
@@ -178,10 +149,10 @@ def main():
 
     cluster_answer = input("\n\nGenerate new clusters? [Y/N]")
     gts_answer = input("\n\nSimulate clusters in the galaxy? [Y/N]")
+    verify_physics_answer = input("\n\nVerify the correctness of the simulations? [Y/N]")
 
     if cluster_answer.lower() == "y":
-        run_path = create_run_directory(configuration["output directory"], cluster_answer, gts_answer)
-
+        run_path = io_manager.create_run_directory(configuration["output directory"])
         cluster_json = os.path.join(run_path, "GEN", "JSON")
         cluster_xyzv = os.path.join(run_path, "GEN", "XYZV")
 
@@ -214,7 +185,7 @@ def main():
 
     if gts_answer.lower() == "y":
         if run_path is None:
-            run_path = create_run_directory(configuration["output directory"], cluster_answer, gts_answer)
+            run_path = io_manager.create_run_directory(configuration["output directory"])
         gts_json = os.path.join(run_path, "GTS", "JSON")
         gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
 
@@ -231,6 +202,12 @@ def main():
         ]
 
         _simulate_gts(logger, configuration, gts_args)
+
+    if verify_physics_answer.lower() == "y":
+        if run_path and os.path.exists(run_path):
+            verify_simulation(run_path, configuration)
+        else:
+            logger.warning("No valid directory {run.path} was found to be verified.")
 
 
 if __name__ == "__main__":
