@@ -3,12 +3,16 @@ import logging
 import time
 import os
 import io_manager
+import multiprocessing as mp
 from multiprocessing import Pool
 
 from simulation_batch import run_cluster_generation as run_gen
 from simulation_batch import run_galaxy_tidal_stripping as run_gts
 from logger_settings import configure_logging
 from verify_physics import verify_simulation
+
+def init_worker(verbose, debug):
+    configure_logging(verbose, debug)
 
 def run_gen_wrapper(args):
     return run_gen(*args)
@@ -17,7 +21,7 @@ def run_gen_wrapper(args):
 def run_gts_wrapper(args):
     return run_gts(*args)
 
-def _generate_clusters(logger, configuration, simulation_args):
+def _generate_clusters(logger, configuration, simulation_args, verbose, debug):
 
     simulation = configuration["simulation"]
     cluster = configuration["cluster generation"]
@@ -38,10 +42,11 @@ def _generate_clusters(logger, configuration, simulation_args):
     logger.info("------------------------------------------")
 
     computing_time = time.perf_counter()
+    chunk_size = max(1, len(simulation_args) // (os.cpu_count() * 2))
 
-    with Pool() as pool:
+    with Pool(initializer=init_worker, initargs=(verbose, debug)) as pool:
         for completed, _ in enumerate(
-            pool.imap_unordered(run_gen_wrapper, simulation_args),
+            pool.imap_unordered(run_gen_wrapper, simulation_args, chunksize=chunk_size),
             1
         ):
             logger.info(
@@ -60,14 +65,14 @@ def _generate_clusters(logger, configuration, simulation_args):
     logger.info("------------------------------------------")
 
 
-def _simulate_gts(logger, configuration, simulation_args):
+def _simulate_gts(logger, configuration, simulation_args, verbose, debug):
 
     simulation = configuration["simulation"]
     gts = configuration["galactic tidal stripping"]
     output = configuration["output directory"]
 
     logger.info("------------------------------------------")
-    logger.info("            EVOLVING GALAXY")
+    logger.info("             EVOLVING GALAXY")
     logger.info("")
     logger.info(f"  NO. SIMULATIONS: {len(simulation_args)}")
     logger.info(f"  INTEGRATOR: {simulation['integrator']}")
@@ -80,10 +85,11 @@ def _simulate_gts(logger, configuration, simulation_args):
     logger.info("------------------------------------------")
 
     computing_time = time.perf_counter()
+    chunk_size = max(1, len(simulation_args) // (os.cpu_count() * 2))
 
-    with Pool() as pool:
+    with Pool(initializer=init_worker, initargs=(verbose, debug)) as pool:
         for completed, _ in enumerate(
-            pool.imap_unordered(run_gts_wrapper, simulation_args),
+            pool.imap_unordered(run_gts_wrapper, simulation_args, chunksize=chunk_size),
             1
         ):
             logger.info(
@@ -129,7 +135,8 @@ def main():
 
     args = parser.parse_args()
 
-    configuration = io_manager.load_json_file(args.config)
+    config_path = os.path.abspath(args.config)
+    configuration = io_manager.load_json_file(config_path)
 
     configure_logging(args.verbose, args.debug)
 
@@ -172,7 +179,7 @@ def main():
                 )
             )
 
-        _generate_clusters(logger, configuration, simulation_args)
+        _generate_clusters(logger, configuration, simulation_args, args.verbose, args.debug)
     else:
         print("can't simulate GTS without generating the cluster first. exiting...")
         exit()
@@ -201,7 +208,7 @@ def main():
             for cluster_file in cluster_files
         ]
 
-        _simulate_gts(logger, configuration, gts_args)
+        _simulate_gts(logger, configuration, gts_args, args.verbose, args.debug)
 
     if verify_physics_answer.lower() == "y":
         if run_path and os.path.exists(run_path):
@@ -211,4 +218,5 @@ def main():
 
 
 if __name__ == "__main__":
+    mp.set_start_method("spawn", force=True)
     main()
