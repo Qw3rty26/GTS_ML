@@ -37,3 +37,7 @@ def configure_logging(verbose: bool, debug: bool):
             handler
         ]
     )
+
+#place duct tape on numba's mouth
+logging.getLogger('numba').setLevel(logging.WARNING)
+logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)

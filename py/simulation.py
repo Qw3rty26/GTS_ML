@@ -8,6 +8,7 @@ class Simulation:
 
         self.simulation = rebound.Simulation()
         self.galactic_potential = None
+        self.rebX = None
         self.cluster_diagnostics = ClusterDiagnostics(self)
 
         self.simulation.dt = dt
@@ -36,7 +37,8 @@ class Simulation:
             particle.vz += speed_z
 
     def _apply_galactic_forces(self, sim_pointer):
-        self.galactic_potential.add_galaxy_forces(self.simulation.particles)
+        if self.galactic_potential:
+            self.galactic_potential.add_galaxy_forces(self.simulation.particles)
 
     def add_galactic_potential(self, galactic_potential):
         self.galactic_potential = galactic_potential
@@ -44,7 +46,6 @@ class Simulation:
 
     def add_entity(self, x=0, y=0, z=0, vx=0, vy=0, vz=0, mass=0.1, name=0):
         self.simulation.add(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz, m=mass, name=str(name))
-
 
     def remove_entity(self, entity_id):
         self.simulation.remove(entity_id)
