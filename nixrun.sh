@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MAIN="py/launch.py"
+MAIN="py/run.py"
 
 nix-shell --run "
 if [ ! -d .venv ]; then

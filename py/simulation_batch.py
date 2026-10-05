@@ -1,141 +1,192 @@
+import logging
+import os
+import numpy as np
+import io_manager
 from simulation import Simulation
 from plummer import Plummer
 from galactic_potential import GalacticPotential
-import logging
-import numpy as np
-import json
-import os
 
 logger = logging.getLogger(__name__)
 
-# MAGIC NUMBERS
-RADIUS = 5
 
-def create_simulation(simulation_id, number_of_stars, integrator, dt):
-    np.random.seed(simulation_id)
+def try_to_clean_stars(cluster_name, simulation):
+    escaped_entity_ids = (
+        simulation.cluster_diagnostics.get_escaped_entity_ids()
+    )
+
+    if escaped_entity_ids:
+        relative_error = simulation.cluster_diagnostics.get_total_energy_relative_error_percentage()
+
+        simulation.clean_escaped_stars(escaped_entity_ids)
+
+        simulation.cluster_diagnostics.set_initial_total_energy()
+        new_total_energy = simulation.cluster_diagnostics.get_total_energy()
+
+        logger.debug(
+            f"Simulation no. {cluster_name}: Cleaning {len(escaped_entity_ids)} star/s "
+            f"Relative error before cleaning: {relative_error:.8f}% "
+            f"New total energy: {new_total_energy:.8f}"
+        )
+
+
+def generate_cluster(cluster_id, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator):
+
+    np.random.seed(cluster_id)
     STAR_MASS = 1.0 / number_of_stars
 
-    logger.debug(f"Simulation {simulation_id}: Generating Plummer cluster...")
-    plummer = Plummer(RADIUS, number_of_stars)
-    logger.debug(f"Simulation {simulation_id}: Plummer cluster generated.")
-    sim = Simulation(dt, integrator)
+    logger.debug(f"Cluster no. {cluster_id}: Generating Plummer Cluster...")
 
+    plummer = Plummer(cluster_radius, number_of_stars)
     positions, velocities = plummer.generate_plummer_cluster()
 
-    for x, v in zip(positions, velocities):
-       sim.add_entity(
-          x[0], x[1], x[2],
-          v[0], v[1], v[2],
-          STAR_MASS
-       )
+    simulation = Simulation(dt, G, softening, time_warp, integrator)
 
-    sim.move_to_center_of_mass()
-    sim.cluster_diagnostics.set_initial_total_energy()
+    for id, (pos, vel) in enumerate(zip(positions, velocities)):
+        simulation.add_entity(pos[0], pos[1], pos[2], vel[0], vel[1], vel[2], STAR_MASS, id)
 
-    return sim
-
-def save_cluster_with_snapshots(sim, file):
-    snapshot = sim.get_XYZV_snapshot()
-    for line in snapshot:
-        file.write(f"{line}\n")
-
-def clean_cluster_with_snapshots(sim, end_time, file):
-    next_cleanup = 1.0
-    next_snapshot = 0.01
-    escaped_entities = 0
-
-    while sim.simulation.t < end_time:
-        sim.update()
-
-        if sim.simulation.t >= next_snapshot:
-            save_cluster_with_snapshots(sim, file)
-            next_snapshot += 0.01
-
-        if sim.simulation.t >= next_cleanup:
-            escaped_entities += sim.clean_cluster()
-            next_cleanup += 1.0
-
-    return escaped_entities
-
-def evolve_cluster(sim, end_time, file):
-
-    while sim.simulation.t < end_time:
-        sim.update()
-    save_cluster_with_snapshots(sim, file)
-
-def clean_cluster(sim, end_time):
-    next_cleanup = 1.0
-    escaped_entities = 0
-
-    while sim.simulation.t < end_time:
-       sim.update()
-
-       if sim.simulation.t >= next_cleanup:
-          escaped_entities += sim.clean_cluster()
-          next_cleanup += 1.0
-
-    return escaped_entities
+    simulation.simulation.move_to_com()
+    simulation.cluster_diagnostics.set_initial_total_energy()
+    simulation.cluster_diagnostics.set_initial_angular_momentum()
+    return simulation
 
 
-def save_cluster(sim, simulation_id, output_path):
-    os.makedirs(output_path+"/JSON", exist_ok=True)
+def clean_cluster(cluster_id, simulation, end_time, xyzv_file, json_file):
 
-    #sim.save_to_file(f"{output_path}/cluster_{simulation_id}.bin")
-    snapshot = sim.get_JSON_snapshot()
-    with open(f"{output_path}/JSON/cluster_{simulation_id}.json", "w") as file:
-       json.dump(snapshot, file, indent=4)
+    dt_cleanup = 1.0
+    dt_snapshot = 0.01
 
-    #snapshot = sim.get_XYZV_snapshot()
-    #with open(f"{output_path}/cluster_{simulation_id}.xyzv", "w") as file:
-    #    for line in snapshot:
-    #        file.write(f"{line}\n")
+    next_cleanup = simulation.simulation.t + dt_cleanup
+    next_snapshot = simulation.simulation.t + dt_snapshot
+    io_manager.init_json_snapshot(simulation, json_file)
 
-def run_gen(simulation_id = 0, number_of_stars = 1, integrator = "whfast", dt = 1e-3, output_path = "default"):
-    logger.debug(f"Simulation {simulation_id}: Started!")
-    sim = create_simulation(simulation_id, number_of_stars, integrator, dt)
+    while simulation.simulation.t < end_time:
+        simulation.update()
 
-    END_TIME = 10 * RADIUS ** (3 / 2) / np.sqrt(number_of_stars)
-    os.makedirs(output_path, exist_ok=True)
-    logger.debug(f"Simulation {simulation_id}: Evolving cluster...")
-    with open(f"{output_path}/cluster_{simulation_id}.xyzv", "w") as file:
-        escaped_entities = clean_cluster_with_snapshots(sim, END_TIME, file)
-    save_cluster(sim, simulation_id, output_path)
-    logger.info(f"Simulation {simulation_id}: {escaped_entities} Stars removed.")
+        if simulation.simulation.t >= next_snapshot:
+            io_manager.save_xyzv_snapshot(simulation, xyzv_file)
+            io_manager.record_json_snapshot(simulation, json_file)
+            next_snapshot += dt_snapshot
+
+        if simulation.simulation.t >= next_cleanup:
+            next_cleanup += dt_cleanup
+            try_to_clean_stars(cluster_id, simulation)
 
 
-def run_gts(cluster_file, galaxy_mass=10, galaxy_radius=1, integrator="whfast", dt=1e-3, output_path="default" ):
-    logger.debug(f"Simulation {cluster_file}: Started!")
+def evolve_cluster(cluster_name, simulation, number_of_orbits, xyzv_file, json_file):
 
-    with open(cluster_file, "r") as file:
-        snapshot = json.load(file)
+    dt_cleanup = 1.0
+    dt_snapshot = 0.1
 
-    sim = Simulation(
-        dt=snapshot["dt"],
-        integrator=snapshot["integrator"]
+    next_cleanup = simulation.simulation.t + dt_cleanup
+    next_snapshot = simulation.simulation.t + dt_snapshot
+    io_manager.init_json_snapshot(simulation, json_file)
+    orbits = 0
+
+    while simulation.cluster_diagnostics.get_cluster_orbits() < number_of_orbits:
+
+        simulation.update()
+
+        if simulation.simulation.t >= next_snapshot:
+            io_manager.save_xyzv_snapshot(simulation, xyzv_file)
+            io_manager.record_json_snapshot(simulation, json_file)
+            next_snapshot += dt_snapshot
+
+#       if simulation.simulation.t >= next_cleanup:
+#           next_cleanup += dt_cleanup
+#           try_to_clean_stars(cluster_name, simulation)
+
+        simulation.cluster_diagnostics.update_orbital_angle()
+
+        new_orbits = simulation.cluster_diagnostics.get_cluster_orbits()
+
+        if orbits != new_orbits:
+            orbits = new_orbits
+            logger.info(f"Cluster no. {cluster_name}: {orbits}/{number_of_orbits} done")
+
+
+def run_cluster_generation(cluster_id, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator, json_output_path, xyzv_output_path):
+
+    logger.info(f"Cluster no. {cluster_id}: Generating...")
+
+    simulation = generate_cluster(cluster_id, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator)
+    initial_total_energy = simulation.cluster_diagnostics.get_initial_total_energy()
+    initial_angular_momentum = simulation.cluster_diagnostics.get_initial_angular_momentum()
+    logger.debug(
+        f"Cluster no. {cluster_id}:\n"
+        f"Initial total energy: {initial_total_energy:.7f}\n"
+        f"Initial angular momentum: {initial_angular_momentum}\n"
     )
 
-    galactic_potential = GalacticPotential(
-        galaxy_radius,
-        galaxy_mass
+    END_TIME = (
+        20 * cluster_radius ** (3 / 2)
+        / np.sqrt(number_of_stars)
     )
 
-    sim.add_galactic_potential(galactic_potential)
+    os.makedirs(json_output_path, exist_ok=True)
+    os.makedirs(xyzv_output_path, exist_ok=True)
 
-    sim.load_JSON_snapshot(snapshot)
+    xyzv_path = os.path.join(xyzv_output_path, f"cluster_{cluster_id}.xyzv")
+    json_path = os.path.join(json_output_path, f"cluster_{cluster_id}.json")
 
-    logger.debug(f"Simulation {cluster_file}: Cluster loaded.")
+    with open(xyzv_path, "w") as xyzv_file:
+        logger.debug(f"Cluster no. {cluster_id}: Cleaning...")
+        clean_cluster(cluster_id, simulation, END_TIME, xyzv_file, json_path)
 
-    END_TIME = 100
-    os.makedirs(output_path, exist_ok=True)
-
-    cluster_name = os.path.splitext(
-         os.path.basename(cluster_file)
-     )[0]
-
-    output_file = os.path.join(
-        output_path,
-        f"{cluster_name}.xyzv"
+    final_total_energy = simulation.cluster_diagnostics.get_total_energy()
+    energy_relative_error = simulation.cluster_diagnostics.get_total_energy_relative_error_percentage()
+    final_angular_momentum = simulation.cluster_diagnostics.get_total_angular_momentum()
+    angular_momentum_relative_error = simulation.cluster_diagnostics.get_total_angular_momentum_error_percentage()
+    logger.debug(
+        f"Cluster no. {cluster_id}:\n"
+        f"Final cluster total energy: {final_total_energy:.7f} ({energy_relative_error:.7f}% relative error)\n"
+        f"Final cluster angular momentum: {final_angular_momentum} ({angular_momentum_relative_error:.4f}% relative error)\n"
     )
 
-    with open(output_file, "w") as file:
-        evolve_cluster(sim, END_TIME, file)
+    logger.debug(f"Cluster no. {cluster_id}: Done.")
+
+
+def run_galaxy_tidal_stripping(cluster_path, galaxy_mass, galaxy_radius, number_of_orbits, json_output_path, xyzv_output_path):
+    CLUSTER_DISTANCE_FROM_GALAXY_FACTOR = 10
+
+    cluster_name = os.path.splitext(os.path.basename(cluster_path))[0]
+
+    logger.debug(f"Simulation {cluster_name}: Running...")
+
+    with open(cluster_path, "r") as cluster_file:
+        simulation = io_manager.load_json_snapshot(cluster_file)
+
+    galactic_potential = GalacticPotential(galaxy_radius, galaxy_mass)
+
+    orbital_radius = CLUSTER_DISTANCE_FROM_GALAXY_FACTOR * galaxy_radius
+    orbital_velocity = galactic_potential.get_cluster_initial_velocity(orbital_radius)
+
+    simulation.add_galactic_potential(galactic_potential)
+
+    simulation.move_cluster(orbital_radius, 0, 0)
+    simulation.speed_cluster(0, orbital_velocity, 0)
+    simulation.cluster_diagnostics.set_initial_total_energy()
+
+    initial_total_energy = simulation.cluster_diagnostics.get_initial_total_energy()
+    logger.debug(
+        f"Cluster no. {cluster_name}:\n"
+        f"Initial total energy: {initial_total_energy:.7f}\n"
+    )
+
+    os.makedirs(xyzv_output_path, exist_ok=True)
+    os.makedirs(json_output_path, exist_ok=True)
+
+    xyzv_path = os.path.join(xyzv_output_path, f"{cluster_name}.xyzv")
+    json_path = os.path.join(json_output_path, f"{cluster_name}.json")
+
+    with open(xyzv_path, "w") as xyzv_file:
+        logger.debug(f"Simulation {cluster_name}: Evolving...")
+        evolve_cluster(cluster_name, simulation, number_of_orbits, xyzv_file, json_path)
+
+    final_total_energy = simulation.cluster_diagnostics.get_total_energy()
+    energy_relative_error = simulation.cluster_diagnostics.get_total_energy_relative_error_percentage()
+    logger.debug(
+        f"Cluster no. {cluster_name}:\n"
+        f"Final cluster total energy: {final_total_energy:.7f} ({energy_relative_error:.7f}% relative error)\n"
+    )
+
+    logger.debug(f"Simulation {cluster_name}: Done.")

@@ -33,7 +33,8 @@ systemCanvas.addEventListener("mouseup", (event)=>{ // used to drag the space
 
 systemCanvas.addEventListener("wheel", (event)=>{ // used to zoom in and out
         event.preventDefault(); // remove default handlers
-        entitySystem.space.zoomSpace(gridCtx, event.deltaY); // redraw the grid
+        const zoomAmount = event.deltaY > 0 ? -5 : 5;
+        entitySystem.space.zoomSpace(gridCtx, zoomAmount); // redraw the grid
         entitySystem.renderEntities(systemCtx); // render the system
 })
 

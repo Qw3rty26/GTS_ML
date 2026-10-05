@@ -1,6 +1,38 @@
 import numpy as np
+from numba import njit
 
 GRAVITATIONAL_CONSTANT = 1
+
+# numba is used to make this faster by not calling Python interpreter at each call
+@njit(fastmath=True)
+def _compute_plummer_accelerations(coords, plummer_mass, plummer_radius):
+    n = coords.shape[0]
+    ax = np.empty(n, dtype=np.float64)
+    ay = np.empty(n, dtype=np.float64)
+    az = np.empty(n, dtype=np.float64)
+
+    numerator = -GRAVITATIONAL_CONSTANT * plummer_mass
+    plummer_radius_squared = plummer_radius**2
+
+    for i in range(n):
+        x = coords[i, 0]
+        y = coords[i, 1]
+        z = coords[i, 2]
+
+        #               - G * M
+        # a = -------------------------------
+        #     (a^2 + x^2 + y^2 + z^2)^(3/2)
+
+        radius_squared = x**2 + y**2 + z**2
+        denominator = (plummer_radius_squared + radius_squared)**(1.5)
+
+        acceleration_factor = numerator / denominator
+
+        ax[i] = acceleration_factor * x
+        ay[i] = acceleration_factor * y
+        az[i] = acceleration_factor * z
+
+    return ax, ay, az
 
 
 class GalacticPotential:
@@ -16,13 +48,9 @@ class GalacticPotential:
         self.plummer_mass = plummer_mass # M
 
     def get_galaxy_radius(self):
-        if self.plummer_radius is None:
-            raise ValueError("plummer_radius value is None")
         return self.plummer_radius
 
     def get_galaxy_mass(self):
-        if self.plummer_mass is None:
-            raise ValueError("plummer_mass value is None")
         return self.plummer_mass
 
     def _potential_phi(self, radius_from_center):
@@ -38,57 +66,33 @@ class GalacticPotential:
         phi = numerator / denominator
         return phi
 
-    def _acceleration(self, x, y, z):
-
-        #                   - G * M
-        # a_x = ------------------------------- * x
-        #        (a^2 + x^2 + y^2 + z^2)^(3/2)
-        #
-        #                   - G * M
-        # a_y = ------------------------------- * y
-        #        (a^2 + x^2 + y^2 + z^2)^(3/2)
-        #
-        #                   - G * M
-        # a_z = ------------------------------- * z
-        #        (a^2 + x^2 + y^2 + z^2)^(3/2)
-
-        numerator = -GRAVITATIONAL_CONSTANT * self.plummer_mass
-
-        radius_squared = x**2 + y**2 + z**2
-        denominator = ( self.plummer_radius**2 + radius_squared )**(3/2)
-
-        acceleration_factor = numerator / denominator
-
-        acceleration_x = acceleration_factor * x
-        acceleration_y = acceleration_factor * y
-        acceleration_z = acceleration_factor * z
-
-        return acceleration_x, acceleration_y, acceleration_z
-
     def get_cluster_initial_velocity(self, radius):
 
-        #               G * M * r^2
+        #             G * M * r^2
         # v = sqrt( ------------------- )
-        #            (a^2 + r^2)^(3/2)
+        #          (a^2 + r^2)^(3/2)
 
         numerator = ( GRAVITATIONAL_CONSTANT * self.plummer_mass * radius**2 )
 
-        denominator = ( self.plummer_radius**2 + radius**2 )**(3/2)
+        denominator = ( self.plummer_radius**2 + radius**2 )**(1.5)
 
         velocity = np.sqrt( numerator / denominator )
         return velocity
 
-
     def add_galaxy_forces(self, particles):
-        for particle in particles:
-            acceleration_x, acceleration_y, acceleration_z = (
-                self._acceleration(
-                    particle.x,
-                    particle.y,
-                    particle.z
-                )
-            )
+        n = len(particles)
+        coords = np.empty((n, 3), dtype=np.float64)
 
-            particle.ax += acceleration_x
-            particle.ay += acceleration_y
-            particle.az += acceleration_z
+        for i, p in enumerate(particles):
+            coords[i, 0] = p.x
+            coords[i, 1] = p.y
+            coords[i, 2] = p.z
+
+        ax, ay, az = _compute_plummer_accelerations(
+            coords, self.plummer_mass, self.plummer_radius
+        )
+
+        for i, particle in enumerate(particles):
+            particle.ax += ax[i]
+            particle.ay += ay[i]
+            particle.az += az[i]

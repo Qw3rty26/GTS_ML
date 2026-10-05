@@ -8,6 +8,7 @@ CLUSTER_MASS = 1           # M
 class Plummer:
 
     def __init__(self, plummer_radius = 1, number_of_stars = 1):
+
         if plummer_radius <= 0:
             raise ValueError("plummer_radius must be greater than 0")
 
@@ -36,13 +37,13 @@ class Plummer:
         # y = ---
         #      a
 
-        #  d_rho     -15 * y * (1 + y^2)^(-7/2)
+        #  d_rho     -15 * M * y * (1 + y^2)^(-7/2)
         # ------- = ----------------------------
         #   d_r           4 * pi * a^4
 
         y = radius_from_center / self.plummer_radius
 
-        numerator = - 15 * y * (1 + y**2)**(-7/2)
+        numerator = - 15 * CLUSTER_MASS * y * (1 + y**2)**(-7/2)
 
         denominator = 4 * np.pi * self.plummer_radius**4
 
@@ -115,7 +116,7 @@ class Plummer:
         versor = np.random.normal(size = 3) # generate a random point in 3D space
         norm = np.linalg.norm(versor) # normalise the versor so that its length is 1
         if norm == 0:
-            return self.random_versor()
+            return self._random_versor()
         else:
             return versor / norm
 
@@ -209,6 +210,45 @@ class Plummer:
             if total_energy < 0:
                 return velocity
 
+    def _apply_virial_correction(self, positions, velocities):
+
+        #                              | U |
+        # virial_scale_factor = sqrt( ------- )
+        #                               2K
+
+        star_mass = CLUSTER_MASS / self.number_of_stars
+
+        #              G * m^2
+        # U = - sum ( --------- )
+        #       i<j      r_ij
+
+        softening_eps = 0.01 * self.plummer_radius
+        total_potential_energy = 0.0
+
+        for i in range (self.number_of_stars):
+            for j in range (i + 1, self.number_of_stars):
+
+                distance_vector = positions[j] - positions[i]
+                distance = np.sqrt(np.sum(distance_vector**2) + softening_eps**2)
+
+                total_potential_energy -= GRAVITATIONAL_CONSTANT * (star_mass**2) / distance
+
+        #      1
+        # K = --- * m * v^2
+        #      2
+
+        total_kinetic_energy = 0.5 * star_mass * np.sum(velocities**2)
+
+        numerator = np.abs(total_potential_energy)
+        denominator = 2.0 * total_kinetic_energy
+
+        virial_scale_factor = np.sqrt(numerator / denominator)
+
+        velocities = velocities * virial_scale_factor
+
+        return velocities
+
+
     def _debug(self, positions, velocities, radius_vector, sigma_squared_vector):
         for r in [0, 1, 2, 5]:
             sigma_num = np.interp(r, radius_vector, sigma_squared_vector)
@@ -243,5 +283,7 @@ class Plummer:
         velocities = np.array(velocities)
 
         #self._debug(positions, velocities, radius_vector, sigma_squared_vector)
+
+        velocities = self._apply_virial_correction(positions, velocities)
 
         return positions, velocities

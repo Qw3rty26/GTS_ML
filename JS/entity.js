@@ -10,7 +10,7 @@ class Entity{
 		this.yVel = yVel;
                 this.zVel = zVel;
 		this.mass = mass;
-		this.radius = 15;
+		this.radius = 90;
 	}
 
 	render(ctx, space, oldE, alpha) {

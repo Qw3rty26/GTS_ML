@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-MAIN="py/launch.py"
+MAIN="py/run.py"
 
 if [ ! -d .venv ]; then
     python3 -m venv .venv

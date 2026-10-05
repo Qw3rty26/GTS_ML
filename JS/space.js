@@ -42,20 +42,24 @@ class space{
 		this.#drawGrid(ctx); // update grid
 	}
 
-	zoomSpace(ctx, zoomedAmount=0){
-		const oldZoom = this.zoom;
+	zoomSpace(ctx, zoomedAmount = 0) {
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 150;
+    const oldZoom = this.zoom;
 
-		this.zoom += zoomedAmount / 10;
-		this.zoom = Math.max(10, Math.min(this.zoom, 150)); // clamp zoom to 10 <= this.zoom <= 150
-		this.scale = this.zoom / 100;
+    this.zoom *= 1 + zoomedAmount / 100;
+    this.zoom = Math.max(MIN_ZOOM, Math.min(this.zoom, MAX_ZOOM));
 
-		const scale = this.zoom / oldZoom;
-		const centerX = this.screenWidth / 2;
-		const centerY = this.screenHeight / 2;
+    this.scale = this.zoom / 100;
 
-		this.originX = centerX - (centerX - this.originX) * scale;
-		this.originY = centerY - (centerY - this.originY) * scale;
+    const scale = this.zoom / oldZoom;
 
-		this.#drawGrid(ctx); // update grid
-	}
+    const centerX = this.screenWidth / 2;
+    const centerY = this.screenHeight / 2;
+
+    this.originX = centerX - (centerX - this.originX) * scale;
+    this.originY = centerY - (centerY - this.originY) * scale;
+
+    this.#drawGrid(ctx);
+}
 }

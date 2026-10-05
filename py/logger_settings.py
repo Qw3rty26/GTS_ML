@@ -8,6 +8,9 @@ class DebugFormatter(logging.Formatter):
         if record.levelno == logging.DEBUG:
             return f"\033[95m{message}\033[0m"
 
+        if record.levelno == logging.WARNING:
+            return f"\033[93m{message}\033[0m"
+
         return message
 
 
@@ -34,3 +37,7 @@ def configure_logging(verbose: bool, debug: bool):
             handler
         ]
     )
+
+#place duct tape on numba's mouth
+logging.getLogger('numba').setLevel(logging.WARNING)
+logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
