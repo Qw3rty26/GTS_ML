@@ -2,6 +2,7 @@ import argparse
 import logging
 import time
 import os
+import itertools
 import io_manager
 import multiprocessing as mp
 from multiprocessing import Pool
@@ -28,7 +29,7 @@ def _generate_clusters(logger, configuration, simulation_args, verbose, debug):
     output = configuration["output directory"]
 
     logger.info("------------------------------------------")
-    logger.info("           GENERATING CLUSTERS")
+    logger.info("            GENERATING CLUSTERS")
     logger.info("")
     logger.info(f"  NO. SIMULATIONS: {len(simulation_args)}")
     logger.info(f"  STARS: {cluster['number_of_stars']}")
@@ -68,18 +69,17 @@ def _generate_clusters(logger, configuration, simulation_args, verbose, debug):
 def _simulate_gts(logger, configuration, simulation_args, verbose, debug):
 
     simulation = configuration["simulation"]
-    gts = configuration["galactic tidal stripping"]
+    gts = configuration["galactic environment"]
     output = configuration["output directory"]
 
     logger.info("------------------------------------------")
-    logger.info("             EVOLVING GALAXY")
+    logger.info("               EVOLVING GALAXY")
     logger.info("")
     logger.info(f"  NO. SIMULATIONS: {len(simulation_args)}")
     logger.info(f"  INTEGRATOR: {simulation['integrator']}")
     logger.info(f"  DT: {simulation['dt']}")
     logger.info(f"  GALAXY MASS: {gts['galaxy_mass']}")
     logger.info(f"  GALAXY RADIUS: {gts['galaxy_radius']}")
-    logger.info(f"  NUMBER OF ORBITS: {gts['number_of_orbits']}")
     logger.info(f"  OUTPUT: {output}/")
     logger.info("")
     logger.info("------------------------------------------")
@@ -122,6 +122,13 @@ def main():
     )
 
     parser.add_argument(
+        "--load-cluster-dir",
+        type=str,
+        default=None,
+        help="path to an existing GEN/JSON directory to reuse clusters"
+    )
+
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="enable verbose output"
@@ -144,7 +151,8 @@ def main():
 
     simulation = configuration["simulation"]
     cluster = configuration["cluster generation"]
-    gts = configuration["galactic tidal stripping"]
+    gts = configuration["galactic environment"]
+    ml_inputs = configuration["ml_dataset_input"]
 
     simulation_args = []
     run_path = None
@@ -154,14 +162,21 @@ def main():
     gts_json = None
     gts_xyzv = None
 
-    cluster_answer = input("\n\nGenerate new clusters? [Y/N]")
-    gts_answer = input("\n\nSimulate clusters in the galaxy? [Y/N]")
-    verify_physics_answer = input("\n\nVerify the correctness of the simulations? [Y/N]")
-
-    if cluster_answer.lower() == "y":
+    if args.load_cluster_dir:
+        cluster_json = os.path.abspath(args.load_cluster_dir)
+        if not os.path.exists(cluster_json):
+            logger.error(f"Provided cluster directory does not exist: {cluster_json}")
+            exit(1)
+        logger.info(f"Reusing existing clusters from: {cluster_json}")
+        run_path = io_manager.create_run_directory(configuration["output directory"])
+        gts_json = os.path.join(run_path, "GTS", "JSON")
+        gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
+    else:
         run_path = io_manager.create_run_directory(configuration["output directory"])
         cluster_json = os.path.join(run_path, "GEN", "JSON")
         cluster_xyzv = os.path.join(run_path, "GEN", "XYZV")
+        gts_json = os.path.join(run_path, "GTS", "JSON")
+        gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
 
         for cluster_id in range(cluster["number_of_clusters"]):
             simulation_args.append(
@@ -180,9 +195,6 @@ def main():
             )
 
         _generate_clusters(logger, configuration, simulation_args, args.verbose, args.debug)
-    else:
-        print("can't simulate GTS without generating the cluster first. exiting...")
-        exit()
 
     cluster_files = [
         os.path.join(cluster_json, file)
@@ -190,31 +202,42 @@ def main():
         if file.endswith(".json")
     ]
 
-    if gts_answer.lower() == "y":
-        if run_path is None:
-            run_path = io_manager.create_run_directory(configuration["output directory"])
-        gts_json = os.path.join(run_path, "GTS", "JSON")
-        gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
+    if not cluster_files:
+        logger.error("No cluster JSON files found to process!")
+        exit(1)
 
-        gts_args = [
-            (
-                cluster_file,
-                gts["galaxy_mass"],
-                gts["galaxy_radius"],
-                gts["number_of_orbits"],
-                gts_json,
-                gts_xyzv
+    if run_path is None:
+        run_path = io_manager.create_run_directory(configuration["output directory"])
+
+    semi_axes = ml_inputs["semi_major_axes"]
+    eccentricities = ml_inputs["eccentricities"]
+
+    orbit_grid = list(itertools.product(semi_axes, eccentricities))
+    gts_args = []
+    sim_counter = 0
+
+    for cluster_file in cluster_files:
+        for a, e in orbit_grid:
+            gts_args.append(
+                (
+                    cluster_file,
+                    gts["galaxy_mass"],
+                    gts["galaxy_radius"],
+                    a,
+                    e,
+                    gts_json,
+                    gts_xyzv,
+                    sim_counter
+                )
             )
-            for cluster_file in cluster_files
-        ]
+            sim_counter += 1
 
-        _simulate_gts(logger, configuration, gts_args, args.verbose, args.debug)
+    _simulate_gts(logger, configuration, gts_args, args.verbose, args.debug)
 
-    if verify_physics_answer.lower() == "y":
-        if run_path and os.path.exists(run_path):
-            verify_simulation(run_path, configuration)
-        else:
-            logger.warning("No valid directory {run.path} was found to be verified.")
+    if run_path and os.path.exists(run_path):
+        verify_simulation(run_path, configuration)
+    else:
+        logger.warning(f"No valid directory {run_path} was found to be verified.")
 
 
 if __name__ == "__main__":

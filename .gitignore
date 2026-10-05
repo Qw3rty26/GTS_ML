@@ -2,3 +2,4 @@ __pycache__/
 .venv/
 plummer_sphere.py
 configuration.json
+clusters/
