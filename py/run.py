@@ -1,10 +1,19 @@
+import os
+#limit the number of threads that numpy can use to 1
+MAX_THREADS = "1"
+os.environ["OMP_NUM_THREADS"] = MAX_THREADS
+os.environ["MKL_NUM_THREADS"] = MAX_THREADS
+os.environ["OPENBLAS_NUM_THREADS"] = MAX_THREADS
+os.environ["VECLIB_MAXIMUM_THREADS"] = MAX_THREADS
+os.environ["NUMEXPR_NUM_THREADS"] = MAX_THREADS
+
 import argparse
 import logging
 import time
-import os
 import itertools
 import io_manager
 import multiprocessing as mp
+import numpy as np
 from multiprocessing import Pool
 
 from simulation_batch import run_cluster_generation as run_gen
@@ -45,7 +54,10 @@ def _generate_clusters(logger, configuration, simulation_args, verbose, debug):
     computing_time = time.perf_counter()
     chunk_size = max(1, len(simulation_args) // (os.cpu_count() * 2))
 
-    with Pool(initializer=init_worker, initargs=(verbose, debug)) as pool:
+    max_workers = configuration.get("cores_used", 1)
+    logger.info(f"\033[94mUsing {max_workers} core/s.\033[0m")
+
+    with Pool(processes=max_workers, initializer=init_worker, initargs=(verbose, debug)) as pool:
         for completed, _ in enumerate(
             pool.imap_unordered(run_gen_wrapper, simulation_args, chunksize=chunk_size),
             1
@@ -87,7 +99,10 @@ def _simulate_gts(logger, configuration, simulation_args, verbose, debug):
     computing_time = time.perf_counter()
     chunk_size = max(1, len(simulation_args) // (os.cpu_count() * 2))
 
-    with Pool(initializer=init_worker, initargs=(verbose, debug)) as pool:
+    max_workers = configuration.get("cores_used", 1)
+    logger.info(f"\033[94mUsing {max_workers} core/s.\033[0m")
+
+    with Pool(processes=max_workers, initializer=init_worker, initargs=(verbose, debug)) as pool:
         for completed, _ in enumerate(
             pool.imap_unordered(run_gts_wrapper, simulation_args, chunksize=chunk_size),
             1
@@ -162,6 +177,12 @@ def main():
     gts_json = None
     gts_xyzv = None
 
+
+    master_seed = cluster["master_seed"]
+    number_of_clusters = cluster["number_of_clusters"]
+    master_rng = np.random.Generator(np.random.MT19937(master_seed))
+    cluster_seeds = master_rng.integers(low=0, high=2**31 - 1, size=number_of_clusters, dtype=np.int64)
+
     if args.load_cluster_dir:
         cluster_json = os.path.abspath(args.load_cluster_dir)
         if not os.path.exists(cluster_json):
@@ -169,19 +190,15 @@ def main():
             exit(1)
         logger.info(f"Reusing existing clusters from: {cluster_json}")
         run_path = io_manager.create_run_directory(configuration["output directory"])
-        gts_json = os.path.join(run_path, "GTS", "JSON")
-        gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
     else:
         run_path = io_manager.create_run_directory(configuration["output directory"])
         cluster_json = os.path.join(run_path, "GEN", "JSON")
         cluster_xyzv = os.path.join(run_path, "GEN", "XYZV")
-        gts_json = os.path.join(run_path, "GTS", "JSON")
-        gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
 
-        for cluster_id in range(cluster["number_of_clusters"]):
+        for cluster_seed in cluster_seeds:
             simulation_args.append(
                 (
-                    cluster_id,
+                    int(cluster_seed),
                     cluster["cluster_radius"],
                     cluster["number_of_stars"],
                     simulation["dt"],
@@ -215,6 +232,9 @@ def main():
     orbit_grid = list(itertools.product(semi_axes, eccentricities))
     gts_args = []
     sim_counter = 0
+
+    gts_json = os.path.join(run_path, "GTS", "JSON")
+    gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
 
     for cluster_file in cluster_files:
         for a, e in orbit_grid:
