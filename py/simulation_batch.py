@@ -29,14 +29,13 @@ def try_to_clean_stars(cluster_name, simulation):
         )
 
 
-def generate_cluster(cluster_id, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator):
+def generate_cluster(seed, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator):
 #TODO aggiungere un seed di base
-    np.random.seed(cluster_id)
     STAR_MASS = 1.0 / number_of_stars
 
-    logger.debug(f"Cluster no. {cluster_id}: Generating Plummer Cluster...")
+    logger.debug(f"Cluster no. {seed}: Generating Plummer Cluster...")
 
-    plummer = Plummer(cluster_radius, number_of_stars)
+    plummer = Plummer(cluster_radius, number_of_stars, seed=seed)
     positions, velocities = plummer.generate_plummer_cluster()
 
     simulation = Simulation(dt, G, softening, time_warp, integrator)
@@ -104,15 +103,15 @@ def evolve_cluster(cluster_name, simulation, number_of_orbits, xyzv_file, json_f
             logger.info(f"Simulation no. {cluster_name}: {orbits}/{number_of_orbits} orbits done")
 
 
-def run_cluster_generation(cluster_id, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator, json_output_path, xyzv_output_path):
+def run_cluster_generation(seed, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator, json_output_path, xyzv_output_path):
 
-    logger.info(f"Cluster no. {cluster_id}: Generating...")
+    logger.info(f"Cluster no. {seed}: Generating...")
 
-    simulation = generate_cluster(cluster_id, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator)
+    simulation = generate_cluster(seed, cluster_radius, number_of_stars, dt, G, softening, time_warp, integrator)
     initial_total_energy = simulation.cluster_diagnostics.get_initial_total_energy()
     initial_angular_momentum = simulation.cluster_diagnostics.get_initial_angular_momentum()
     logger.debug(
-        f"Cluster no. {cluster_id}:\n"
+        f"Cluster no. {seed}:\n"
         f"Initial total energy: {initial_total_energy:.7f}\n"
         f"Initial angular momentum: {initial_angular_momentum}\n"
     )
@@ -125,28 +124,28 @@ def run_cluster_generation(cluster_id, cluster_radius, number_of_stars, dt, G, s
     os.makedirs(json_output_path, exist_ok=True)
     os.makedirs(xyzv_output_path, exist_ok=True)
 
-    xyzv_path = os.path.join(xyzv_output_path, f"cluster_{cluster_id}.xyzv")
-    json_path = os.path.join(json_output_path, f"cluster_{cluster_id}.json")
+    xyzv_path = os.path.join(xyzv_output_path, f"cluster_{seed}.xyzv")
+    json_path = os.path.join(json_output_path, f"cluster_{seed}.json")
 
     with open(xyzv_path, "w") as xyzv_file:
-        logger.debug(f"Cluster no. {cluster_id}: Cleaning...")
-        clean_cluster(cluster_id, simulation, END_TIME, xyzv_file, json_path)
+        logger.debug(f"Cluster no. {seed}: Cleaning...")
+        clean_cluster(seed, simulation, END_TIME, xyzv_file, json_path)
 
     final_total_energy = simulation.cluster_diagnostics.get_total_energy()
     energy_relative_error = simulation.cluster_diagnostics.get_total_energy_relative_error_percentage()
     final_angular_momentum = simulation.cluster_diagnostics.get_total_angular_momentum()
     angular_momentum_relative_error = simulation.cluster_diagnostics.get_total_angular_momentum_error_percentage()
     logger.debug(
-        f"Cluster no. {cluster_id}:\n"
+        f"Cluster no. {seed}:\n"
         f"Final cluster total energy: {final_total_energy:.7f} ({energy_relative_error:.7f}% relative error)\n"
         f"Final cluster angular momentum: {final_angular_momentum} ({angular_momentum_relative_error:.4f}% relative error)\n"
     )
 
-    logger.debug(f"Cluster no. {cluster_id}: Done.")
+    logger.debug(f"Cluster no. {seed}: Done.")
 
 
 def run_galaxy_tidal_stripping(cluster_path, galaxy_mass, galaxy_radius, a, e, json_output_path, xyzv_output_path, sim_id):
-
+    NUMBER_OF_ORBITS = 2
     cluster_name = os.path.splitext(os.path.basename(cluster_path))[0]
 
     logger.debug(f"Simulation {sim_id} ({cluster_name}, a={a}, e={e}): Running...")
@@ -176,11 +175,9 @@ def run_galaxy_tidal_stripping(cluster_path, galaxy_mass, galaxy_radius, a, e, j
     xyzv_path = os.path.join(xyzv_output_path, f"sim_{sim_id}.xyzv")
     json_path = os.path.join(json_output_path, f"sim_{sim_id}.json")
 
-    number_of_orbits = 5
-
     with open(xyzv_path, "w") as xyzv_file:
         logger.debug(f"Simulation {sim_id}: Evolving...")
-        evolve_cluster(sim_id, simulation, number_of_orbits, xyzv_file, json_path)
+        evolve_cluster(sim_id, simulation, NUMBER_OF_ORBITS, xyzv_file, json_path)
 
     final_total_energy = simulation.cluster_diagnostics.get_total_energy()
     energy_relative_error = simulation.cluster_diagnostics.get_total_energy_relative_error_percentage()

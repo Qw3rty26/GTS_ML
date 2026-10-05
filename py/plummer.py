@@ -7,7 +7,7 @@ CLUSTER_MASS = 1           # M
 
 class Plummer:
 
-    def __init__(self, plummer_radius = 1, number_of_stars = 1):
+    def __init__(self, plummer_radius = 1, number_of_stars = 1, seed = None):
 
         if plummer_radius <= 0:
             raise ValueError("plummer_radius must be greater than 0")
@@ -17,6 +17,12 @@ class Plummer:
 
         self.plummer_radius = plummer_radius   # a
         self.number_of_stars = number_of_stars # N
+
+        if seed is not None:
+            self.rng = np.random.Generator(np.random.MT19937(seed))
+        else:
+            self.rng = np.random.default_rng()
+
 
     def _density_rho(self, radius_from_center):
 
@@ -101,7 +107,7 @@ class Plummer:
         # M(r) - u = 0
         # for r
 
-        mass_fraction_u = np.random.rand()
+        mass_fraction_u = self.rng.random()
 
         def mass_equation(radius):
             return self._enclosed_mass(radius) - mass_fraction_u
@@ -113,7 +119,7 @@ class Plummer:
         return sampled_radius
 
     def _random_versor(self):
-        versor = np.random.normal(size = 3) # generate a random point in 3D space
+        versor = self.rng.normal(size = 3) # generate a random point in 3D space
         norm = np.linalg.norm(versor) # normalise the versor so that its length is 1
         if norm == 0:
             return self._random_versor()
@@ -168,15 +174,15 @@ class Plummer:
                 sigma_squared_vector
             )
 
-            radial_velocity = np.random.normal(
+            radial_velocity = self.rng.normal(
                 scale = np.sqrt(sigma_squared)
             )
 
-            theta_velocity = np.random.normal(
+            theta_velocity = self.rng.normal(
                 scale = np.sqrt((1.0 - self._anisotropy_beta(radius_from_center)) * sigma_squared)
             )
 
-            phi_velocity = np.random.normal(
+            phi_velocity = self.rng.normal(
                 scale = np.sqrt((1.0 - self._anisotropy_beta(radius_from_center)) * sigma_squared)
             )
 
