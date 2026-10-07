@@ -103,10 +103,10 @@ class ML_Dataset_Generation:
 
             writer.writerow([
                 "cluster_seed",
-                "semi_major_axis",
-                "eccentricity",
-                "f_bound",
-                "r_half"
+                "orbit_semi_major_axis",
+                "orbit_eccentricity",
+                "bound_mass_fraction",
+                "half_mass_radius"
             ])
 
             for gts_json_file_path in gts_json_files_path:
