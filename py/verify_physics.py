@@ -101,25 +101,15 @@ class Verify_Physics:
         else:
             energy_drift = 0.0
 
-        angular_momentum_start = (
-            diagnostics_start.get_angular_momentum()
-        )
-
-        angular_momentum_end = (
-            diagnostics_end.get_angular_momentum()
-        )
+        angular_momentum_start = diagnostics_start.get_angular_momentum()
+        angular_momentum_end = diagnostics_end.get_angular_momentum()
 
         angular_momentum_drift = np.linalg.norm(
             angular_momentum_end - angular_momentum_start
         )
 
-        virial_ratio_start = (
-            diagnostics_start.get_virial_ratio()
-        )
-
-        virial_ratio_end = (
-            diagnostics_end.get_virial_ratio()
-        )
+        virial_ratio_start = diagnostics_start.get_virial_ratio()
+        virial_ratio_end = diagnostics_end.get_virial_ratio()
 
         energy_status = (
             "[OK]"
@@ -184,27 +174,8 @@ class Verify_Physics:
         diagnostics_start,
         diagnostics_end
     ):
-        simulation_start = diagnostics_start.simulation
-        simulation_end = diagnostics_end.simulation
-
-        positions_start, masses_start = (
-            simulation_start.get_entity_arrays()
-        )
-
-        positions_end, masses_end = (
-            simulation_end.get_entity_arrays()
-        )
-
-        total_mass_start = np.sum(masses_start)
-        total_mass_end = np.sum(masses_end)
-
-        energy_internal_start = (
-            diagnostics_start.get_total_energy()
-        )
-
-        energy_internal_end = (
-            diagnostics_end.get_total_energy()
-        )
+        energy_internal_start = diagnostics_start.get_total_energy()
+        energy_internal_end = diagnostics_end.get_total_energy()
 
         galactic_potential_energy_start = (
             diagnostics_start.get_galactic_potential_energy()
@@ -215,11 +186,11 @@ class Verify_Physics:
         )
 
         center_of_mass_start = (
-            simulation_start.get_center_of_mass()
+            diagnostics_start.simulation.get_center_of_mass()
         )
 
         center_of_mass_end = (
-            simulation_end.get_center_of_mass()
+            diagnostics_end.simulation.get_center_of_mass()
         )
 
         center_of_mass_velocity_start = np.array([
@@ -233,6 +204,16 @@ class Verify_Physics:
             center_of_mass_end.vy,
             center_of_mass_end.vz
         ])
+
+        total_mass_start = sum(
+            entity.mass
+            for entity in diagnostics_start.simulation.get_entities()
+        )
+
+        total_mass_end = sum(
+            entity.mass
+            for entity in diagnostics_end.simulation.get_entities()
+        )
 
         center_of_mass_kinetic_energy_start = (
             0.5
@@ -278,13 +259,8 @@ class Verify_Physics:
             angular_momentum_end - angular_momentum_start
         )
 
-        virial_ratio_start = (
-            diagnostics_start.get_virial_ratio()
-        )
-
-        virial_ratio_end = (
-            diagnostics_end.get_virial_ratio()
-        )
+        virial_ratio_start = diagnostics_start.get_virial_ratio()
+        virial_ratio_end = diagnostics_end.get_virial_ratio()
 
         half_mass_radius_start = (
             diagnostics_start.get_half_mass_radius()
@@ -294,17 +270,8 @@ class Verify_Physics:
             diagnostics_end.get_half_mass_radius()
         )
 
-        bound_mass_start = self._get_bound_mass(
-            simulation_start,
-            positions_start,
-            masses_start
-        )
-
-        bound_mass_end = self._get_bound_mass(
-            simulation_end,
-            positions_end,
-            masses_end
-        )
+        bound_mass_start = diagnostics_start.get_bound_mass()
+        bound_mass_end = diagnostics_end.get_bound_mass()
 
         bound_mass_fraction_start = (
             bound_mass_start / total_mass_start
@@ -384,87 +351,6 @@ class Verify_Physics:
         )
         logger.info(
             f"      r50_end        = {half_mass_radius_end:.3f}"
-        )
-
-    def _get_bound_mass(
-        self,
-        simulation,
-        positions,
-        masses
-    ):
-        number_of_entities = len(masses)
-
-        if number_of_entities == 0:
-            return 0.0
-
-        center_of_mass = simulation.get_center_of_mass()
-
-        center_of_mass_velocity = np.array([
-            center_of_mass.vx,
-            center_of_mass.vy,
-            center_of_mass.vz
-        ])
-
-        velocities = np.empty(
-            (number_of_entities, 3),
-            dtype=np.float64
-        )
-
-        particles = simulation.simulation.particles
-
-        for i, particle in enumerate(particles):
-            velocities[i] = (
-                particle.vx,
-                particle.vy,
-                particle.vz
-            )
-
-        relative_velocities = (
-            velocities - center_of_mass_velocity
-        )
-
-        kinetic_energies = (
-            0.5
-            * masses
-            * np.sum(
-                relative_velocities ** 2,
-                axis=1
-            )
-        )
-
-        position_differences = (
-            positions[:, np.newaxis, :]
-            - positions[np.newaxis, :, :]
-        )
-
-        distance_squared = (
-            np.sum(
-                position_differences ** 2,
-                axis=2
-            )
-            + simulation.get_softening() ** 2
-        )
-
-        distances = np.sqrt(distance_squared)
-
-        np.fill_diagonal(distances, np.inf)
-
-        potential_energies = (
-            -simulation.get_gravitational_constant()
-            * masses
-            * np.sum(
-                masses[np.newaxis, :] / distances,
-                axis=1
-            )
-        )
-
-        total_energies = (
-            kinetic_energies
-            + potential_energies
-        )
-
-        return np.sum(
-            masses[total_energies < 0.0]
         )
 
     def run(self):
