@@ -254,16 +254,6 @@ class Plummer:
 
         return velocities
 
-
-    def _debug(self, positions, velocities, radius_vector, sigma_squared_vector):
-        for r in [0, 1, 2, 5]:
-            sigma_num = np.interp(r, radius_vector, sigma_squared_vector)
-            sigma_exact = GRAVITATIONAL_CONSTANT * CLUSTER_MASS / (
-                6*np.sqrt(r*r + self.plummer_radius**2)
-            )
-            print("\n", r, "\nsigma theoretical: ", sigma_num, "\nsigma exact:       ", sigma_exact, "\ndifference:        ", sigma_exact - sigma_num)
-        print("\n\nstar positions:\n", positions, "\n\nstar velocities:\n", velocities)
-
     def generate_plummer_cluster(self):
         MAX_RADIUS = 10 * self.plummer_radius # approaching infinity
 
@@ -287,8 +277,6 @@ class Plummer:
 
         positions = np.array(positions)
         velocities = np.array(velocities)
-
-        #self._debug(positions, velocities, radius_vector, sigma_squared_vector)
 
         velocities = self._apply_virial_correction(positions, velocities)
 
