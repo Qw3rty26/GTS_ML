@@ -17,6 +17,7 @@ import numpy as np
 from multiprocessing import Pool
 from cluster_generation import Cluster_Generation
 from galactic_tidal_stripping import Galactic_Tidal_Stripping
+from verify_physics import Verify_Physics
 
 from io_manager import IOPaths, Metadata
 from simulation import SimulationConfig
@@ -136,8 +137,9 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
 
     logger.info(f"GALACTIC TIDAL STRIPPING COMPLETE")
 
-def _run_verify_physics(configuration):
-    pass
+def _run_verify_physics(configuration, cluster_json_dir_path):
+    verify_physics = Verify_Physics(cluster_json_dir_path)
+    verify_physics.run()
 
 def _run_ml_dataset_generation(configuration):
     pass
@@ -188,7 +190,8 @@ def main():
     else:
         _run_galactic_tidal_stripping(configuration, args.load_cluster_dir)
 
-    _run_verify_physics(configuration)
+    _run_verify_physics(configuration, io_paths.gen_json_dir)
+    _run_verify_physics(configuration, io_paths.gts_json_dir)
 
     _run_ml_dataset_generation(configuration)
 

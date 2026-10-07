@@ -3,7 +3,8 @@ import json
 
 from functools import cached_property
 from dataclasses import dataclass, field
-from simulation import SimulationConfig, Entity, Position, Velocity
+from entity import Entity, Position, Velocity
+from simulation import SimulationConfig
 
 
 @dataclass

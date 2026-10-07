@@ -1,5 +1,7 @@
 import numpy as np
 from numba import njit
+from ctypes import sizeof
+from rebound.particle import Particle
 
 GRAVITATIONAL_CONSTANT = 1
 
@@ -53,7 +55,7 @@ class GalacticPotential:
     def get_galaxy_mass(self):
         return self.plummer_mass
 
-    def _potential_phi(self, radius_from_center):
+    def potential_phi(self, radius_from_center):
         #             - G * M
         # phi(r) = -----------------
         #           sqrt(a^2 + r^2)
@@ -86,8 +88,8 @@ class GalacticPotential:
         r_apo = a * (1.0 + e)
         r_peri = a * (1.0 - e)
 
-        phi_apo = self._potential_phi(r_apo)
-        phi_peri = self._potential_phi(r_peri)
+        phi_apo = self.potential_phi(r_apo)
+        phi_peri = self.potential_phi(r_peri)
 
         numerator = 2.0 * (phi_apo - phi_peri)
         denominator = (1.0 / (r_peri**2)) - (1.0 / (r_apo**2))
@@ -100,20 +102,53 @@ class GalacticPotential:
         v_apo = L / r_apo
         return v_apo
 
+    # some obscure magic is happening here, all you need to know is that
+    # we are calculating the galactic pull for each entity and adding the acceleration to it
     def add_galaxy_forces(self, particles):
-        n = len(particles)
-        coords = np.empty((n, 3), dtype=np.float64)
+        particle_array = particles._ps
 
-        for i, p in enumerate(particles):
-            coords[i, 0] = p.x
-            coords[i, 1] = p.y
-            coords[i, 2] = p.z
+        particle_dtype = np.dtype({
+            "names": ["x", "y", "z", "ax", "ay", "az"],
+            "formats": [
+                np.float64,
+                np.float64,
+                np.float64,
+                np.float64,
+                np.float64,
+                np.float64
+            ],
+            "offsets": [
+                Particle.x.offset,
+                Particle.y.offset,
+                Particle.z.offset,
+                Particle.ax.offset,
+                Particle.ay.offset,
+                Particle.az.offset
+            ],
+            "itemsize": sizeof(Particle)
+        })
 
-        ax, ay, az = _compute_plummer_accelerations(
-            coords, self.plummer_mass, self.plummer_radius
+        particle_data = np.ndarray(
+            len(particle_array),
+            dtype=particle_dtype,
+            buffer=particle_array
         )
 
-        for i, particle in enumerate(particles):
-            particle.ax += ax[i]
-            particle.ay += ay[i]
-            particle.az += az[i]
+        coords = np.empty(
+            (len(particle_array), 3),
+            dtype=np.float64
+        )
+
+        coords[:, 0] = particle_data["x"]
+        coords[:, 1] = particle_data["y"]
+        coords[:, 2] = particle_data["z"]
+
+        ax, ay, az = _compute_plummer_accelerations(
+            coords,
+            self.plummer_mass,
+            self.plummer_radius
+        )
+
+        particle_data["ax"] += ax
+        particle_data["ay"] += ay
+        particle_data["az"] += az

@@ -1,6 +1,8 @@
 import rebound
+import numpy as np
 from dataclasses import dataclass, field
 
+from entity import Entity, Position, Velocity
 from cluster_diagnostics import ClusterDiagnostics
 
 @dataclass
@@ -11,25 +13,6 @@ class SimulationConfig:
     softening: float = 0.1
     time_warp: int = 1
     integrator: str = "leapfrog"
-
-@dataclass
-class Position:
-    x: float = 0.0
-    y: float = 0.0
-    z: float = 0.0
-
-@dataclass
-class Velocity:
-    vx: float = 0.0
-    vy: float = 0.0
-    vz: float = 0.0
-
-@dataclass
-class Entity:
-    name: str = "0"
-    position: Position = field(default_factory = Position)
-    velocity: Velocity = field(default_factory = Velocity)
-    mass: float = 0.0
 
 class Simulation:
 
@@ -60,6 +43,12 @@ class Simulation:
                 self.simulation.t + self.simulation.dt
             )
 
+    def get_gravitational_constant(self):
+        return self.simulation_config.G
+
+    def get_softening(self):
+        return self.simulation_config.softening
+
     def get_time(self):
         return self.simulation.t
 
@@ -83,26 +72,55 @@ class Simulation:
             entities.append(entity)
         return entities
 
+    # used for heavy optimisations
+    def get_entity_arrays(self):
+        particles = self.simulation.particles
+        number_of_entities = len(particles)
+
+        positions = np.empty(
+            (number_of_entities, 3),
+            dtype=np.float64
+        )
+
+        masses = np.empty(
+            number_of_entities,
+            dtype=np.float64
+        )
+
+        for i, particle in enumerate(particles):
+            positions[i] = (
+                particle.x,
+                particle.y,
+                particle.z
+            )
+            masses[i] = particle.m
+
+        return positions, masses
+
+
     def get_center_of_mass(self):
         return self.simulation.com()
 
     def get_percentile_center_of_mass(self):
         return self.cluster_diagnostics.get_percentile_center_of_mass()
 
+    def get_number_of_orbits(self):
+        return self.cluster_diagnostics.get_number_of_orbits()
+
     def move_cluster(self, moved_x, moved_y, moved_z):
-        for particle in self.simulation.particles:
-            particle.x += moved_x
-            particle.y += moved_y
-            particle.z += moved_z
+        for entity in self.simulation.particles:
+            entity.x += moved_x
+            entity.y += moved_y
+            entity.z += moved_z
 
     def move_cluster_to_center_of_mass(self):
         self.simulation.move_to_com()
 
     def speed_cluster(self, speed_x, speed_y, speed_z):
-        for particle in self.simulation.particles:
-            particle.vx += speed_x
-            particle.vy += speed_y
-            particle.vz += speed_z
+        for entity in self.simulation.particles:
+            entity.vx += speed_x
+            entity.vy += speed_y
+            entity.vz += speed_z
 
     def _apply_galactic_forces(self, sim_pointer):
         if self.galactic_potential:
@@ -124,12 +142,15 @@ class Simulation:
             m = entity.mass
         )
 
-    def remove_entity(self, entity_id):
-        self.simulation.remove(entity_id)
+    def remove_entity(self, entity_index):
+        self.simulation.remove(entity_index)
 
-    def clean_escaped_entities(self):
-        escaped_entity_ids = self.cluster_diagnostics.get_escaped_entity_ids()
+    def clean_unbound_entities(self):
+        unbound_entity_indices = (
+            self.cluster_diagnostics.get_unbound_entity_indices()
+        )
 
-        for entity_id in sorted(escaped_entity_ids, reverse=True):
-            self.simulation.remove(entity_id)
-        return len(escaped_entity_ids)
+        for entity_index in sorted(unbound_entity_indices, reverse=True):
+            self.simulation.remove(entity_index)
+
+        return len(unbound_entity_indices)

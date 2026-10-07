@@ -84,7 +84,7 @@ class Cluster_Generation:
 
             if self.simulation.get_time() >= next_cleanup:
                 next_cleanup += DT_CLEANUP
-                number_of_entities_cleaned = self.simulation.clean_escaped_entities()
+                number_of_entities_cleaned = self.simulation.clean_unbound_entities()
                 if number_of_entities_cleaned > 0:
                     logger.debug(f"Cluster {self.metadata.cluster_seed}: Cleaning {number_of_entities_cleaned} star/s...")
         logger.info(f"Cluster {self.metadata.cluster_seed}: Generated.")
