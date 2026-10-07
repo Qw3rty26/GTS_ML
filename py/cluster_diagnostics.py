@@ -4,17 +4,6 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-
-@dataclass(slots=True)
-class CenterOfMassState:
-    x: float
-    y: float
-    z: float
-    vx: float
-    vy: float
-    vz: float
-
-
 class ClusterDiagnostics:
 
     def __init__(self, simulation):
@@ -37,7 +26,8 @@ class ClusterDiagnostics:
         self.total_rotation = 0.0
         self.orbits = 0
 
-    def get_center_of_mass(self) -> CenterOfMassState:
+    def get_percentile_center_of_mass(self) -> "Entity":
+        from simulation import Entity, Position, Velocity
 
         sim = self.rebound_simulation
 
@@ -48,7 +38,11 @@ class ClusterDiagnostics:
 
         if n_particles == 0:
             com = sim.com()
-            return CenterOfMassState(com.x, com.y, com.z, com.vx, com.vy, com.vz)
+            return Entity(
+                m=0.0,
+                position=Position(com.x, com.y, com.z),
+                velocity=Velocity(com.vx, com.vy, com.vz)
+            )
 
         pos = np.array([[p.x, p.y, p.z] for p in sim.particles], dtype=np.float64)
         vel = np.array([[p.vx, p.vy, p.vz] for p in sim.particles], dtype=np.float64)
@@ -78,9 +72,11 @@ class ClusterDiagnostics:
             com_pos = np.average(sub_pos, axis=0, weights=sub_masses)
             com_vel = np.average(sub_vel, axis=0, weights=sub_masses)
 
-        com_state = CenterOfMassState(
-            com_pos[0], com_pos[1], com_pos[2],
-            com_vel[0], com_vel[1], com_vel[2]
+        total_mass = float(np.sum(masses))
+        com_state = Entity(
+            m=total_mass,
+            position=Position(float(com_pos[0]), float(com_pos[1]), float(com_pos[2])),
+            velocity=Velocity(float(com_vel[0]), float(com_vel[1]), float(com_vel[2]))
         )
 
         self._cached_com_time = sim.t
@@ -89,12 +85,15 @@ class ClusterDiagnostics:
         return com_state
 
     def _cache_center_of_mass(self):
-        self._cached_center_of_mass = self.get_center_of_mass()
+        self._cached_center_of_mass = self.get_percentile_center_of_mass()
 
-    def _get_effective_center_of_mass(self) -> CenterOfMassState:
+    def _get_effective_center_of_mass(self) -> "Entity":
         if self._cached_center_of_mass is None:
-            return self.get_center_of_mass()
+            return self.get_percentile_center_of_mass()
         return self._cached_center_of_mass
+
+    def get_center_of_mass(self) -> "Entity":
+        return self.get_percentile_center_of_mass()
 
     def get_cluster_orbits(self):
         return self.orbits
@@ -107,7 +106,7 @@ class ClusterDiagnostics:
             x_position, y_position = 0.0, 0.0
         else:
             com = self.get_center_of_mass()
-            x_position, y_position = com.x, com.y
+            x_position, y_position = com.position.x, com.position.y
 
         numerator = 180.0 * np.arctan2(y_position, x_position)
         denominator = np.pi
@@ -119,7 +118,7 @@ class ClusterDiagnostics:
 
         new_angle = self.get_cluster_orbital_angle()
         com = self.get_center_of_mass()
-        x, y = com.x, com.y
+        x, y = com.position.x, com.position.y
 
         if self._prev_y is not None:
             if self._prev_y * y < 0.0 and x > 0.0:
@@ -199,8 +198,8 @@ class ClusterDiagnostics:
 
         center_of_mass = self.get_center_of_mass()
 
-        pos = np.array([[p.x, p.y, p.z] for p in sim.particles], dtype=np.float64) - np.array([center_of_mass.x, center_of_mass.y, center_of_mass.z])
-        vel = np.array([[p.vx, p.vy, p.vz] for p in sim.particles], dtype=np.float64) - np.array([center_of_mass.vx, center_of_mass.vy, center_of_mass.vz])
+        pos = np.array([[p.x, p.y, p.z] for p in sim.particles], dtype=np.float64) - np.array([center_of_mass.position.x, center_of_mass.position.y, center_of_mass.position.z])
+        vel = np.array([[p.vx, p.vy, p.vz] for p in sim.particles], dtype=np.float64) - np.array([center_of_mass.velocity.vx, center_of_mass.velocity.vy, center_of_mass.velocity.vz])
         masses = np.array([p.m for p in sim.particles], dtype=np.float64)
 
         cross_products = np.cross(pos, vel)
@@ -276,7 +275,7 @@ class ClusterDiagnostics:
 
         center_of_mass = self.get_center_of_mass()
 
-        pos = np.array([[p.x, p.y, p.z] for p in valid_particles], dtype=np.float64) - np.array([center_of_mass.x, center_of_mass.y, center_of_mass.z])
+        pos = np.array([[p.x, p.y, p.z] for p in valid_particles], dtype=np.float64) - np.array([center_of_mass.position.x, center_of_mass.position.y, center_of_mass.position.z])
         masses = np.array([p.m for p in valid_particles], dtype=np.float64)
 
         distances = np.linalg.norm(pos, axis=1)
@@ -310,7 +309,7 @@ class ClusterDiagnostics:
 
         center_of_mass = self.get_center_of_mass()
 
-        vel = np.array([[p.vx, p.vy, p.vz] for p in sim.particles], dtype=np.float64) - np.array([center_of_mass.vx, center_of_mass.vy, center_of_mass.vz])
+        vel = np.array([[p.vx, p.vy, p.vz] for p in sim.particles], dtype=np.float64) - np.array([center_of_mass.velocity.vx, center_of_mass.velocity.vy, center_of_mass.velocity.vz])
         masses = np.array([p.m for p in sim.particles], dtype=np.float64)
 
         velocity_squared = np.sum(vel**2, axis=1)
@@ -397,9 +396,9 @@ class ClusterDiagnostics:
         p = sim.particles[index]
         com = self._get_effective_center_of_mass()
 
-        vx = p.vx - com.vx
-        vy = p.vy - com.vy
-        vz = p.vz - com.vz
+        vx = p.vx - com.velocity.vx
+        vy = p.vy - com.velocity.vy
+        vz = p.vz - com.velocity.vz
         kinetic_energy = 0.5 * p.m * (vx**2 + vy**2 + vz**2)
 
         pos = np.array([[pt.x, pt.y, pt.z] for pt in sim.particles], dtype=np.float64)
