@@ -487,17 +487,89 @@ class ClusterDiagnostics:
 
         return sorted_distances[half_mass_index]
 
-    def get_bound_mass(self):
-        # E_i < 0 -> bound to the cluster
+    # used to optimise get_bound_mass()
+    def _get_entity_energies(self):
 
         entities = self.simulation.get_entities()
-        bound_mass = 0.0
 
-        for entity in entities:
-            if self.get_entity_total_energy(entity) < 0:
-                bound_mass += entity.mass
+        if not entities:
+            return np.array([]), np.array([])
 
-        return bound_mass
+        entity_positions = np.array([
+            [entity.position.x, entity.position.y, entity.position.z]
+            for entity in entities
+        ], dtype=np.float64)
+
+        entity_velocities = np.array([
+            [entity.velocity.vx, entity.velocity.vy, entity.velocity.vz]
+            for entity in entities
+        ], dtype=np.float64)
+
+        entity_masses = np.array([
+            entity.mass
+            for entity in entities
+        ], dtype=np.float64)
+
+        center_of_mass = self.simulation.get_center_of_mass()
+
+        center_of_mass_velocity = np.array([
+            center_of_mass.vx,
+            center_of_mass.vy,
+            center_of_mass.vz
+        ])
+
+        relative_velocities = (
+            entity_velocities - center_of_mass_velocity
+        )
+
+        kinetic_energies = (
+            0.5
+            * entity_masses
+            * np.sum(relative_velocities ** 2, axis=1)
+        )
+
+        position_differences = (
+            entity_positions[:, np.newaxis, :]
+            - entity_positions[np.newaxis, :, :]
+        )
+
+        distances = np.sqrt(
+            np.sum(position_differences ** 2, axis=2)
+            + self.simulation.get_softening() ** 2
+        )
+
+        np.fill_diagonal(distances, np.inf)
+
+        potential_energies = (
+            -self.simulation.get_gravitational_constant()
+            * entity_masses
+            * np.sum(
+                entity_masses[np.newaxis, :] / distances,
+                axis=1
+            )
+        )
+
+        return kinetic_energies, potential_energies
+
+    def get_bound_mass(self):
+        # E_i = K_i + U_i
+        # E_i < 0 -> bound
+        # M_bound = sum(m_i) for all E_i < 0
+        kinetic_energies, potential_energies = self._get_entity_energies()
+
+        total_energies = kinetic_energies + potential_energies
+
+        entities = self.simulation.get_entities()
+
+        entity_masses = np.array([
+            entity.mass
+            for entity in entities
+        ], dtype=np.float64)
+
+        return np.sum(
+            entity_masses[total_energies < 0.0]
+        )
+
 
     def get_entity_energy_for_cleanup(self, entity):
         # E_i = K_i + U_i + m_i * Phi_galaxy(r_i)

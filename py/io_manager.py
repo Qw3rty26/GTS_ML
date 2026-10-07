@@ -61,7 +61,8 @@ class IOPaths:
         json_path = os.path.join(self.gts_json_dir, f"{cluster_seed}_a{orbit_semi_major_axis}_e{orbit_eccentricity}.json")
         return json_path
 
-#TODO add CSV file
+    def get_csv_path(self):
+        return os.path.join(self.get_run_dir, "ml_dataset.csv")
 
 _paths = IOPaths()
 
@@ -69,6 +70,9 @@ def set_io_paths(io_paths: IOPaths):
     _ = io_paths.get_run_dir
     global _paths
     _paths = io_paths
+
+def get_csv_path():
+    return _paths.get_csv_path()
 
 @dataclass
 class Metadata:
