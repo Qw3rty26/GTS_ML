@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import io_manager
+from io_manager import Metadata
 from simulation import Simulation, SimulationConfig, Entity, Position, Velocity
 from plummer import Plummer
 
@@ -11,25 +12,20 @@ class Cluster_Generation:
     def __init__(
         self,
         simulation_config: SimulationConfig,
-        seed = 0,
-        cluster_radius = 1.0,
-        number_of_entities = 10,
+        metadata: Metadata,
     ):
-        self.seed = seed
-        self.cluster_radius = cluster_radius
-        self.number_of_entities = number_of_entities
+        self.metadata = metadata
         self.simulation_config = simulation_config
         self.plummer = None
         self.simulation = None
-
-        logger.debug(f"Cluster {self.seed}: Generating...")
+        logger.debug(f"Cluster {self.metadata.cluster_seed}: Generating...")
         self._create_cluster()
 
 
     def _create_cluster(self):
-        ENTITY_MASS = 1 / self.number_of_entities
+        ENTITY_MASS = 1 / self.metadata.initial_number_of_entities
 
-        self.plummer = Plummer(self.cluster_radius, self.number_of_entities, self.seed)
+        self.plummer = Plummer(self.metadata.cluster_radius, self.metadata.initial_number_of_entities, self.metadata.cluster_seed)
         self.simulation = Simulation(self.simulation_config)
 
         entity_positions, entity_velocities = self.plummer.generate_plummer_cluster()
@@ -54,10 +50,12 @@ class Cluster_Generation:
         self.simulation.move_cluster_to_center_of_mass()
 
     def run(self):
+        logger.debug(f"Cluster {self.metadata.cluster_seed}: Generating...")
+
         #calculated through kepler's third law
         END_TIME = (
-            20 * self.cluster_radius ** (3 / 2)
-            / np.sqrt(self.number_of_entities)
+            20 * self.metadata.cluster_radius ** (3 / 2)
+            / np.sqrt(self.metadata.initial_number_of_entities)
         )
 
         DT_CLEANUP = 1.0
@@ -66,31 +64,27 @@ class Cluster_Generation:
         next_cleanup = self.simulation.get_time() + DT_CLEANUP
         next_snapshot = self.simulation.get_time() + DT_SNAPSHOT
 
-        _metadata = io_manager.Metadata (
-            cluster_seed = self.seed,
-            simulation_config = self.simulation_config,
-            cluster_radius = self.cluster_radius,
-            initial_number_of_entities = self.number_of_entities
-        )
+        io_manager.init_json_gen(self.metadata)
 
-        io_manager.init_json_gen(_metadata)
+        _entities = self.simulation.get_entities()
+        _percentile_center_of_mass = self.simulation.get_percentile_center_of_mass()
+        io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
+        io_manager.save_json_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
 
         while self.simulation.get_time() < END_TIME:
             self.simulation.integrate()
 
             if self.simulation.get_time() >= next_snapshot:
                 next_snapshot += DT_SNAPSHOT
-                _metadata.simulation_config.t = self.simulation.get_time()
+                self.metadata.simulation_config.t = self.simulation.get_time()
                 _entities = self.simulation.get_entities()
                 _percentile_center_of_mass = self.simulation.get_percentile_center_of_mass()
-                io_manager.save_xyzv_snapshot_gen(_metadata, _entities, _percentile_center_of_mass)
-                io_manager.save_json_snapshot_gen(_metadata, _entities, _percentile_center_of_mass)
+                io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
+                io_manager.save_json_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
 
             if self.simulation.get_time() >= next_cleanup:
                 next_cleanup += DT_CLEANUP
                 number_of_entities_cleaned = self.simulation.clean_escaped_entities()
                 if number_of_entities_cleaned > 0:
-                    logger.debug(
-                        f"Cluster {self.seed}: Cleaning {number_of_entities_cleaned} star/s..."
-                    )
-
+                    logger.debug(f"Cluster {self.metadata.cluster_seed}: Cleaning {number_of_entities_cleaned} star/s...")
+        logger.info(f"Cluster {self.metadata.cluster_seed}: Generated.")

@@ -15,140 +15,156 @@ import io_manager
 import multiprocessing as mp
 import numpy as np
 from multiprocessing import Pool
+from cluster_generation import Cluster_Generation
+from galactic_tidal_stripping import Galactic_Tidal_Stripping
 
-from simulation_batch import run_cluster_generation as run_gen
-from simulation_batch import run_galaxy_tidal_stripping as run_gts
+from io_manager import IOPaths, Metadata
+from simulation import SimulationConfig
 from logger_settings import configure_logging
-from verify_physics import verify_simulation
 
-def init_worker(verbose, debug):
-    configure_logging(verbose, debug)
+LOGGING_VERBOSE = True
+LOGGING_DEBUG = False
+logger = logging.getLogger(__name__)
 
-def run_gen_wrapper(args):
-    return run_gen(*args)
+io_paths = None
+
+def initialise_logging_worker(io_paths):
+    configure_logging(LOGGING_VERBOSE, LOGGING_DEBUG)
+    io_manager.set_io_paths(io_paths)
+
+def _run_cluster_generation_wrapper(args):
+    simulation_config, metadata = args
+    cluster_generation = Cluster_Generation(
+        simulation_config = simulation_config,
+        metadata = metadata
+    )
+    cluster_generation.run()
 
 
-def run_gts_wrapper(args):
-    return run_gts(*args)
+def _run_cluster_generation(configuration):
 
-def _generate_clusters(logger, configuration, simulation_args, verbose, debug):
-
-    simulation = configuration["simulation"]
-    cluster = configuration["cluster generation"]
-    output = configuration["output directory"]
-
-    logger.info("------------------------------------------")
-    logger.info("            GENERATING CLUSTERS")
-    logger.info("")
-    logger.info(f"  NO. SIMULATIONS: {len(simulation_args)}")
-    logger.info(f"  STARS: {cluster['number_of_stars']}")
-    logger.info(f"  DT: {simulation['dt']}")
-    logger.info(f"  G: {simulation['G']}")
-    logger.info(f"  SOFTENING: {simulation['softening']}")
-    logger.info(f"  TIME WARP: {simulation['time_warp']}")
-    logger.info(f"  INTEGRATOR: {simulation['integrator']}")
-    logger.info(f"  OUTPUT: {output}/")
-    logger.info("")
-    logger.info("------------------------------------------")
-
+    logger.info(f"CLUSTER GENERATION STARTED")
     computing_time = time.perf_counter()
-    chunk_size = max(1, len(simulation_args) // (os.cpu_count() * 2))
 
-    max_workers = configuration.get("cores_used", 1)
-    logger.info(f"\033[94mUsing {max_workers} core/s.\033[0m")
+    cluster_generation = configuration["cluster_generation"]
 
-    with Pool(processes=max_workers, initializer=init_worker, initargs=(verbose, debug)) as pool:
-        for completed, _ in enumerate(
-            pool.imap_unordered(run_gen_wrapper, simulation_args, chunksize=chunk_size),
-            1
-        ):
-            logger.info(
-                f"\033[32mProgress: "
-                f"{completed}/{len(simulation_args)} "
-                f"Clusters generated.\033[0m"
-            )
+    simulation_config = SimulationConfig(
+        dt = configuration["simulation_config"]["dt"],
+        t = configuration["simulation_config"]["t"],
+        G = configuration["simulation_config"]["G"],
+        softening = configuration["simulation_config"]["softening"],
+        time_warp = configuration["simulation_config"]["time_warp"],
+        integrator = configuration["simulation_config"]["integrator"]
+    )
+
+    master_seed = configuration["cluster_generation"]["master_seed"]
+    number_of_clusters = configuration["cluster_generation"]["number_of_clusters"]
+
+    master_rng = np.random.Generator(np.random.MT19937(master_seed))
+    cluster_seeds = master_rng.integers(low=0, high=2**31 - 1, size = number_of_clusters, dtype=int)
+    gen_args = []
+
+    for cluster_seed in cluster_seeds:
+        metadata = Metadata (
+            master_seed = configuration["cluster_generation"]["master_seed"],
+            cluster_seed = int(cluster_seed),
+            number_of_clusters = configuration["cluster_generation"]["number_of_clusters"],
+            cluster_radius = configuration["cluster_generation"]["cluster_radius"],
+            initial_number_of_entities = configuration["cluster_generation"]["number_of_stars"]
+        )
+        gen_args.append((simulation_config, metadata))
+
+    max_workers = configuration.get("cores_used", os.cpu_count())
+    with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths,)) as pool:
+        for i, _ in enumerate(pool.imap_unordered(_run_cluster_generation_wrapper, gen_args), 1):
+            if i % 5 == 0 or i == number_of_clusters:
+                logger.info(f"\033[32mProgress: {i}/{number_of_clusters} clusters generated.\033[0m")
 
     computing_time = time.perf_counter() - computing_time
+    logger.debug(f"Execution time: {computing_time:.3f} seconds")
 
-    logger.info("------------------------------------------")
-    logger.info("        CLUSTER GENERATION COMPLETED")
-    logger.info("")
-    logger.info(f"  EXECUTION TIME: {computing_time:.3f} seconds")
-    logger.info("")
-    logger.info("------------------------------------------")
+    logger.info(f"CLUSTER GENERATION COMPLETE")
 
+def _run_galactic_tidal_stripping_wrapper(args):
+    cluster_json_file, metadata = args
+    galactic_tidal_stripping = Galactic_Tidal_Stripping(
+        cluster_json_file = cluster_json_file,
+        metadata = metadata
+    )
+    galactic_tidal_stripping.run()
 
-def _simulate_gts(logger, configuration, simulation_args, verbose, debug):
+def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
 
-    simulation = configuration["simulation"]
-    gts = configuration["galactic environment"]
-    output = configuration["output directory"]
-
-    logger.info("------------------------------------------")
-    logger.info("               EVOLVING GALAXY")
-    logger.info("")
-    logger.info(f"  NO. SIMULATIONS: {len(simulation_args)}")
-    logger.info(f"  INTEGRATOR: {simulation['integrator']}")
-    logger.info(f"  DT: {simulation['dt']}")
-    logger.info(f"  GALAXY MASS: {gts['galaxy_mass']}")
-    logger.info(f"  GALAXY RADIUS: {gts['galaxy_radius']}")
-    logger.info(f"  OUTPUT: {output}/")
-    logger.info("")
-    logger.info("------------------------------------------")
-
+    logger.info(f"GALACTIC TIDAL STRIPPING STARTED")
     computing_time = time.perf_counter()
-    chunk_size = max(1, len(simulation_args) // (os.cpu_count() * 2))
 
-    max_workers = configuration.get("cores_used", 1)
-    logger.info(f"\033[94mUsing {max_workers} core/s.\033[0m")
+    cluster_json_files_path = [
+        os.path.join(cluster_json_dir_path, f)
+        for f in os.listdir(cluster_json_dir_path)
+        if f.endswith(".json")
+    ]
 
-    with Pool(processes=max_workers, initializer=init_worker, initargs=(verbose, debug)) as pool:
-        for completed, _ in enumerate(
-            pool.imap_unordered(run_gts_wrapper, simulation_args, chunksize=chunk_size),
-            1
-        ):
-            logger.info(
-                f"\033[32mProgress: "
-                f"{completed}/{len(simulation_args)} "
-                f"Simulations completed.\033[0m"
+    if not cluster_json_files_path:
+        logger.error(f"No cluster JSON files were found in {cluster_json_dir_path}!")
+        return
+
+    orbit_semi_major_axes = configuration["ml_dataset_input"]["semi_major_axes"]
+    orbit_eccentricities = configuration["ml_dataset_input"]["eccentricities"]
+
+    ml_grid = list(itertools.product(orbit_semi_major_axes, orbit_eccentricities))
+    gts_args = []
+    for cluster_json_file_path in cluster_json_files_path:
+        for orbit_semi_major_axis, orbit_eccentricity in ml_grid:
+            metadata = Metadata (
+                galaxy_mass = configuration["galactic_environment"]["galaxy_mass"],
+                galaxy_radius = configuration["galactic_environment"]["galaxy_radius"],
+                orbit_semi_major_axis = orbit_semi_major_axis,
+                orbit_eccentricity = orbit_eccentricity,
+                number_of_orbits = configuration["galactic_environment"]["number_of_orbits"]
             )
+            gts_args.append((cluster_json_file_path, metadata))
+
+    max_workers = configuration.get("cores_used", os.cpu_count())
+    total_tasks = len(gts_args)
+    with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths,)) as pool:
+        for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, gts_args), 1):
+            if i % 5 == 0 or i == total_tasks:
+                logger.info(f"\033[32mProgress: {i}/{total_tasks} galaxies simulated.\033[0m")
 
     computing_time = time.perf_counter() - computing_time
+    logger.debug(f"Execution time: {computing_time:.3f} seconds")
 
-    logger.info("------------------------------------------")
-    logger.info("         GALAXY EVOLUTION COMPLETED")
-    logger.info("")
-    logger.info(f"  EXECUTION TIME: {computing_time:.3f} seconds")
-    logger.info("")
-    logger.info("------------------------------------------")
+    logger.info(f"GALACTIC TIDAL STRIPPING COMPLETE")
 
+def _run_verify_physics(configuration):
+    pass
+
+def _run_ml_dataset_generation(configuration):
+    pass
 
 def main():
+    global io_paths
 
     parser = argparse.ArgumentParser(
         description="Generate Plummer clusters and simulate galactic tidal strippings"
     )
-
     parser.add_argument(
         "--config",
         type=str,
         default="../configuration.json",
-        help="path to configuration file"
+        help="path to configuration.json file"
     )
-
     parser.add_argument(
         "--load-cluster-dir",
         type=str,
         default=None,
-        help="path to an existing GEN/JSON directory to reuse clusters"
+        help="path to an existing directory containing JSON cluster files"
     )
-
     parser.add_argument(
         "--verbose",
         action="store_true",
         help="enable verbose output"
     )
-
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -156,109 +172,25 @@ def main():
     )
 
     args = parser.parse_args()
-
     config_path = os.path.abspath(args.config)
     configuration = io_manager.load_json_file(config_path)
-
     configure_logging(args.verbose, args.debug)
-
     logger = logging.getLogger(__name__)
 
-    simulation = configuration["simulation"]
-    cluster = configuration["cluster generation"]
-    gts = configuration["galactic environment"]
-    ml_inputs = configuration["ml_dataset_input"]
+    io_paths = IOPaths(configuration["output_directory"])
 
-    simulation_args = []
-    run_path = None
-    cluster_files = None
-    cluster_json = None
-    cluster_xyzv = None
-    gts_json = None
-    gts_xyzv = None
+    io_manager.set_io_paths(io_paths)
 
-
-    master_seed = cluster["master_seed"]
-    number_of_clusters = cluster["number_of_clusters"]
-    master_rng = np.random.Generator(np.random.MT19937(master_seed))
-    cluster_seeds = master_rng.integers(low=0, high=2**31 - 1, size=number_of_clusters, dtype=np.int64)
-
-    if args.load_cluster_dir:
-        cluster_json = os.path.abspath(args.load_cluster_dir)
-        if not os.path.exists(cluster_json):
-            logger.error(f"Provided cluster directory does not exist: {cluster_json}")
-            exit(1)
-        logger.info(f"Reusing existing clusters from: {cluster_json}")
-        run_path = io_manager.create_run_directory(configuration["output directory"])
+    if not args.load_cluster_dir:
+        _run_cluster_generation(configuration)
+        cluster_json_dir_path = io_paths.gen_json_dir
+        _run_galactic_tidal_stripping(configuration, cluster_json_dir_path)
     else:
-        run_path = io_manager.create_run_directory(configuration["output directory"])
-        cluster_json = os.path.join(run_path, "GEN", "JSON")
-        cluster_xyzv = os.path.join(run_path, "GEN", "XYZV")
+        _run_galactic_tidal_stripping(configuration, args.load_cluster_dir)
 
-        for cluster_seed in cluster_seeds:
-            simulation_args.append(
-                (
-                    int(cluster_seed),
-                    cluster["cluster_radius"],
-                    cluster["number_of_stars"],
-                    simulation["dt"],
-                    simulation["G"],
-                    simulation["softening"],
-                    simulation["time_warp"],
-                    simulation["integrator"],
-                    cluster_json,
-                    cluster_xyzv
-                )
-            )
+    _run_verify_physics(configuration)
 
-        _generate_clusters(logger, configuration, simulation_args, args.verbose, args.debug)
-
-    cluster_files = [
-        os.path.join(cluster_json, file)
-        for file in os.listdir(cluster_json)
-        if file.endswith(".json")
-    ]
-
-    if not cluster_files:
-        logger.error("No cluster JSON files found to process!")
-        exit(1)
-
-    if run_path is None:
-        run_path = io_manager.create_run_directory(configuration["output directory"])
-
-    semi_axes = ml_inputs["semi_major_axes"]
-    eccentricities = ml_inputs["eccentricities"]
-
-    orbit_grid = list(itertools.product(semi_axes, eccentricities))
-    gts_args = []
-    sim_counter = 0
-
-    gts_json = os.path.join(run_path, "GTS", "JSON")
-    gts_xyzv = os.path.join(run_path, "GTS", "XYZV")
-
-    for cluster_file in cluster_files:
-        for a, e in orbit_grid:
-            gts_args.append(
-                (
-                    cluster_file,
-                    gts["galaxy_mass"],
-                    gts["galaxy_radius"],
-                    a,
-                    e,
-                    gts_json,
-                    gts_xyzv,
-                    sim_counter
-                )
-            )
-            sim_counter += 1
-
-    _simulate_gts(logger, configuration, gts_args, args.verbose, args.debug)
-
-    if run_path and os.path.exists(run_path):
-        verify_simulation(run_path, configuration)
-    else:
-        logger.warning(f"No valid directory {run_path} was found to be verified.")
-
+    _run_ml_dataset_generation(configuration)
 
 if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)
