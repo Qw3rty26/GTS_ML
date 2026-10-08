@@ -35,10 +35,9 @@ class Simulation:
         self.simulation.G = self.simulation_config.G
         self.simulation.softening = self.simulation_config.softening
         self.simulation.integrator = self.simulation_config.integrator
-        self.time_warp = self.simulation_config.time_warp
 
     def integrate(self):
-        for _ in range(self.time_warp):
+        for _ in range(self.simulation_config.time_warp):
             self.simulation.integrate(
                 self.simulation.t + self.simulation.dt
             )

@@ -45,8 +45,17 @@ def _run_cluster_generation_wrapper(args):
 
 
 def _run_cluster_generation(configuration):
-    logger.info(f"--------------------------")
-    logger.info(f"CLUSTER GENERATION STARTED")
+    logger.info(f"------------------------------------------")
+    logger.info(f"        CLUSTER GENERATION STARTED")
+    logger.info(f"")
+    logger.info(f" Master Seed: {configuration["cluster_generation"]["master_seed"]}")
+    logger.info(f" Number of Clusters: {configuration["cluster_generation"]["number_of_clusters"]}")
+    logger.info(f" Number of Stars: {configuration["cluster_generation"]["number_of_stars"]}")
+    logger.info(f" Cluster Radius: {configuration["cluster_generation"]["cluster_radius"]}")
+    logger.info(f"------------------------------------------")
+    logger.info(f"")
+    logger.info(f"")
+
     computing_time = time.perf_counter()
 
     cluster_generation = configuration["cluster_generation"]
@@ -85,10 +94,14 @@ def _run_cluster_generation(configuration):
                 logger.info(f"\033[32mProgress: {i}/{number_of_clusters} clusters generated.\033[0m")
 
     computing_time = time.perf_counter() - computing_time
-    logger.debug(f"Execution time: {computing_time:.3f} seconds")
 
-    logger.info(f"CLUSTER GENERATION COMPLETE")
-    logger.info(f"--------------------------\n\n")
+    logger.info(f"------------------------------------------")
+    logger.info(f"        CLUSTER GENERATION COMPLETE")
+    logger.info(f"")
+    logger.info(f" Execution time: {computing_time:.3f} seconds")
+    logger.info(f"------------------------------------------")
+    logger.info(f"")
+    logger.info(f"")
 
 def _run_galactic_tidal_stripping_wrapper(args):
     cluster_json_file, metadata = args
@@ -100,10 +113,6 @@ def _run_galactic_tidal_stripping_wrapper(args):
 
 def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
 
-    logger.info(f"--------------------------")
-    logger.info(f"GALACTIC TIDAL STRIPPING STARTED")
-    computing_time = time.perf_counter()
-
     cluster_json_files_path = [
         os.path.join(cluster_json_dir_path, f)
         for f in os.listdir(cluster_json_dir_path)
@@ -114,8 +123,26 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
         logger.error(f"No cluster JSON files were found in {cluster_json_dir_path}!")
         return
 
-    orbit_semi_major_axes = configuration["ml_dataset_input"]["semi_major_axes"]
-    orbit_eccentricities = configuration["ml_dataset_input"]["eccentricities"]
+    orbit_semi_major_axes = configuration["ml_dataset_input"]["orbit_semi_major_axes"]
+    orbit_eccentricities = configuration["ml_dataset_input"]["orbit_eccentricities"]
+
+    total_tasks = (
+        len(cluster_json_files_path)
+        * len(orbit_semi_major_axes)
+        * len(orbit_eccentricities)
+    )
+
+    logger.info(f"------------------------------------------")
+    logger.info(f"    GALACTIC TIDAL STRIPPING STARTED")
+    logger.info(f"")
+    logger.info(f" Number of Simulations: {total_tasks}")
+    logger.info(f" Galaxy Mass: {configuration["galactic_environment"]["galaxy_mass"]}")
+    logger.info(f" Galaxy Radius: {configuration["galactic_environment"]["galaxy_radius"]}")
+    logger.info(f" Number of Orbits: {configuration["galactic_environment"]["number_of_orbits"]}")
+    logger.info(f"------------------------------------------")
+    logger.info(f"")
+    logger.info(f"")
+    computing_time = time.perf_counter()
 
     ml_grid = list(itertools.product(orbit_semi_major_axes, orbit_eccentricities))
     gts_args = []
@@ -131,7 +158,6 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
             gts_args.append((cluster_json_file_path, metadata))
 
     max_workers = configuration.get("cores_used", os.cpu_count())
-    total_tasks = len(gts_args)
     logger.info(f"\033[94mUsing {max_workers} cores.\033[0m")
     with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, gts_args), 1):
@@ -139,10 +165,14 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
                 logger.info(f"\033[32mProgress: {i}/{total_tasks} galaxies simulated.\033[0m")
 
     computing_time = time.perf_counter() - computing_time
-    logger.debug(f"Execution time: {computing_time:.3f} seconds")
 
-    logger.info(f"GALACTIC TIDAL STRIPPING COMPLETE")
-    logger.info(f"--------------------------\n\n")
+    logger.info(f"------------------------------------------")
+    logger.info(f"    GALACTIC TIDAL STRIPPING COMPLETE")
+    logger.info(f"")
+    logger.info(f" Execution time: {computing_time:.3f} seconds")
+    logger.info(f"------------------------------------------")
+    logger.info(f"")
+    logger.info(f"")
 
 def _run_verify_physics(cluster_json_dir_path):
     verify_physics = Verify_Physics(cluster_json_dir_path)
