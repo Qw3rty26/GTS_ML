@@ -87,7 +87,7 @@ def _run_cluster_generation(configuration):
         gen_args.append((simulation_config, metadata))
 
     max_workers = configuration.get("cores_used", os.cpu_count())
-    logger.info(f"\033[94mUsing {max_workers} cores.\033[0m")
+    logger.info(f"\033[94mUsing {max_workers} cores in parallel.\033[0m")
     with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG,)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_cluster_generation_wrapper, gen_args), 1):
             if i % 5 == 0 or i == number_of_clusters:
@@ -139,6 +139,8 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
     logger.info(f" Galaxy Mass: {configuration["galactic_environment"]["galaxy_mass"]}")
     logger.info(f" Galaxy Radius: {configuration["galactic_environment"]["galaxy_radius"]}")
     logger.info(f" Number of Orbits: {configuration["galactic_environment"]["number_of_orbits"]}")
+    logger.info(f" Orbit Semi Major Axes: {configuration["ml_dataset_input"]["orbit_semi_major_axes"]}")
+    logger.info(f" Orbit Eccentricities: {configuration["ml_dataset_input"]["orbit_eccentricities"]}")
     logger.info(f"------------------------------------------")
     logger.info(f"")
     logger.info(f"")
@@ -158,11 +160,11 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
             gts_args.append((cluster_json_file_path, metadata))
 
     max_workers = configuration.get("cores_used", os.cpu_count())
-    logger.info(f"\033[94mUsing {max_workers} cores.\033[0m")
+    logger.info(f"\033[94mUsing {max_workers} cores in parallel.\033[0m")
     with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, gts_args), 1):
             if i % 5 == 0 or i == total_tasks:
-                logger.info(f"\033[32mProgress: {i}/{total_tasks} galaxies simulated.\033[0m")
+                logger.info(f"\033[32mProgress: {i}/{total_tasks} clusters simulated.\033[0m")
 
     computing_time = time.perf_counter() - computing_time
 
