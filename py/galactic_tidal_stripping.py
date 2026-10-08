@@ -20,6 +20,7 @@ class Galactic_Tidal_Stripping:
         self._create_cluster(cluster_json_file)
 
     def _create_cluster(self, cluster_json_file):
+
         file_metadata, entities, center_of_mass = (
             io_manager.load_json_snapshot(cluster_json_file)
         )
@@ -27,6 +28,14 @@ class Galactic_Tidal_Stripping:
         for key, value in vars(file_metadata).items():
             if value is not None:
                 setattr(self.metadata, key, value)
+
+        logger.info(
+            f"Cluster "
+            f"{self.metadata.cluster_seed}_a"
+            f"{self.metadata.orbit_semi_major_axis}_e"
+            f"{self.metadata.orbit_eccentricity}: "
+            f"Creating..."
+        )
 
         self.simulation = Simulation(
             self.metadata.simulation_config
@@ -84,14 +93,17 @@ class Galactic_Tidal_Stripping:
 
     def run(self):
 
+        logger.info(
+            f"Cluster "
+            f"{self.metadata.cluster_seed}_a"
+            f"{self.metadata.orbit_semi_major_axis}_e"
+            f"{self.metadata.orbit_eccentricity}: "
+            f"Running..."
+        )
+
         dt_snapshot = 0.1
-        orbit_check_margin = 1.0
 
-        orbits = 0
-        last_orbit_time = self.simulation.get_time()
-
-        # T = 2 * pi * sqrt(a^3 / (G * M))
-        orbit_period = (
+        theoretical_orbit_period = (
             2.0 * np.pi
             * np.sqrt(
                 self.metadata.orbit_semi_major_axis**3
@@ -102,10 +114,13 @@ class Galactic_Tidal_Stripping:
             )
         )
 
-        next_orbit_check = (
-            self.simulation.get_time()
-            + orbit_period
-            - orbit_check_margin
+        logger.debug(
+            f"Cluster "
+            f"{self.metadata.cluster_seed}_a"
+            f"{self.metadata.orbit_semi_major_axis}_e"
+            f"{self.metadata.orbit_eccentricity}: "
+            f"Theoretical orbital period: "
+            f"{theoretical_orbit_period:.4f}"
         )
 
         next_snapshot = (
@@ -120,6 +135,7 @@ class Galactic_Tidal_Stripping:
         )
 
         entities = self.simulation.get_entities()
+
         percentile_center_of_mass = (
             self.simulation.get_percentile_center_of_mass()
         )
@@ -136,19 +152,37 @@ class Galactic_Tidal_Stripping:
             percentile_center_of_mass
         )
 
-        while orbits < self.metadata.number_of_orbits:
+        last_logged_orbits = 0
 
+        ORBIT_TRACKING_START = 0.8
+
+        next_orbit_completion_time = (
+            self.simulation.get_time()
+            + theoretical_orbit_period
+        )
+
+        next_orbit_tracking_start = (
+            self.simulation.get_time()
+            + (
+                ORBIT_TRACKING_START
+                * theoretical_orbit_period
+            )
+        )
+
+        tracking_orbit = False
+
+        while True:
             self.simulation.integrate()
 
             current_time = self.simulation.get_time()
 
             if current_time >= next_snapshot:
-
                 next_snapshot += dt_snapshot
 
                 self.metadata.simulation_config.t = current_time
 
                 entities = self.simulation.get_entities()
+
                 percentile_center_of_mass = (
                     self.simulation.get_percentile_center_of_mass()
                 )
@@ -165,42 +199,60 @@ class Galactic_Tidal_Stripping:
                     percentile_center_of_mass
                 )
 
-            if current_time >= next_orbit_check:
+            if (
+                not tracking_orbit
+                and current_time >= next_orbit_tracking_start
+            ):
+                tracking_orbit = True
 
-                new_orbits = (
+            if tracking_orbit:
+                current_orbits = (
                     self.simulation.get_number_of_orbits()
                 )
 
-                if new_orbits != orbits:
+                if current_orbits > last_logged_orbits:
+                    last_logged_orbits = current_orbits
+                    tracking_orbit = False
 
-                    orbits = new_orbits
-
-                    orbit_period = (
-                        current_time - last_orbit_time
-                    )
-
-                    last_orbit_time = current_time
-
-                    next_orbit_check = (
+                    next_orbit_completion_time = (
                         current_time
-                        + orbit_period
-                        - orbit_check_margin
+                        + theoretical_orbit_period
                     )
 
                     logger.info(
-                        f"\033[94mCluster "
+                        f"Cluster "
                         f"{self.metadata.cluster_seed}_a"
                         f"{self.metadata.orbit_semi_major_axis}_e"
                         f"{self.metadata.orbit_eccentricity}: "
-                        f"{orbits}/"
-                        f"{self.metadata.number_of_orbits} "
-                        f"orbits done.\033[0m"
+                        f"Orbit {current_orbits}/"
+                        f"{self.metadata.number_of_orbits} completed "
+                    )
+
+                    if current_orbits >= self.metadata.number_of_orbits:
+                        break
+
+                    logger.debug(
+                        f"Cluster "
+                        f"{self.metadata.cluster_seed}_a"
+                        f"{self.metadata.orbit_semi_major_axis}_e"
+                        f"{self.metadata.orbit_eccentricity}: "
+                        f"next_orbit_completion_time = "
+                        f"{next_orbit_completion_time:.2f}, "
+                        f"current_t = {current_time:.2f}"
+                    )
+
+                    next_orbit_tracking_start = (
+                        current_time
+                        + (
+                            ORBIT_TRACKING_START
+                            * theoretical_orbit_period
+                        )
                     )
 
         logger.info(
-            f"Cluster "
+            f"\033[94mCluster "
             f"{self.metadata.cluster_seed}_a"
             f"{self.metadata.orbit_semi_major_axis}_e"
             f"{self.metadata.orbit_eccentricity}: "
-            f"Completed."
+            f"Done.\033[0m"
         )

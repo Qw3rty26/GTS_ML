@@ -26,12 +26,13 @@ from logger_settings import configure_logging
 
 LOGGING_VERBOSE = True
 LOGGING_DEBUG = False
+
 logger = logging.getLogger(__name__)
 
 io_paths = None
 
-def initialise_logging_worker(io_paths):
-    configure_logging(LOGGING_VERBOSE, LOGGING_DEBUG)
+def initialise_logging_worker(io_paths, logging_verbose, logging_debug):
+    configure_logging(logging_verbose, logging_debug)
     io_manager.set_io_paths(io_paths)
 
 def _run_cluster_generation_wrapper(args):
@@ -44,7 +45,7 @@ def _run_cluster_generation_wrapper(args):
 
 
 def _run_cluster_generation(configuration):
-
+    logger.info(f"--------------------------")
     logger.info(f"CLUSTER GENERATION STARTED")
     computing_time = time.perf_counter()
 
@@ -77,7 +78,8 @@ def _run_cluster_generation(configuration):
         gen_args.append((simulation_config, metadata))
 
     max_workers = configuration.get("cores_used", os.cpu_count())
-    with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths,)) as pool:
+    logger.info(f"\033[94mUsing {max_workers} cores.\033[0m")
+    with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG,)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_cluster_generation_wrapper, gen_args), 1):
             if i % 5 == 0 or i == number_of_clusters:
                 logger.info(f"\033[32mProgress: {i}/{number_of_clusters} clusters generated.\033[0m")
@@ -86,6 +88,7 @@ def _run_cluster_generation(configuration):
     logger.debug(f"Execution time: {computing_time:.3f} seconds")
 
     logger.info(f"CLUSTER GENERATION COMPLETE")
+    logger.info(f"--------------------------\n\n")
 
 def _run_galactic_tidal_stripping_wrapper(args):
     cluster_json_file, metadata = args
@@ -97,6 +100,7 @@ def _run_galactic_tidal_stripping_wrapper(args):
 
 def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
 
+    logger.info(f"--------------------------")
     logger.info(f"GALACTIC TIDAL STRIPPING STARTED")
     computing_time = time.perf_counter()
 
@@ -128,7 +132,8 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
 
     max_workers = configuration.get("cores_used", os.cpu_count())
     total_tasks = len(gts_args)
-    with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths,)) as pool:
+    logger.info(f"\033[94mUsing {max_workers} cores.\033[0m")
+    with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, gts_args), 1):
             if i % 5 == 0 or i == total_tasks:
                 logger.info(f"\033[32mProgress: {i}/{total_tasks} galaxies simulated.\033[0m")
@@ -137,6 +142,7 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
     logger.debug(f"Execution time: {computing_time:.3f} seconds")
 
     logger.info(f"GALACTIC TIDAL STRIPPING COMPLETE")
+    logger.info(f"--------------------------\n\n")
 
 def _run_verify_physics(cluster_json_dir_path):
     verify_physics = Verify_Physics(cluster_json_dir_path)
@@ -150,6 +156,8 @@ def _run_ml_dataset_generation(gts_json_dir_path):
 
 def main():
     global io_paths
+    global LOGGING_VERBOSE
+    global LOGGING_DEBUG
 
     parser = argparse.ArgumentParser(
         description="Generate Plummer clusters and simulate galactic tidal strippings"
@@ -180,6 +188,8 @@ def main():
     args = parser.parse_args()
     config_path = os.path.abspath(args.config)
     configuration = io_manager.load_json_file(config_path)
+    LOGGING_VERBOSE = args.verbose
+    LOGGING_DEBUG = args.debug
     configure_logging(args.verbose, args.debug)
     logger = logging.getLogger(__name__)
 

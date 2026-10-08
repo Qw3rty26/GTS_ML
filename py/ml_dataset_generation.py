@@ -117,5 +117,5 @@ class ML_Dataset_Generation:
                 )
 
         logger.info(
-            f"ML dataset generated: {csv_path}"
+            f"\033[32mML dataset generated: {csv_path}\033[0m"
         )

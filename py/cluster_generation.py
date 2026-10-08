@@ -18,11 +18,11 @@ class Cluster_Generation:
         self.simulation_config = simulation_config
         self.plummer = None
         self.simulation = None
-        logger.debug(f"Cluster {self.metadata.cluster_seed}: Generating...")
         self._create_cluster()
 
 
     def _create_cluster(self):
+        logger.info(f"Cluster {self.metadata.cluster_seed}: Creating...")
         ENTITY_MASS = 1 / self.metadata.initial_number_of_entities
 
         self.plummer = Plummer(self.metadata.cluster_radius, self.metadata.initial_number_of_entities, self.metadata.cluster_seed)
@@ -50,13 +50,15 @@ class Cluster_Generation:
         self.simulation.move_cluster_to_center_of_mass()
 
     def run(self):
-        logger.debug(f"Cluster {self.metadata.cluster_seed}: Generating...")
+        logger.info(f"Cluster {self.metadata.cluster_seed}: Running...")
 
         #calculated through kepler's third law
         END_TIME = (
-            20 * self.metadata.cluster_radius ** (3 / 2)
+            20 * self.metadata.cluster_radius ** (3/2)
             / np.sqrt(self.metadata.initial_number_of_entities)
         )
+
+        logger.debug(f"Cluster {self.metadata.cluster_seed}: END_TIME = {END_TIME:.4f}")
 
         DT_CLEANUP = 1.0
         DT_SNAPSHOT = 0.01
@@ -87,4 +89,4 @@ class Cluster_Generation:
                 number_of_entities_cleaned = self.simulation.clean_unbound_entities()
                 if number_of_entities_cleaned > 0:
                     logger.debug(f"Cluster {self.metadata.cluster_seed}: Cleaning {number_of_entities_cleaned} star/s...")
-        logger.info(f"Cluster {self.metadata.cluster_seed}: Generated.")
+        logger.info(f"\033[94mCluster {self.metadata.cluster_seed}: Generated.\033[0m")
