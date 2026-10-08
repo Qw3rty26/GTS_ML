@@ -1,27 +1,30 @@
 {
-    "simulation": {
+    "simulation_config": {
         "dt": 0.01,
-        "integrator": "leapfrog",
+        "t": 0,
         "G": 1.0,
         "softening": 0.1,
-        "time_warp": 1
+        "time_warp": 1,
+        "integrator": "leapfrog"
     },
-#TODO mettere numero di core
-    "cluster generation": {
-        "number_of_stars": 200,
-        "cluster_radius": 1.0,
-        "number_of_clusters": 5
+    "cluster_generation": {
+        "master_seed": 262626,
+        "number_of_clusters": 1,
+        "number_of_stars": 100,
+        "cluster_radius": 1.0
     },
 
-    "galactic environment": {
+    "galactic_environment": {
         "galaxy_mass": 2000,
-        "galaxy_radius": 10
+        "galaxy_radius": 10,
+        "number_of_orbits": 2
     },
 
     "ml_dataset_input": {
-        "semi_major_axes": [100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0, 500.0],
-        "eccentricities": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+        "orbit_semi_major_axes": [100.0, 150.0],
+        "orbit_eccentricities": [0.0,  0.3]
     },
 
-    "output directory": "./clusters"
+    "cores_used": 4,
+    "output_directory": "./clusters"
 }
