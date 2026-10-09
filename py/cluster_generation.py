@@ -13,13 +13,21 @@ class Cluster_Generation:
         self,
         simulation_config: SimulationConfig,
         metadata: Metadata,
+        json_and_xyzv_snapshots_dt = 1,
     ):
+        self.json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
         self.metadata = metadata
         self.simulation_config = simulation_config
         self.plummer = None
         self.simulation = None
         self._create_cluster()
 
+    def _save_to_file(self):
+            self.metadata.simulation_config.t = self.simulation.get_time()
+            _entities = self.simulation.get_entities()
+            _percentile_center_of_mass = self.simulation.get_percentile_center_of_mass()
+            io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
+            io_manager.save_json_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
 
     def _create_cluster(self):
         logger.info(f"Cluster {self.metadata.cluster_seed}: Creating...")
@@ -61,28 +69,21 @@ class Cluster_Generation:
         logger.debug(f"Cluster {self.metadata.cluster_seed}: END_TIME = {END_TIME:.4f}")
 
         DT_CLEANUP = 1.0
-        DT_SNAPSHOT = 0.01
 
         next_cleanup = self.simulation.get_time() + DT_CLEANUP
-        next_snapshot = self.simulation.get_time() + DT_SNAPSHOT
+        next_snapshot = self.simulation.get_time() + self.json_and_xyzv_snapshots_dt 
 
         io_manager.init_json_gen(self.metadata)
 
-        _entities = self.simulation.get_entities()
-        _percentile_center_of_mass = self.simulation.get_percentile_center_of_mass()
-        io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
-        io_manager.save_json_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
+        self._save_to_file()
+
 
         while self.simulation.get_time() < END_TIME:
             self.simulation.integrate()
 
             if self.simulation.get_time() >= next_snapshot:
-                next_snapshot += DT_SNAPSHOT
-                self.metadata.simulation_config.t = self.simulation.get_time()
-                _entities = self.simulation.get_entities()
-                _percentile_center_of_mass = self.simulation.get_percentile_center_of_mass()
-                io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
-                io_manager.save_json_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
+                next_snapshot += self.json_and_xyzv_snapshots_dt
+                self._save_to_file()
 
             if self.simulation.get_time() >= next_cleanup:
                 next_cleanup += DT_CLEANUP

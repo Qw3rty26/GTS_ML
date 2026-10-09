@@ -14,10 +14,36 @@ class Galactic_Tidal_Stripping:
     def __init__(
         self,
         cluster_json_file,
-        metadata: Metadata
+        metadata: Metadata,
+        json_and_xyzv_snapshots_dt = 1
     ):
         self.metadata = metadata
+        self.json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
         self._create_cluster(cluster_json_file)
+
+    def _save_to_file(self):
+
+        self.metadata.simulation_config.t = (
+            self.simulation.get_time()
+        )
+
+        entities = self.simulation.get_entities()
+
+        percentile_center_of_mass = (
+            self.simulation.get_percentile_center_of_mass()
+        )
+
+        io_manager.save_xyzv_snapshot_gts(
+            self.metadata,
+            entities,
+            percentile_center_of_mass
+        )
+
+        io_manager.save_json_snapshot_gts(
+            self.metadata,
+            entities,
+            percentile_center_of_mass
+        )
 
     def _create_cluster(self, cluster_json_file):
 
@@ -101,8 +127,6 @@ class Galactic_Tidal_Stripping:
             f"Running..."
         )
 
-        dt_snapshot = 0.1
-
         theoretical_orbit_period = (
             2.0 * np.pi
             * np.sqrt(
@@ -125,44 +149,31 @@ class Galactic_Tidal_Stripping:
 
         next_snapshot = (
             self.simulation.get_time()
-            + dt_snapshot
+            + self.json_and_xyzv_snapshots_dt
         )
 
         io_manager.init_json_gts(self.metadata)
 
-        self.metadata.simulation_config.t = (
-            self.simulation.get_time()
-        )
-
-        entities = self.simulation.get_entities()
-
-        percentile_center_of_mass = (
-            self.simulation.get_percentile_center_of_mass()
-        )
-
-        io_manager.save_xyzv_snapshot_gts(
-            self.metadata,
-            entities,
-            percentile_center_of_mass
-        )
-
-        io_manager.save_json_snapshot_gts(
-            self.metadata,
-            entities,
-            percentile_center_of_mass
-        )
+        self._save_to_file()
 
         last_logged_orbits = 0
 
         ORBIT_TRACKING_START = 0.8
+        ORBIT_TIMEOUT_FACTOR = 2.0
+
+        current_time = self.simulation.get_time()
+        orbit_timeout = (
+            current_time
+            + ORBIT_TIMEOUT_FACTOR * theoretical_orbit_period
+        )
 
         next_orbit_completion_time = (
-            self.simulation.get_time()
+            current_time
             + theoretical_orbit_period
         )
 
         next_orbit_tracking_start = (
-            self.simulation.get_time()
+            current_time
             + (
                 ORBIT_TRACKING_START
                 * theoretical_orbit_period
@@ -177,27 +188,8 @@ class Galactic_Tidal_Stripping:
             current_time = self.simulation.get_time()
 
             if current_time >= next_snapshot:
-                next_snapshot += dt_snapshot
-
-                self.metadata.simulation_config.t = current_time
-
-                entities = self.simulation.get_entities()
-
-                percentile_center_of_mass = (
-                    self.simulation.get_percentile_center_of_mass()
-                )
-
-                io_manager.save_xyzv_snapshot_gts(
-                    self.metadata,
-                    entities,
-                    percentile_center_of_mass
-                )
-
-                io_manager.save_json_snapshot_gts(
-                    self.metadata,
-                    entities,
-                    percentile_center_of_mass
-                )
+                next_snapshot += self.json_and_xyzv_snapshots_dt
+                self._save_to_file()
 
             if (
                 not tracking_orbit
@@ -214,6 +206,12 @@ class Galactic_Tidal_Stripping:
                     last_logged_orbits = current_orbits
                     tracking_orbit = False
 
+                    orbit_timeout = (
+                        current_time
+                        + ORBIT_TIMEOUT_FACTOR
+                        * theoretical_orbit_period
+                    )
+
                     next_orbit_completion_time = (
                         current_time
                         + theoretical_orbit_period
@@ -229,6 +227,14 @@ class Galactic_Tidal_Stripping:
                     )
 
                     if current_orbits >= self.metadata.number_of_orbits:
+                        logger.debug(
+                            f"Cluster "
+                            f"{self.metadata.cluster_seed}_a"
+                            f"{self.metadata.orbit_semi_major_axis}_e"
+                            f"{self.metadata.orbit_eccentricity}: "
+                            f"current_t = {current_time:.2f}"
+                        )
+                        self._save_to_file()
                         break
 
                     logger.debug(
@@ -248,6 +254,21 @@ class Galactic_Tidal_Stripping:
                             * theoretical_orbit_period
                         )
                     )
+
+            if current_time >= orbit_timeout:
+                logger.warning(
+                    f"Cluster "
+                    f"{self.metadata.cluster_seed}_a"
+                    f"{self.metadata.orbit_semi_major_axis}_e"
+                    f"{self.metadata.orbit_eccentricity}: "
+                    f"Orbit timeout after "
+                    f"{ORBIT_TIMEOUT_FACTOR * theoretical_orbit_period:.2f} "
+                    f"time units. "
+                    f"Completed {last_logged_orbits}/"
+                    f"{self.metadata.number_of_orbits} orbits."
+                )
+                self._save_to_file()
+                break
 
         logger.info(
             f"\033[94mCluster "

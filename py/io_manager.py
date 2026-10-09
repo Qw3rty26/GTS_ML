@@ -22,6 +22,18 @@ class IOPaths:
         return dir
 
     @property
+    def gen_dir(self):
+        dir = os.path.join(self.get_run_dir, "GEN")
+        os.makedirs(dir, exist_ok=True)
+        return dir
+
+    @property
+    def gts_dir(self):
+        dir = os.path.join(self.get_run_dir, "GTS")
+        os.makedirs(dir, exist_ok=True)
+        return dir
+
+    @property
     def gen_json_dir(self):
         dir = os.path.join(self.get_run_dir, "GEN", "JSON")
         os.makedirs(dir, exist_ok=True)

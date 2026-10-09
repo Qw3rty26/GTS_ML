@@ -36,15 +36,18 @@ def initialise_logging_worker(io_paths, logging_verbose, logging_debug):
     io_manager.set_io_paths(io_paths)
 
 def _run_cluster_generation_wrapper(args):
-    simulation_config, metadata = args
+    simulation_config, metadata, json_and_xyzv_snapshots_dt = args
     cluster_generation = Cluster_Generation(
         simulation_config = simulation_config,
-        metadata = metadata
+        metadata = metadata,
+        json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
     )
     cluster_generation.run()
 
 
 def _run_cluster_generation(configuration):
+    max_workers = configuration.get("cores_used", 1)
+
     logger.info(f"------------------------------------------")
     logger.info(f"        CLUSTER GENERATION STARTED")
     logger.info(f"")
@@ -52,6 +55,17 @@ def _run_cluster_generation(configuration):
     logger.info(f" Number of Clusters: {configuration["cluster_generation"]["number_of_clusters"]}")
     logger.info(f" Number of Stars: {configuration["cluster_generation"]["number_of_stars"]}")
     logger.info(f" Cluster Radius: {configuration["cluster_generation"]["cluster_radius"]}")
+    logger.info(f"------------------------------------------")
+    logger.info(f" dt: {configuration["simulation_config"]["dt"]}")
+    logger.info(f" t: {configuration["simulation_config"]["t"]}")
+    logger.info(f" G: {configuration["simulation_config"]["G"]}")
+    logger.info(f" Softening: {configuration["simulation_config"]["softening"]}")
+    logger.info(f" Time Warp: {configuration["simulation_config"]["time_warp"]}")
+    logger.info(f" Integrator: {configuration["simulation_config"]["integrator"]}")
+    logger.info(f"------------------------------------------")
+    logger.info(f" Saved Snapshots dt: {configuration["json_and_xyzv_snapshots_dt"]}")
+    logger.info(f" Output Directory: {io_paths.gen_dir}")
+    logger.info(f" Cores in parallel: {max_workers}")
     logger.info(f"------------------------------------------")
     logger.info(f"")
     logger.info(f"")
@@ -84,10 +98,8 @@ def _run_cluster_generation(configuration):
             cluster_radius = configuration["cluster_generation"]["cluster_radius"],
             initial_number_of_entities = configuration["cluster_generation"]["number_of_stars"]
         )
-        gen_args.append((simulation_config, metadata))
+        gen_args.append((simulation_config, metadata, configuration["json_and_xyzv_snapshots_dt"]))
 
-    max_workers = configuration.get("cores_used", os.cpu_count())
-    logger.info(f"\033[94mUsing {max_workers} cores in parallel.\033[0m")
     with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG,)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_cluster_generation_wrapper, gen_args), 1):
             if i % 5 == 0 or i == number_of_clusters:
@@ -104,10 +116,11 @@ def _run_cluster_generation(configuration):
     logger.info(f"")
 
 def _run_galactic_tidal_stripping_wrapper(args):
-    cluster_json_file, metadata = args
+    cluster_json_file, metadata, json_and_xyzv_snapshots_dt= args
     galactic_tidal_stripping = Galactic_Tidal_Stripping(
         cluster_json_file = cluster_json_file,
-        metadata = metadata
+        metadata = metadata,
+        json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
     )
     galactic_tidal_stripping.run()
 
@@ -132,6 +145,9 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
         * len(orbit_eccentricities)
     )
 
+
+    max_workers = configuration.get("cores_used", 1)
+
     logger.info(f"------------------------------------------")
     logger.info(f"    GALACTIC TIDAL STRIPPING STARTED")
     logger.info(f"")
@@ -141,6 +157,16 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
     logger.info(f" Number of Orbits: {configuration["galactic_environment"]["number_of_orbits"]}")
     logger.info(f" Orbit Semi Major Axes: {configuration["ml_dataset_input"]["orbit_semi_major_axes"]}")
     logger.info(f" Orbit Eccentricities: {configuration["ml_dataset_input"]["orbit_eccentricities"]}")
+    logger.info(f"------------------------------------------")
+    logger.info(f" dt: {configuration["simulation_config"]["dt"]}")
+    logger.info(f" G: {configuration["simulation_config"]["G"]}")
+    logger.info(f" Softening: {configuration["simulation_config"]["softening"]}")
+    logger.info(f" Time Warp: {configuration["simulation_config"]["time_warp"]}")
+    logger.info(f" Integrator: {configuration["simulation_config"]["integrator"]}")
+    logger.info(f"------------------------------------------")
+    logger.info(f" Saved Snapshots dt: {configuration["json_and_xyzv_snapshots_dt"]}")
+    logger.info(f" Output Directory: {io_paths.gts_dir}")
+    logger.info(f" Cores in parallel: {max_workers}")
     logger.info(f"------------------------------------------")
     logger.info(f"")
     logger.info(f"")
@@ -157,10 +183,8 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
                 orbit_eccentricity = orbit_eccentricity,
                 number_of_orbits = configuration["galactic_environment"]["number_of_orbits"]
             )
-            gts_args.append((cluster_json_file_path, metadata))
+            gts_args.append((cluster_json_file_path, metadata, configuration["json_and_xyzv_snapshots_dt"]))
 
-    max_workers = configuration.get("cores_used", os.cpu_count())
-    logger.info(f"\033[94mUsing {max_workers} cores in parallel.\033[0m")
     with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG)) as pool:
         for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, gts_args), 1):
             if i % 5 == 0 or i == total_tasks:
