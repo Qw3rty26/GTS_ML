@@ -25,6 +25,7 @@
         "orbit_eccentricities": [0.0,  0.3]
     },
 
+    "json_and_xyzv_snapshots_dt": 1,
     "cores_used": 4,
     "output_directory": "./clusters"
 }
