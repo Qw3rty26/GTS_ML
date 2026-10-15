@@ -1,0 +1,18 @@
+\babel@toc {italian}{}\relax 
+\babel@toc {italian}{}\relax 
+\contentsline {chapter}{Sommario}{2}{}%
+\contentsline {chapter}{\numberline {1}In ante nulla, vestibulum a}{2}{}%
+\contentsline {section}{\numberline {1.1}Pellentesque habitant morbi tristique senectus}{2}{}%
+\contentsline {section}{\numberline {1.2}Nullam et justo vitae nisi}{3}{}%
+\contentsline {chapter}{\numberline {2}Proin rhoncus a sapien in.}{3}{}%
+\contentsline {section}{\numberline {2.1}Cras in aliquam quam, et}{3}{}%
+\contentsline {subsection}{\numberline {2.1.1}Sed pulvinar placerat enim, a}{3}{}%
+\contentsline {section}{\numberline {2.2}Vivamus hendrerit imperdiet ex. Vivamus}{3}{}%
+\contentsline {chapter}{\numberline {3}Conclusioni}{4}{}%
+\contentsline {chapter}{Bibliografia}{4}{}%
+\contentsline {chapter}{\numberline {A}Titolo primo allegato}{6}{}%
+\contentsline {section}{\numberline {A.1}Titolo}{6}{}%
+\contentsline {subsection}{\numberline {A.1.1}Sottotitolo}{6}{}%
+\contentsline {chapter}{\numberline {B}Titolo secondo allegato}{7}{}%
+\contentsline {section}{\numberline {B.1}Titolo}{7}{}%
+\contentsline {subsection}{\numberline {B.1.1}Sottotitolo}{7}{}%

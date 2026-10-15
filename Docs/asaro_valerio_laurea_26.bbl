@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{ictbusiness}
+Ict business.
+\newblock http://www.ictbusiness.it/.
+\newblock ultimo accesso 15/06/2015.
+
+\bibitem{coulouris}
+Dollimore J. e Kindberg~T Coulouris G.~F.
+\newblock {\em Distributed Systems: concepts and Design}.
+\newblock Addison-Wesley, second edition edition, 1994.
+
+\bibitem{dalal}
+Triggs~B. Dalal~N.
+\newblock Histograms of oriented gradients for human detection.
+\newblock In {\em Computer Vision and Pattern Recognition (CVPR)}, pages
+  886--893, San Diego, USA, 20-26 June 2005.
+
+\bibitem{donoho}
+Donoho~D. L.
+\newblock Compressed sensing.
+\newblock {\em IEEE Trans. Inf. Theory}, 52(4):1289--1306, 2006.
+
+\end{thebibliography}
