@@ -1,18 +1,46 @@
 \babel@toc {italian}{}\relax 
 \babel@toc {italian}{}\relax 
-\contentsline {chapter}{Sommario}{2}{}%
-\contentsline {chapter}{\numberline {1}In ante nulla, vestibulum a}{2}{}%
-\contentsline {section}{\numberline {1.1}Pellentesque habitant morbi tristique senectus}{2}{}%
-\contentsline {section}{\numberline {1.2}Nullam et justo vitae nisi}{3}{}%
-\contentsline {chapter}{\numberline {2}Proin rhoncus a sapien in.}{3}{}%
-\contentsline {section}{\numberline {2.1}Cras in aliquam quam, et}{3}{}%
-\contentsline {subsection}{\numberline {2.1.1}Sed pulvinar placerat enim, a}{3}{}%
-\contentsline {section}{\numberline {2.2}Vivamus hendrerit imperdiet ex. Vivamus}{3}{}%
-\contentsline {chapter}{\numberline {3}Conclusioni}{4}{}%
-\contentsline {chapter}{Bibliografia}{4}{}%
-\contentsline {chapter}{\numberline {A}Titolo primo allegato}{6}{}%
-\contentsline {section}{\numberline {A.1}Titolo}{6}{}%
-\contentsline {subsection}{\numberline {A.1.1}Sottotitolo}{6}{}%
-\contentsline {chapter}{\numberline {B}Titolo secondo allegato}{7}{}%
-\contentsline {section}{\numberline {B.1}Titolo}{7}{}%
-\contentsline {subsection}{\numberline {B.1.1}Sottotitolo}{7}{}%
+\contentsline {chapter}{Sommario}{3}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Introduzione}{4}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Gli ammassi stellari}{4}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Galactic Tidal Stripping}{4}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Obiettivo}{4}{section.1.3}%
+\contentsline {chapter}{\numberline {2}Il modello fisico}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Notazione}{5}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Generazione dell'ammasso stellare}{5}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Il modello di Plummer}{5}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Distribuzione delle posizioni}{5}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Distribuzione delle velocità}{5}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Condizione di equilibrio viriale}{5}{subsection.2.2.4}%
+\contentsline {section}{\numberline {2.3}Modello del potenziale galattico}{5}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Potenziale galattico di Plummer}{5}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Parametri orbitali}{5}{subsection.2.3.2}%
+\contentsline {section}{\numberline {2.4}Equazioni del moto ed evoluzione}{5}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Implementazione software}{6}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Notazione}{6}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Generazione dell'ammasso stellare}{6}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Il modello di Plummer}{6}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Distribuzione delle posizioni}{6}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Distribuzione delle velocità}{6}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Condizione di equilibrio viriale}{6}{subsection.3.2.4}%
+\contentsline {section}{\numberline {3.3}Modello del potenziale galattico}{6}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Potenziale galattico di Plummer}{6}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Parametri orbitali}{6}{subsection.3.3.2}%
+\contentsline {section}{\numberline {3.4}Equazioni del moto ed evoluzione}{6}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Diagnostica del cluster}{6}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Centro di massa e raggio di metà massa}{6}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Energie e rapporto del viriale}{6}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Massa legata e rimozione delle stelle}{6}{subsection.3.5.3}%
+\contentsline {section}{\numberline {3.6}Verifica delle grandezze fisiche}{6}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Generazione del dataset}{6}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Dataset e Machine Learning}{7}{chapter.4}%
+\contentsline {section}{\numberline {4.1}I dati di input}{7}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Semiasse maggiore}{7}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Eccentricità}{7}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}I dati di output}{7}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Raggio di metà massa}{7}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Frazione di massa legata}{7}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Organizzazione del dataset}{7}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Applicazione del Machine Learning}{7}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Conclusioni}{8}{chapter.5}%
+\contentsline {chapter}{Bibliografia}{8}{chapter.5}%

@@ -26,11 +26,47 @@
 %
 %\usepackage[latin1]{inputenc} % per Windows;
 \usepackage[utf8x]{inputenc} % per Linux (richiede il pacchetto unicode);
+\usepackage[T1]{fontenc}
 %\usepackage[applemac]{inputenc} % per Mac.
 
 \singlespacing
 
 \usepackage[italian]{babel}
+
+% aggiunti da Valerio Asaro
+\usepackage[hidelinks]{hyperref}
+
+% per le tabelle
+\usepackage{array}
+% per formule matematiche
+\usepackage{amsmath}
+
+% per snippets di codice
+\usepackage{xcolor}
+\usepackage{listings}
+
+\definecolor{codegreen}{rgb}{0.0,0.45,0.2}
+\definecolor{codegray}{rgb}{0.45,0.45,0.45}
+\definecolor{codepurple}{rgb}{0.55,0.2,0.65}
+\definecolor{codeblue}{rgb}{0.1,0.2,0.7}
+
+\lstset{
+	language=Python,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{codeblue}\bfseries,
+	commentstyle=\color{codegreen}\itshape,
+	stringstyle=\color{codepurple},
+	identifierstyle=\color{black},
+	numbers=left,
+	numberstyle=\tiny\color{codegray},
+	stepnumber=1,
+	frame=single,
+	breaklines=true,
+	captionpos=b,
+	showstringspaces=false,
+	keepspaces=true,
+	tabsize=4
+}
 
 \begin{document}
 
@@ -99,6 +135,7 @@
       
       % sommario
       \input{sommario}
+      \endgroup
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Nota
@@ -115,6 +152,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
       
+	\begingroup
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % lista dei capitoli
       %
@@ -123,7 +161,8 @@
       \input{capitolo1}
       \input{capitolo2}
       \input{capitolo3}
-      %\input{capitolo4}
+      \input{capitolo4}
+      \input{capitolo5}
       
       
     \endgroup
@@ -165,10 +204,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
 
-    \titleformat{\chapter}
-        {\normalfont\Huge\bfseries}{Allegato \thechapter}{1em}{}
-    % sezione Allegati - opzionale
-    \appendix
-    \input{allegati}
+%    \titleformat{\chapter}
+%        {\normalfont\Huge\bfseries}{Allegato \thechapter}{1em}{}
+%    % sezione Allegati - opzionale
+%    \appendix
+%    \input{allegati}
 
 \end{document}
