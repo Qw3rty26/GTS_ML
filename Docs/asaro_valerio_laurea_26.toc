@@ -9,38 +9,40 @@
 \contentsline {section}{\numberline {2.1}Notazione}{5}{section.2.1}%
 \contentsline {section}{\numberline {2.2}Generazione dell'ammasso stellare}{5}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Il modello di Plummer}{5}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Distribuzione delle posizioni}{5}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Distribuzione delle velocità}{5}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Condizione di equilibrio viriale}{5}{subsection.2.2.4}%
-\contentsline {section}{\numberline {2.3}Modello del potenziale galattico}{5}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Potenziale galattico di Plummer}{5}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}Parametri orbitali}{5}{subsection.2.3.2}%
-\contentsline {section}{\numberline {2.4}Equazioni del moto ed evoluzione}{5}{section.2.4}%
-\contentsline {chapter}{\numberline {3}Implementazione software}{6}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Notazione}{6}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Generazione dell'ammasso stellare}{6}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Il modello di Plummer}{6}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Distribuzione delle posizioni}{6}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Distribuzione delle velocità}{6}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Condizione di equilibrio viriale}{6}{subsection.3.2.4}%
-\contentsline {section}{\numberline {3.3}Modello del potenziale galattico}{6}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Potenziale galattico di Plummer}{6}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Parametri orbitali}{6}{subsection.3.3.2}%
-\contentsline {section}{\numberline {3.4}Equazioni del moto ed evoluzione}{6}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Diagnostica del cluster}{6}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}Centro di massa e raggio di metà massa}{6}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}Energie e rapporto del viriale}{6}{subsection.3.5.2}%
-\contentsline {subsection}{\numberline {3.5.3}Massa legata e rimozione delle stelle}{6}{subsection.3.5.3}%
-\contentsline {section}{\numberline {3.6}Verifica delle grandezze fisiche}{6}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Generazione del dataset}{6}{section.3.7}%
-\contentsline {chapter}{\numberline {4}Dataset e Machine Learning}{7}{chapter.4}%
-\contentsline {section}{\numberline {4.1}I dati di input}{7}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Semiasse maggiore}{7}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Eccentricità}{7}{subsection.4.1.2}%
-\contentsline {section}{\numberline {4.2}I dati di output}{7}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Raggio di metà massa}{7}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Frazione di massa legata}{7}{subsection.4.2.2}%
-\contentsline {section}{\numberline {4.3}Organizzazione del dataset}{7}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Applicazione del Machine Learning}{7}{section.4.4}%
-\contentsline {chapter}{\numberline {5}Conclusioni}{8}{chapter.5}%
-\contentsline {chapter}{Bibliografia}{8}{chapter.5}%
+\contentsline {subsection}{\numberline {2.2.2}Distribuzione delle posizioni}{6}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Distribuzione delle velocità}{6}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Condizione di equilibrio viriale}{7}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Riscalamento delle velocità}{8}{subsection.2.2.5}%
+\contentsline {section}{\numberline {2.3}Evoluzione e dinamica orbitale}{9}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Potenziale galattico di Plummer}{9}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Parametri orbitali}{9}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Equazioni del moto}{10}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Integrazione numerica}{11}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Centro di massa percentile}{11}{subsection.2.3.5}%
+\contentsline {chapter}{\numberline {3}Implementazione software}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Notazione}{13}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Generazione dell'ammasso stellare}{13}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Distribuzione delle posizioni}{13}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Distribuzione delle velocità}{13}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Condizione di equilibrio viriale}{13}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Modello del potenziale galattico}{13}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Potenziale galattico di Plummer}{13}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Parametri orbitali}{13}{subsection.3.3.2}%
+\contentsline {section}{\numberline {3.4}Equazioni del moto ed evoluzione}{13}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Diagnostica del cluster}{13}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Centro di massa e raggio di metà massa}{13}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Energie e rapporto del viriale}{13}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Massa legata e rimozione delle stelle}{13}{subsection.3.5.3}%
+\contentsline {section}{\numberline {3.6}Verifica delle grandezze fisiche}{13}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Generazione del dataset}{13}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Dataset e Machine Learning}{14}{chapter.4}%
+\contentsline {section}{\numberline {4.1}I dati di input}{14}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Semiasse maggiore}{14}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Eccentricità}{14}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}I dati di output}{14}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Raggio di metà massa}{14}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Frazione di massa legata}{14}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Organizzazione del dataset}{14}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Applicazione del Machine Learning}{14}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Conclusioni}{15}{chapter.5}%
+\contentsline {chapter}{Bibliografia}{15}{chapter.5}%
