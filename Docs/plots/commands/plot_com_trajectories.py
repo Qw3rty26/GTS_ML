@@ -1,129 +1,183 @@
-import json
+#!/usr/bin/env python3
+
 from pathlib import Path
+import json
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-JSON_PATH = Path(
-    "./clusters/run_001/GTS/JSON/1163923016_a294.0_e0.7.json"
-)
-OUTPUT_PATH = Path("./Docs/plots/com_trajectories.pdf")
+SCRIPT_PATH = Path(__file__).resolve()
+PROJECT_PATH = SCRIPT_PATH.parents[3]
+CLUSTERS_PATH = PROJECT_PATH / "clusters"
+OUTPUT_PATH = SCRIPT_PATH.parents[1] / "com_trajectories.pdf"
+
+RUNS = [
+    {
+        "directory": "run_001",
+        "label": "Modello 1",
+        "color": "tab:blue",
+    },
+    {
+        "directory": "run_002",
+        "label": "Modello 2",
+        "color": "tab:orange",
+    },
+]
 
 
-def classical_com(entities):
-    positions = np.array([
-        [entity["x"], entity["y"], entity["z"]]
-        for entity in entities
-    ])
-    masses = np.array([entity["mass"] for entity in entities])
+def configure_plot_style():
+    plt.rcParams.update({
+        "font.family": "serif",
+        "font.size": 11,
+        "axes.titlesize": 13,
+        "axes.labelsize": 12,
+        "xtick.labelsize": 10,
+        "ytick.labelsize": 10,
+        "legend.fontsize": 11,
+        "axes.linewidth": 0.9,
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "xtick.top": True,
+        "ytick.right": True,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+        "mathtext.fontset": "dejavuserif",
+    })
 
-    if len(masses) == 0 or masses.sum() <= 0:
-        raise ValueError("Cannot calculate the classical COM.")
 
-    return np.average(positions, axis=0, weights=masses)
+def find_gts_json(run_directory):
+    """Individua il file JSON GTS della simulazione."""
+    json_directory = CLUSTERS_PATH / run_directory / "GTS" / "JSON"
+    json_files = list(json_directory.glob("*.json"))
+
+    if len(json_files) != 1:
+        raise FileNotFoundError(
+            f"Atteso un solo file JSON in {json_directory}, "
+            f"trovati {len(json_files)}."
+        )
+
+    return json_files[0]
 
 
-def percentile_com(snapshot):
-    center = snapshot["center_of_mass"]
-    return np.array([center["x"], center["y"], center["z"]])
+def load_trajectory(json_path):
+    """Legge i metadati e le coordinate del centro di massa percentile."""
+    times = []
+    positions_x = []
+    positions_y = []
+
+    with json_path.open("r", encoding="utf-8") as json_file:
+        first_line = json_file.readline()
+
+        if not first_line.strip():
+            raise ValueError(f"File JSON vuoto: {json_path}")
+
+        metadata = json.loads(first_line)["metadata"]
+
+        for line in json_file:
+            if not line.strip():
+                continue
+
+            snapshot = json.loads(line)
+            center = snapshot["center_of_mass"]
+
+            times.append(snapshot["t"])
+            positions_x.append(center["x"])
+            positions_y.append(center["y"])
+
+    if not times:
+        raise ValueError(f"Nessuno snapshot trovato in {json_path}")
+
+    return metadata, np.array(times), np.array(positions_x), np.array(positions_y)
 
 
 def main():
-    if not JSON_PATH.exists():
-        raise FileNotFoundError(f"File not found: {JSON_PATH}")
+    configure_plot_style()
 
-    data_records = []
+    fig = plt.figure(figsize=(9, 8.5))
+    ax = fig.add_axes([0.13, 0.22, 0.82, 0.70])
 
-    # Stream line-by-line to prevent RAM exhaustion
-    with JSON_PATH.open("r", encoding="utf-8") as file:
-        first_line = file.readline()
-        if not first_line.strip():
-            raise ValueError(f"Empty or invalid metadata in {JSON_PATH}")
+    for run in RUNS:
+        json_path = find_gts_json(run["directory"])
+        metadata, times, x, y = load_trajectory(json_path)
 
-        for line in file:
-            if not line.strip():
-                continue
-            snapshot = json.loads(line)
-            t = snapshot["t"]
-            c_pos = classical_com(snapshot["entities"])
-            p_pos = percentile_com(snapshot)
-            data_records.append((t, c_pos, p_pos))
+        eccentricity = metadata.get("orbit_eccentricity", "?")
 
-    if not data_records:
-        raise ValueError(f"No snapshots found in {JSON_PATH}")
+        ax.plot(
+            x,
+            y,
+            color=run["color"],
+            linewidth=1.5,
+            label=f"{run['label']} ($e = {eccentricity}$)",
+        )
 
-    # Sort by time to ensure chronological order
-    data_records.sort(key=lambda rec: rec[0])
+        # Posizione iniziale
+        ax.scatter(
+            x[0],
+            y[0],
+            marker="*",
+            s=140,
+            color=run["color"],
+            edgecolors="black",
+            linewidths=0.5,
+            zorder=5,
+        )
 
-    times = np.array([rec[0] for rec in data_records])
-    classical_positions = np.array([rec[1] for rec in data_records])
-    percentile_positions = np.array([rec[2] for rec in data_records])
+        # Posizione finale
+        ax.scatter(
+            x[-1],
+            y[-1],
+            marker="o",
+            s=40,
+            color=run["color"],
+            edgecolors="black",
+            linewidths=0.5,
+            zorder=5,
+        )
 
-    # Calculate angles to cleanly split orbits (2*pi per orbit)
-    angles = np.arctan2(percentile_positions[:, 1], percentile_positions[:, 0])
-    unwrapped_angles = np.unwrap(angles)
-    delta_angles = unwrapped_angles - unwrapped_angles[0]
+    # Centro galattico (pallino rosso)
+    ax.scatter(
+        0,
+        0,
+        marker="o",
+        s=80,
+        color="tab:red",
+        edgecolors="black",
+        linewidths=0.5,
+        zorder=6,
+        label="Centro galattico",
+    )
 
-    # Find indices for end of 1st orbit and end of 2nd orbit
-    orbit1_indices = np.where(delta_angles < 2.0 * np.pi)[0]
-    orbit2_indices = np.where((delta_angles >= 2.0 * np.pi) & (delta_angles <= 4.0 * np.pi))[0]
+    ax.set_title("Traiettorie del centro di massa percentile")
+    ax.set_xlabel(r"Posizione $x$")
+    ax.set_ylabel(r"Posizione $y$")
+    ax.set_aspect("equal", adjustable="datalim")
+    ax.grid(True, alpha=0.3)
 
-    # Fallback if dataset is slightly shorter/longer
-    if len(orbit1_indices) == 0:
-        raise ValueError("Not enough data for the first orbit.")
-    
-    idx_end_orbit1 = orbit1_indices[-1] + 1
-    
-    # Slice data for orbit 1 and orbit 2
-    t1, c1, p1 = times[:idx_end_orbit1], classical_positions[:idx_end_orbit1], percentile_positions[:idx_end_orbit1]
-    
-    if len(orbit2_indices) > 0:
-        idx_start_orbit2 = orbit1_indices[-1]
-        idx_end_orbit2 = orbit2_indices[-1] + 1
-        t2, c2, p2 = times[idx_start_orbit2:idx_end_orbit2], classical_positions[idx_start_orbit2:idx_end_orbit2], percentile_positions[idx_start_orbit2:idx_end_orbit2]
-    else:
-        # If 2nd orbit is incomplete, take whatever is left
-        t2, c2, p2 = times[idx_end_orbit1:], classical_positions[idx_end_orbit1:], percentile_positions[idx_end_orbit1:]
+    handles, labels = ax.get_legend_handles_labels()
 
-    # Setup 1x2 subplots
-    figure, axes = plt.subplots(1, 2, figsize=(14, 7))
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        ncol=3,
+        bbox_to_anchor=(0.5, 0.03),
+        frameon=True,
+        fancybox=False,
+        edgecolor="black",
+        facecolor="white",
+        framealpha=1.0,
+        fontsize=11,
+        handlelength=2.0,
+        borderpad=0.8,
+        labelspacing=0.5,
+    )
 
-    # Common initial position
-    initial_position = percentile_positions[0]
-
-    # --- Panel 1: First Orbit ---
-    axes[0].plot(c1[:, 0], c1[:, 1], color="tab:blue", linewidth=1.5, label="Classical COM")
-    axes[0].plot(p1[:, 0], p1[:, 1], color="tab:orange", linewidth=1.5, label="Percentile COM")
-    axes[0].scatter(0, 0, color="green", marker="*", s=200, label="Galactic center", zorder=5)
-    axes[0].scatter(initial_position[0], initial_position[1], color="red", marker="*", s=200, label="Common initial position", zorder=6)
-    axes[0].set_xlabel("x")
-    axes[0].set_ylabel("y")
-    axes[0].set_title("First Orbit (Agreement)")
-    axes[0].set_aspect("equal", adjustable="datalim")
-    axes[0].grid(True, alpha=0.25)
-
-    # --- Panel 2: Second Orbit (Divergence) ---
-    axes[1].plot(c2[:, 0], c2[:, 1], color="tab:blue", linewidth=1.5, label="Classical COM")
-    axes[1].plot(p2[:, 0], p2[:, 1], color="tab:orange", linewidth=1.5, label="Percentile COM")
-    axes[1].scatter(0, 0, color="green", marker="*", s=200, label="Galactic center", zorder=5)
-    axes[1].set_xlabel("x")
-    axes[1].set_ylabel("y")
-    axes[1].set_title("Second Orbit (Divergence)")
-    axes[1].set_aspect("equal", adjustable="datalim")
-    axes[1].grid(True, alpha=0.25)
-
-    # Shared legend below
-    handles, labels = axes[0].get_legend_handles_labels()
-    figure.legend(handles, labels, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0.02))
-
-    figure.tight_layout(rect=[0, 0.08, 1, 1])
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(OUTPUT_PATH, format="pdf", bbox_inches="tight")
-    plt.close(figure)
+    fig.savefig(OUTPUT_PATH, format="pdf", bbox_inches="tight")
+    plt.close(fig)
 
-    print(f"Input: {JSON_PATH}")
-    print(f"Output saved to: {OUTPUT_PATH}")
+    print(f"\nPlot saved to: {OUTPUT_PATH.resolve()}")
 
 
 if __name__ == "__main__":

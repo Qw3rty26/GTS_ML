@@ -12,11 +12,9 @@ PROJECT_PATH = SCRIPT_PATH.parents[3]
 OUTPUT_PATH = SCRIPT_PATH.parents[1] / "galactic_plummer_potential.pdf"
 
 sys.path.insert(0, str(PROJECT_PATH / "py"))
-
 from galactic_potential import GalacticPotential, _compute_plummer_accelerations
 
 
-# Standard galactic parameters used by the project.
 GRAVITATIONAL_CONSTANT = 1.0
 GALAXY_MASS = 2000.0
 GALAXY_RADIUS = 10.0
@@ -27,7 +25,6 @@ NUMBER_OF_POINTS = 1_000
 
 
 def calculate_normalized_acceleration(potential, radius):
-    """Calculate the normalized acceleration using the simulation code."""
     coordinates = np.zeros((len(radius), 3), dtype=np.float64)
     coordinates[:, 0] = radius
 
@@ -55,7 +52,6 @@ def calculate_normalized_acceleration(potential, radius):
 
 
 def plot_galactic_plummer():
-    """Plot the normalized galactic Plummer potential and acceleration."""
     potential = GalacticPotential(
         plummer_radius=GALAXY_RADIUS,
         plummer_mass=GALAXY_MASS,
@@ -82,19 +78,25 @@ def plot_galactic_plummer():
         radius,
     )
 
-    # Key parameters: Peak acceleration occurs at R/a = 1/sqrt(2)
     peak_radius = 1.0 / np.sqrt(2.0)
     peak_acceleration = 2.0 / (3.0 * np.sqrt(3.0))
-    
-    # Corresponding normalized potential value at peak acceleration radius
     potential_at_peak = -1.0 / np.sqrt(peak_radius**2 + 1.0)
 
     plt.rcParams.update({
         "font.family": "serif",
+        "font.size": 12,
+        "axes.titlesize": 14,
+        "axes.labelsize": 13,
+        "xtick.labelsize": 11,
+        "ytick.labelsize": 11,
+        "axes.linewidth": 0.9,
         "xtick.direction": "in",
         "ytick.direction": "in",
         "xtick.top": True,
         "ytick.right": True,
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+        "mathtext.fontset": "dejavuserif",
     })
 
     figure, (ax_pot, ax_acc) = plt.subplots(
@@ -103,7 +105,6 @@ def plot_galactic_plummer():
         figsize=(11, 4.5),
     )
 
-    # --- Left panel: normalized gravitational potential ---
     ax_pot.plot(
         normalized_radius,
         normalized_potential,
@@ -117,7 +118,6 @@ def plot_galactic_plummer():
         alpha=0.6,
     )
 
-    # Projections for peak acceleration radius on potential plot
     ax_pot.axvline(
         peak_radius,
         color="black",
@@ -133,7 +133,6 @@ def plot_galactic_plummer():
         alpha=0.7,
     )
 
-    # Highlight point on potential curve
     ax_pot.scatter(
         [peak_radius],
         [potential_at_peak],
@@ -142,18 +141,17 @@ def plot_galactic_plummer():
         zorder=3,
     )
 
-    # Scientific information box for potential at peak acceleration (Top-Left)
     pot_info_text = (
-        "Potential at peak acceleration:\n"
+        "Potenziale all'accelerazione di picco:\n"
         f"$R / a_{{\\mathrm{{gal}}}} = 1/\\sqrt{{2}} \\approx {peak_radius:.3f}$\n"
         f"$\\tilde{{\\Phi}}_{{\\mathrm{{gal}}}} \\approx {potential_at_peak:.3f}$"
     )
 
     ax_pot.text(
-        0.05, 0.92, pot_info_text,
+        0.95, 0.05, pot_info_text,
         transform=ax_pot.transAxes,
-        ha="left", va="top",
-        fontsize=8.5,
+        ha="right", va="bottom",
+        fontsize=11,
         color="black",
         bbox=dict(
             boxstyle="square,pad=0.5",
@@ -165,16 +163,15 @@ def plot_galactic_plummer():
         zorder=5,
     )
 
-    ax_pot.set_title("Galactic Plummer potential")
-    ax_pot.set_xlabel(r"Normalized radius, $R / a_{\mathrm{gal}}$")
+    ax_pot.set_title("Potenziale galattico di Plummer")
+    ax_pot.set_xlabel(r"Raggio normalizzato, $R / a_{\mathrm{gal}}$")
     ax_pot.set_ylabel(
-        r"Normalized potential, $\Phi_{\mathrm{gal}} / (G M_{\mathrm{gal}} / a_{\mathrm{gal}})$"
+        r"Potenziale normalizzato, $\Phi_{\mathrm{gal}} / (G M_{\mathrm{gal}} / a_{\mathrm{gal}})$"
     )
     ax_pot.set_xlim(MIN_NORMALIZED_RADIUS, MAX_NORMALIZED_RADIUS)
     ax_pot.set_ylim(-1.05, 0.05)
     ax_pot.grid(True, alpha=0.3)
 
-    # --- Right panel: normalized acceleration magnitude ---
     ax_acc.plot(
         normalized_radius,
         normalized_acceleration,
@@ -182,7 +179,6 @@ def plot_galactic_plummer():
         color="#ff7f0e",
     )
 
-    # Clean peak projections on axes (dashed lines)
     ax_acc.axvline(
         peak_radius,
         color="black",
@@ -198,7 +194,6 @@ def plot_galactic_plummer():
         alpha=0.7,
     )
 
-    # Highlight peak point
     ax_acc.scatter(
         [peak_radius],
         [peak_acceleration],
@@ -207,9 +202,8 @@ def plot_galactic_plummer():
         zorder=3,
     )
 
-    # Scientific information box inside the acceleration plot (Top-Right)
     info_text = (
-        "Peak acceleration:\n"
+        "Accelerazione di picco:\n"
         f"$R / a_{{\\mathrm{{gal}}}} = 1/\\sqrt{{2}} \\approx {peak_radius:.3f}$\n"
         f"$|\\tilde{{a}}|_{{\\max}} \\approx {peak_acceleration:.3f}$"
     )
@@ -218,7 +212,7 @@ def plot_galactic_plummer():
         0.95, 0.92, info_text,
         transform=ax_acc.transAxes,
         ha="right", va="top",
-        fontsize=8.5,
+        fontsize=11,
         color="black",
         bbox=dict(
             boxstyle="square,pad=0.5",
@@ -230,10 +224,10 @@ def plot_galactic_plummer():
         zorder=5,
     )
 
-    ax_acc.set_title("Galactic acceleration magnitude")
-    ax_acc.set_xlabel(r"Normalized radius, $R / a_{\mathrm{gal}}$")
+    ax_acc.set_title("Intensità dell'accelerazione galattica")
+    ax_acc.set_xlabel(r"Raggio normalizzato, $R / a_{\mathrm{gal}}$")
     ax_acc.set_ylabel(
-        r"Normalized acceleration, $|\mathbf{a}_{\mathrm{gal}}| / (G M_{\mathrm{gal}} / a_{\mathrm{gal}}^2)$"
+        r"Accelerazione normalizzata, $|\mathbf{a}_{\mathrm{gal}}| / (G M_{\mathrm{gal}} / a_{\mathrm{gal}}^2)$"
     )
     ax_acc.set_xlim(MIN_NORMALIZED_RADIUS, MAX_NORMALIZED_RADIUS)
     ax_acc.set_ylim(bottom=0.0, top=0.45)
@@ -243,10 +237,10 @@ def plot_galactic_plummer():
     figure.savefig(OUTPUT_PATH, format="pdf", bbox_inches="tight")
     plt.close(figure)
 
-    print(f"Galaxy mass: {GALAXY_MASS}")
-    print(f"Galaxy radius: {GALAXY_RADIUS}")
-    print(f"Radial range: 0 - {MAX_NORMALIZED_RADIUS * GALAXY_RADIUS}")
-    print(f"Plot saved to: {OUTPUT_PATH}")
+    print(f"Massa della galassia: {GALAXY_MASS}")
+    print(f"Raggio della galassia: {GALAXY_RADIUS}")
+    print(f"Intervallo radiale: 0 - {MAX_NORMALIZED_RADIUS * GALAXY_RADIUS}")
+    print(f"Grafico salvato in: {OUTPUT_PATH}")
 
 
 def main():

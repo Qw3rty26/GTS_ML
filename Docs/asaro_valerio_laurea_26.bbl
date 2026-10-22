@@ -1,4 +1,4 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{1}
 
 \bibitem{baumgardt2003}
 Holger Baumgardt and Junichiro Makino.
@@ -16,22 +16,10 @@ Luca Ciotti.
 \newblock {\em Introduction to Stellar Dynamics}.
 \newblock Cambridge University Press, 2021.
 
-\bibitem{eddington1916}
-A.~S. Eddington.
-\newblock The distribution of stars in globular clusters.
-\newblock {\em Monthly Notices of the Royal Astronomical Society},
-  76(7):572--585, 1916.
-
 \bibitem{goldstein2002}
 Herbert Goldstein, Charles Poole, and John Safko.
 \newblock {\em Classical Mechanics}.
 \newblock Addison-Wesley, 3 edition, 2002.
-
-\bibitem{hairer2006geometric}
-Ernst Hairer, Christian Lubich, and Gerhard Wanner.
-\newblock {\em Geometric Numerical Integration: Structure-Preserving Algorithms
-  for Ordinary Differential Equations}.
-\newblock Springer, 2 edition, 2006.
 
 \bibitem{plummer1911}
 H.~C. Plummer.
@@ -44,17 +32,12 @@ Thomas Quinn, Neal Katz, Joachim Stadel, and George Lake.
 \newblock Time stepping n-body simulations.
 \newblock {\em The Astrophysical Journal}, 1997.
 
-\bibitem{rein2015ias15}
-Hanno Rein and David~S. Spiegel.
-\newblock Ias15: A fast, adaptive, high-order integrator for gravitational
-  dynamics, accurate to machine precision over a billion orbits.
-\newblock {\em Monthly Notices of the Royal Astronomical Society},
-  446(2):1424--1437, 2015.
-
-\bibitem{computationalmethods2023}
-Rainer Spurzem and Albrecht Kamlah.
-\newblock Computational methods for collisional stellar systems.
-\newblock {\em Living Reviews in Computational Astrophysics}, 9(1), 2023.
+\bibitem{stukowski2010}
+Alexander Stukowski.
+\newblock Visualization and analysis of atomistic simulation data with {OVITO}
+  -- the open visualization tool.
+\newblock {\em Modelling and Simulation in Materials Science and Engineering},
+  18(1):015012, 2010.
 
 \bibitem{wilcox2023guide}
 Rand~R. Wilcox.

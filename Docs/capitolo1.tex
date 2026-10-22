@@ -1,54 +1,29 @@
 \chapter{Introduzione}
 \label{cha:introduzione}
-
 \section{Gli ammassi stellari}
 \label{sec:ammassi-stellari}
-
-Gli ammassi stellari sono sistemi gravitazionalmente legati,
-costituiti da un insieme di stelle che interagiscono attraverso
-la gravità. La loro evoluzione dipende sia dalla dinamica interna
-sia dall'ambiente gravitazionale in cui si muovono
-\cite{binneytremaine2008}.
-
-Nel corso del tempo, le interazioni gravitazionali e l'influenza
-del campo galattico possono modificare la distribuzione delle
-stelle e provocare una perdita progressiva di massa. Comprendere
-questi processi richiede di studiare come le condizioni iniziali
-del sistema e le caratteristiche della sua orbita ne influenzino
-l'evoluzione dinamica \cite{computationalmethods2023}.
-
-Le simulazioni numeriche a molti corpi, o simulazioni
-\textit{N-body}, permettono di seguire il moto delle singole
-particelle e di ricostruire l'evoluzione del sistema nel tempo.
-Esse costituiscono quindi uno strumento per analizzare gli
-effetti delle interazioni gravitazionali e del campo esterno
-sulla struttura di un ammasso stellare.
-
-\section{Galactic Tidal Stripping}
+Gli ammassi stellari sono insiemi di stelle legate dalla reciproca attrazione gravitazionale. La loro evoluzione dipende dalle interazioni tra le stelle e dall'ambiente gravitazionale in cui si trovano \cite{binneytremaine2008}.
+\begin{figure}[H]
+	\centering
+	\makebox[\textwidth][c]{
+		\includegraphics[width=0.25\textwidth]{./images/m62.jpg}
+		\hspace{0.03\textwidth}
+		\includegraphics[width=0.25\textwidth]{./images/m80.jpg}
+	}
+	\caption{L'ammasso Messier 62 (a sinistra) e Messier 80 (a destra) (Crediti: ESA/Hubble \& NASA).}
+	\label{fig:confronto-ammassi}
+\end{figure}
+\section{Rimozione mareale galattica}
 \label{sec:galactic-tidal-stripping}
-
-Un ammasso stellare che orbita all'interno di una galassia
-è soggetto al campo gravitazionale galattico. La differenza
-di accelerazione gravitazionale tra le diverse regioni
-dell'ammasso produce effetti mareali, che possono favorire
-la perdita di stelle e modificare la struttura del sistema.
-Questo processo è noto come \textit{Galactic Tidal Stripping}.
-
-L'intensità degli effetti mareali dipende, tra gli altri
-fattori, dalla posizione dell'ammasso rispetto al centro
-galattico e dalle caratteristiche della sua orbita.
-In particolare, orbite differenti possono esporre l'ammasso
-a condizioni gravitazionali differenti, influenzandone
-l'evoluzione e la perdita di massa
-\cite{baumgardt2003}.
-
-Lo studio di questo fenomeno richiede pertanto di considerare
-contemporaneamente la dinamica interna dell'ammasso e il suo
-moto nel potenziale gravitazionale esterno. La complessità
-del problema rende utile l'impiego di simulazioni numeriche,
-che permettono di esaminare l'evoluzione del sistema per
-diverse condizioni iniziali.
-
+Quando un ammasso stellare orbita attorno al centro galattico, le forze mareali esercitate dalla galassia possono provocare la perdita di alcune delle sue stelle. Questo processo, noto come rimozione mareale galattica, può modificare nel tempo la massa e la struttura dell'ammasso \cite{baumgardt2003}.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.25\textwidth]{./images/palomar5.jpg}
+	\caption{Flusso stellare associato all'ammasso globulare Palomar 5 (crediti: SDSS).}
+	\label{fig:tidal-stripping-examples}
+\end{figure}
 \section{Obiettivo}
 \label{sec:obiettivo}
+Studiare l'evoluzione degli ammassi stellari dopo due orbite nel potenziale gravitazionale galattico, analizzando la relazione tra i parametri orbitali iniziali e le proprietà finali del sistema. I risultati delle simulazioni numeriche saranno utilizzati per addestrare modelli di apprendimento automatico in grado di prevedere tali proprietà a partire dalle condizioni iniziali, con l'obiettivo di ridurre il costo computazionale necessario per ottenere queste stime.
+
 
