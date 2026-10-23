@@ -350,39 +350,39 @@ dove $E(t)$ è l'energia totale del sistema all'istante $t$ ed $E(0)$ è il suo 
 	\label{fig:energy-drift}
 \end{figure}
 \subsection{Massa legata e raggio di metà massa}
-\label{subsec:diagnostiche-ammasso}
-Per descrivere l'evoluzione dell'ammasso stellare si utilizzano la frazione di massa legata e il raggio di metà massa.
-La frazione di massa legata è il rapporto tra la massa delle stelle legate gravitazionalmente all'ammasso e la sua massa totale:
-\begin{equation}
-	f_{\mathrm{bound}} = \frac{M_{\mathrm{bound}}}{M_{\mathrm{tot}}}
-	\label{eq:bound-mass-fraction}
-\end{equation}
-Per individuare le stelle legate, si calcola l'energia meccanica di ciascuna stella rispetto al centro di massa dell'ammasso:
-\begin{equation}
-	E_i = \frac{1}{2}m_i\left|\mathbf{v}_i-\mathbf{v}_{\mathrm{CM}}\right|^2
-	-\sum_{j\neq i}\frac{Gm_i m_j}{\sqrt{|\mathbf{r}_i-\mathbf{r}_j|^2+\epsilon^2}}
-	\label{eq:stellar-energy}
-\end{equation}
-dove $m_i$, $\mathbf{r}_i$ e $\mathbf{v}_i$ sono rispettivamente la massa, la posizione e la velocità della stella $i$, $\mathbf{r}_{\mathrm{CM}}$ e $\mathbf{v}_{\mathrm{CM}}$ sono la posizione e la velocità del centro di massa, e $\epsilon$ è il parametro di ammorbidimento gravitazionale. La massa legata si ottiene sommando le masse delle stelle con energia negativa:
-\begin{equation}
-	M_{\mathrm{bound}} = \sum_{i:E_i<0} m_i
-	\label{eq:bound-mass}
-\end{equation}
-Il raggio di metà massa $r_{1/2}$ è la distanza dal centro di massa entro cui è contenuta metà della massa totale dell'ammasso. Per determinarlo, si ordinano le stelle in base alla distanza dal centro di massa,
-\begin{equation}
-	d_i = |\mathbf{r}_i-\mathbf{r}_{\mathrm{CM}}|
-	\label{eq:stellar-distance}
-\end{equation}
-e si calcola la massa cumulativa delle stelle ordinate per distanza crescente. Indicando con $M(<r)$ la massa cumulativa contenuta entro il raggio $r$, il raggio di metà massa è definito dalla relazione
-\begin{equation}
-	r_{1/2} = r\left(\frac{M_{\mathrm{tot}}}{2}\right)
-	\label{eq:half-mass-radius}
-\end{equation}
-dove $r(M)$ indica il raggio corrispondente alla massa cumulativa $M$. Si seleziona la distanza della prima stella per cui la massa cumulativa raggiunge o supera $M_{\mathrm{tot}}/2$.\\Il calcolo considera tutte le stelle presenti nella simulazione.\\
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=\textwidth]{./plots/cluster_evolution.pdf}
-	\caption[Confronto delle diagnostiche dell'ammasso per diverse eccentricità]{Evoluzione della frazione di massa legata (sinistra) e del raggio di metà massa (destra) per due eccentricità orbitali. \\($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity \in \{0.3, 0.6\}$, $\deltat = 0.01$, Leapfrog)}
-	\label{fig:gts-diagnostics-comparison}
-\end{figure}
-Come mostrato in Figura~\ref{fig:gts-diagnostics-comparison}, il confronto tra le simulazioni con eccentricità $e=0.3$ ed $e=0.6$ mostra che, nel secondo caso, intorno a $t \simeq 1000$ il raggio di metà massa aumenta rapidamente, mentre la frazione di massa legata diminuisce. Questo comportamento indica una progressiva dispersione dell'ammasso ed è compatibile con l'effetto delle perturbazioni mareali, potenzialmente più intense lungo l'orbita più eccentrica.
+%\label{subsec:diagnostiche-ammasso}
+%Per descrivere l'evoluzione dell'ammasso stellare si utilizzano la frazione di massa legata e il raggio di metà massa.
+%La frazione di massa legata è il rapporto tra la massa delle stelle legate gravitazionalmente all'ammasso e la sua massa totale:
+%\begin{equation}
+%	f_{\mathrm{bound}} = \frac{M_{\mathrm{bound}}}{M_{\mathrm{tot}}}
+%	\label{eq:bound-mass-fraction}
+%\end{equation}
+%Per individuare le stelle legate, si calcola l'energia meccanica di ciascuna stella rispetto al centro di massa dell'ammasso:
+%\begin{equation}
+%	E_i = \frac{1}{2}m_i\left|\mathbf{v}_i-\mathbf{v}_{\mathrm{CM}}\right|^2
+%	-\sum_{j\neq i}\frac{Gm_i m_j}{\sqrt{|\mathbf{r}_i-\mathbf{r}_j|^2+\epsilon^2}}
+%	\label{eq:stellar-energy}
+%\end{equation}
+%dove $m_i$, $\mathbf{r}_i$ e $\mathbf{v}_i$ sono rispettivamente la massa, la posizione e la velocità della stella $i$, $\mathbf{r}_{\mathrm{CM}}$ e $\mathbf{v}_{\mathrm{CM}}$ sono la posizione e la velocità del centro di massa, e $\epsilon$ è il parametro di ammorbidimento gravitazionale. La massa legata si ottiene sommando le masse delle stelle con energia negativa:
+%\begin{equation}
+%	M_{\mathrm{bound}} = \sum_{i:E_i<0} m_i
+%	\label{eq:bound-mass}
+%\end{equation}
+%Il raggio di metà massa $r_{1/2}$ è la distanza dal centro di massa entro cui è contenuta metà della massa totale dell'ammasso. Per determinarlo, si ordinano le stelle in base alla distanza dal centro di massa,
+%\begin{equation}
+%	d_i = |\mathbf{r}_i-\mathbf{r}_{\mathrm{CM}}|
+%	\label{eq:stellar-distance}
+%\end{equation}
+%e si calcola la massa cumulativa delle stelle ordinate per distanza crescente. Indicando con $M(<r)$ la massa cumulativa contenuta entro il raggio $r$, il raggio di metà massa è definito dalla relazione
+%\begin{equation}
+%	r_{1/2} = r\left(\frac{M_{\mathrm{tot}}}{2}\right)
+%	\label{eq:half-mass-radius}
+%\end{equation}
+%dove $r(M)$ indica il raggio corrispondente alla massa cumulativa $M$. Si seleziona la distanza della prima stella per cui la massa cumulativa raggiunge o supera $M_{\mathrm{tot}}/2$.\\Il calcolo considera tutte le stelle presenti nella simulazione.\\
+%\begin{figure}[H]
+%	\centering
+%	\includegraphics[width=\textwidth]{./plots/cluster_evolution.pdf}
+%	\caption[Confronto delle diagnostiche dell'ammasso per diverse eccentricità]{Evoluzione della frazione di massa legata (sinistra) e del raggio di metà massa (destra) per due eccentricità orbitali. \\($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity \in \{0.3, 0.6\}$, $\deltat = 0.01$, Leapfrog)}
+%	\label{fig:gts-diagnostics-comparison}
+%\end{figure}
+%Come mostrato in Figura~\ref{fig:gts-diagnostics-comparison}, il confronto tra le simulazioni con eccentricità $e=0.3$ ed $e=0.6$ mostra che, nel secondo caso, intorno a $t \simeq 1000$ il raggio di metà massa aumenta rapidamente, mentre la frazione di massa legata diminuisce. Questo comportamento indica una progressiva dispersione dell'ammasso ed è compatibile con l'effetto delle perturbazioni mareali, potenzialmente più intense lungo l'orbita più eccentrica.
