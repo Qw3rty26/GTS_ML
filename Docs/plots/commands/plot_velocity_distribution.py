@@ -63,7 +63,7 @@ def configure_plot_style():
         "axes.labelsize": 13,
         "xtick.labelsize": 11,
         "ytick.labelsize": 11,
-        "legend.fontsize": 13,
+        "legend.fontsize": 12,
         "axes.linewidth": 0.9,
         "xtick.direction": "in",
         "ytick.direction": "in",
@@ -79,13 +79,6 @@ def plot_velocity_distribution(normalized_speeds):
     configure_plot_style()
 
     bin_edges = np.linspace(0.0, 1.0, NUMBER_OF_BINS + 1)
-    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
-
-    empirical_density, _ = np.histogram(
-        normalized_speeds,
-        bins=bin_edges,
-        density=True,
-    )
 
     theoretical_x = np.linspace(0.0, 1.0, 600)
     theoretical_y = theoretical_plummer_pdf(theoretical_x)
@@ -94,33 +87,26 @@ def plot_velocity_distribution(normalized_speeds):
 
     ax = fig.add_axes([0.11, 0.28, 0.85, 0.64])
 
+    # Istogramma dei dati campionati
     ax.hist(
         normalized_speeds,
         bins=bin_edges,
         density=True,
         color="steelblue",
-        alpha=0.30,
+        alpha=0.40,
         edgecolor="steelblue",
-        linewidth=0.6,
-        label="Velocità campionate",
+        linewidth=0.8,
+        label="Dati campionati (empirici)",
     )
 
-    ax.plot(
-        bin_centers,
-        empirical_density,
-        color="steelblue",
-        linewidth=1.3,
-        drawstyle="steps-mid",
-        label="Distribuzione empirica",
-    )
-
+    # Curva teorica di riferimento
     ax.plot(
         theoretical_x,
         theoretical_y,
         color="darkgreen",
         linestyle="--",
         linewidth=2.2,
-        label="Distribuzione teorica di Plummer",
+        label="Modello teorico di Plummer",
     )
 
     ax.set_title("Distribuzione delle velocità iniziali")
@@ -130,19 +116,20 @@ def plot_velocity_distribution(normalized_speeds):
     ax.set_ylim(bottom=0.0)
     ax.grid(True, alpha=0.3)
 
+    # Legenda unica a 2 colonne in basso, pulita e sensata
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(
         handles,
         labels,
         loc="lower center",
-        ncol=3,
+        ncol=2,
         bbox_to_anchor=(0.5, 0.05),
         frameon=True,
         fancybox=False,
         edgecolor="black",
         facecolor="white",
         framealpha=1.0,
-        fontsize=13,
+        fontsize=12,
         handlelength=2.5,
         borderpad=0.8,
         labelspacing=0.5,
@@ -172,4 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
