@@ -1,152 +1,110 @@
 import rebound
 import numpy as np
-from dataclasses import dataclass, field
-
-from entity import Entity, Position, Velocity
-from cluster_diagnostics import ClusterDiagnostics
+from dataclasses import dataclass
+from cluster_diagnostics import Cluster_Diagnostics
 
 @dataclass
-class SimulationConfig:
-    dt: float = 0.01
-    t: float = 0.0
-    G: float = 1.0
-    softening: float = 0.1
-    time_warp: int = 1
-    integrator: str = "leapfrog"
+class Simulation_Configuration:
+    integration_time: float = None
+    starting_time: float = None
+    gravitational_constant: float = None
+    softening: float = None
+    integrator: str = None
 
 class Simulation:
 
-    def __init__(self, simulation_config: SimulationConfig = None):
-        self.simulation = rebound.Simulation()
+    def __init__(self, simulation_configuration: Simulation_Configuration):
+        self.rebound_handle = rebound.Simulation() # create rebound object
 
-        if simulation_config is not None:
-            self.simulation_config = simulation_config
-        else:
-            self.simulation_config = SimulationConfig()
+        self.simulation_configuration = simulation_configuration
+        self._initialise_rebound()
+        self.diagnostics = Cluster_Diagnostics(self)
 
-        self._set_simulation_configs()
-
-        self.galactic_potential = None
-        self.cluster_diagnostics = ClusterDiagnostics(self)
-
-    def _set_simulation_configs(self):
-        self.simulation.dt = self.simulation_config.dt
-        self.simulation.t = self.simulation_config.t
-        self.simulation.G = self.simulation_config.G
-        self.simulation.softening = self.simulation_config.softening
-        self.simulation.integrator = self.simulation_config.integrator
+    def _initialise_rebound(self):
+        self.rebound_handle.dt = self.simulation_configuration.integration_time
+        self.rebound_handle.t = self.simulation_configuration.starting_time
+        self.rebound_handle.G = self.simulation_configuration.gravitational_constant
+        self.rebound_handle.softening = self.simulation_configuration.softening
+        self.rebound_handle.integrator = self.simulation_configuration.integrator
 
     def integrate(self):
-        self.simulation.steps(self.simulation_config.time_warp)
+        self.rebound_handle.steps(1) #integrate one step
 
-    def get_gravitational_constant(self):
-        return self.simulation_config.G
+    def get_particle_positions(self):
+        particles = self.rebound_handle.particles
+        number_of_particles = len(particles)
 
-    def get_softening(self):
-        return self.simulation_config.softening
-
-    def get_time(self):
-        return self.simulation.t
-
-    def get_entities(self):
-        entities = []
-        for entity in self.simulation.particles:
-            entity = Entity(
-                name = entity.name,
-                position = Position(
-                    x = entity.x,
-                    y = entity.y,
-                    z = entity.z
-                ),
-                velocity = Velocity(
-                    vx = entity.vx,
-                    vy = entity.vy,
-                    vz = entity.vz
-                ),
-                mass = entity.m
-            )
-            entities.append(entity)
-        return entities
-
-    # used for heavy optimisations
-    def get_entity_arrays(self):
-        particles = self.simulation.particles
-        number_of_entities = len(particles)
-
-        positions = np.empty(
-            (number_of_entities, 3),
-            dtype=np.float64
-        )
-
-        masses = np.empty(
-            number_of_entities,
-            dtype=np.float64
+        particle_positions = np.empty(
+            (number_of_particles, 3),
+            dtype = np.float64
         )
 
         for i, particle in enumerate(particles):
-            positions[i] = (
+            particle_positions[i] = (
                 particle.x,
                 particle.y,
                 particle.z
             )
-            masses[i] = particle.m
+        return particle_positions
 
-        return positions, masses
+    def get_particle_velocities(self):
+        particles = self.rebound_handle.particles
+        number_of_particles = len(particles)
 
+        particle_velocities = np.empty(
+            (number_of_particles, 3),
+            dtype = np.float64
+        )
 
-    def get_center_of_mass(self):
-        return self.simulation.com()
+        for i, particle in enumerate(particles):
+            particle_velocities[i] = (
+                particle.vx,
+                particle.vy,
+                particle.vz
+            )
+        return particle_velocities
 
-    def get_bound_center_of_mass(self):
-        return self.cluster_diagnostics.get_bound_center_of_mass()
+    def get_particle_masses(self):
+        particles = self.rebound_handle.particles
+        number_of_particles = len(particles)
 
-    def get_number_of_orbits(self):
-        return self.cluster_diagnostics.get_number_of_orbits()
+        particle_masses = np.empty(
+            number_of_particles,
+            dtype = np.float64
+        )
+
+        for i, particle in enumerate(particles):
+            particle_masses[i] = particle.m
+        return particle_masses
+
 
     def move_cluster(self, moved_x, moved_y, moved_z):
-        for entity in self.simulation.particles:
-            entity.x += moved_x
-            entity.y += moved_y
-            entity.z += moved_z
+        for particle in self.rebound_handle.particles:
+            particle.x += moved_x
+            particle.y += moved_y
+            particle.z += moved_z
 
     def move_cluster_to_center_of_mass(self):
         self.simulation.move_to_com()
 
     def speed_cluster(self, speed_x, speed_y, speed_z):
-        for entity in self.simulation.particles:
-            entity.vx += speed_x
-            entity.vy += speed_y
-            entity.vz += speed_z
+        for particle in self.rebound_handle.particles:
+            particle.vx += speed_x
+            particle.vy += speed_y
+            particle.vz += speed_z
 
-    def _apply_galactic_forces(self, sim_pointer):
-        if self.galactic_potential:
-            self.galactic_potential.add_galaxy_forces(self.simulation.particles)
-
-    def add_galactic_potential(self, galactic_potential):
-        self.galactic_potential = galactic_potential
-        self.simulation.additional_forces = self._apply_galactic_forces
-
-    def add_entity(self, entity):
-        self.simulation.add(
-            name = entity.name,
-            x = entity.position.x,
-            y = entity.position.y,
-            z = entity.position.z,
-            vx = entity.velocity.vx,
-            vy = entity.velocity.vy,
-            vz = entity.velocity.vz,
-            m = entity.mass
+    def add_particle(self, particle):
+        self.rebound_handle.add(
+            name = particle.name,
+            x = particle.x,
+            y = particle.y,
+            z = particle.z,
+            vx = particle.vx,
+            vy = particle.vy,
+            vz = particle.vz,
+            m = particle.m
         )
 
-    def remove_entity(self, entity_index):
-        self.simulation.remove(entity_index)
+    def remove_entity(self, particle_name):
+        self.rebound_handle.remove(particle_name)
 
-    def clean_unbound_entities(self):
-        unbound_entity_indices = (
-            self.cluster_diagnostics.get_unbound_entity_indices()
-        )
-
-        for entity_index in sorted(unbound_entity_indices, reverse=True):
-            self.simulation.remove(entity_index)
-
-        return len(unbound_entity_indices)

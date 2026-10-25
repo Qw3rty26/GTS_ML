@@ -1,775 +1,326 @@
 import numpy as np
+from dataclasses import dataclass
 
-from entity import Entity, Position, Velocity
+@dataclass
+class Diagnostics:
+    time: float = None
+    cluster_kinetic_energy: float = None
+    cluster_potential_energy: float = None
+    cluster_total_energy: float = None
+    cluster_kinetic_internal_energy: float = None
+    cluster_virial_ratio: float = None
+    cluster_bound_mass_fraction: float = None
 
 
-class ClusterDiagnostics:
+class Cluster_Diagnostics:
 
     def __init__(self, simulation):
         self.simulation = simulation
-        self.number_of_orbits_done = 0
-        self.previous_center_of_mass_y = None
-        self.bound_entity_indices = None
-        self.tracked_entity_indices = None
 
-    def _get_entity_energies(
-        self,
-        entity_positions,
-        entity_velocities,
-        entity_masses,
-        source_indices,
-        center_of_mass_velocity
-    ):
-        # E_i = 1/2 * |v_i - v_COM|^2 - G * sum(m_j / r_ij)
+    def get_center_of_mass_position(self):
+        #          N
+        # r_COM = sum(m_i * r_i) / sum(m_i)
+        #         i=1
 
-        gravitational_constant = (
-            self.simulation.get_gravitational_constant()
-        )
-        softening = self.simulation.get_softening()
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
 
-        relative_velocities = (
-            entity_velocities - center_of_mass_velocity
-        )
+        total_mass = np.sum(particle_masses)
+        center_of_mass_position = np.sum(particle_masses[:, np.newaxis] * particle_positions, axis=0) / total_mass
 
-        kinetic_energies = (
-            0.5 * np.sum(relative_velocities**2, axis=1)
-        )
+        rebound_center_of_mass = self.simulation.rebound_handle.com
+        rebound_center_of_mass_position = np.array([rebound_center_of_mass.x, rebound_center_of_mass.y, rebound_center_of_mass.z])
 
-        source_positions = entity_positions[source_indices]
-        source_masses = entity_masses[source_indices]
+        if not np.allclose(center_of_mass_position, rebound_center_of_mass_position, rtol=1e-5, atol=1e-8):
+            raise ValueError(f"Center of mass position mismatch: calculated={center_of_mass_position}, REBOUND={rebound_center_of_mass_position}")
 
-        position_differences = (
-            entity_positions[:, np.newaxis, :]
-            - source_positions[np.newaxis, :, :]
-        )
+        return center_of_mass_position
 
-        distances_squared = np.sum(
-            position_differences**2,
-            axis=2
-        )
+    def get_center_of_mass_velocity(self):
+        #          N
+        # v_COM = sum(m_i * v_i) / sum(m_i)
+        #         i=1
 
-        distances = np.sqrt(distances_squared + softening**2)
+        particle_masses = self.simulation.get_particle_masses()
+        particle_velocities = self.simulation.get_particle_velocities()
 
-        source_lookup = np.full(
-            len(entity_positions),
-            -1,
-            dtype=np.int64
-        )
+        total_mass = np.sum(particle_masses)
+        center_of_mass_velocity = np.sum(particle_masses[:, np.newaxis] * particle_velocities, axis=0) / total_mass
 
-        source_lookup[source_indices] = np.arange(len(source_indices))
+        rebound_center_of_mass = self.simulation.rebound_handle.com()
+        rebound_center_of_mass_velocity = np.array([rebound_center_of_mass.vx, rebound_center_of_mass.vy, rebound_center_of_mass.vz])
 
-        entity_indices = np.arange(len(entity_positions))
-        source_entity_mask = source_lookup >= 0
+        if not np.allclose(center_of_mass_velocity, rebound_center_of_mass_velocity, rtol=1e-5, atol=1e-8):
+            raise ValueError(f"Center of mass velocity mismatch: calculated={center_of_mass_velocity}, REBOUND={rebound_center_of_mass_velocity}")
 
-        distances[
-            entity_indices[source_entity_mask],
-            source_lookup[source_entity_mask]
-        ] = np.inf
+        return center_of_mass_velocity
 
-        potential_energies = (
-            -gravitational_constant
-            * np.sum(
-                source_masses[np.newaxis, :] / distances,
-                axis=1
-            )
-        )
+    def get_cluster_kinetic_energy(self):
+        #  1     N
+        # ___ * sum ( m_i (v_x_i^2 + v_y_i^2 + v_z_i^2) )
+        #  2    i=1
 
-        return kinetic_energies + potential_energies
+        particle_masses = self.simulation.get_particle_masses()
+        particle_velocities = self.simulation.get_particle_velocities()
 
-    def get_bound_entities(self):
-        entities = self.simulation.get_entities()
+        squared_speeds = np.sum(particle_velocities**2, axis=1)
+        cluster_kinetic_energy = 0.5 * np.sum(particle_masses * squared_speeds)
+        return cluster_kinetic_energy
 
-        if not entities:
-            self.bound_entity_indices = np.array([], dtype=np.int64)
-            return []
+    def get_cluster_potential_energy(self):
+        #          N-1    N      m_i * m_j
+        # U = -G * sum   sum ( ------------ )
+        #          i=1  j=i+1      r_ij
 
-        entity_positions = np.array([
-            [entity.position.x, entity.position.y, entity.position.z]
-            for entity in entities
-        ], dtype=np.float64)
+        gravitational_constant = self.simulation.simulation_configuration.gravitational_constant
 
-        entity_velocities = np.array([
-            [entity.velocity.vx, entity.velocity.vy, entity.velocity.vz]
-            for entity in entities
-        ], dtype=np.float64)
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
 
-        entity_masses = np.array([
-            entity.mass for entity in entities
-        ], dtype=np.float64)
+        position_differences = particle_positions[:, np.newaxis, :] - particle_positions[np.newaxis, :, :]
 
-        number_of_entities = len(entities)
+        squared_distances = np.sum(position_differences**2, axis=2)
+        distances = np.sqrt(squared_distances)
+        np.fill_diagonal(distances, np.inf)
+        mass_products = particle_masses[:, np.newaxis] * particle_masses[np.newaxis, :]
 
-        if self.bound_entity_indices is not None:
-            source_indices = self.bound_entity_indices
+        potential_energy_matrix = -gravitational_constant * mass_products / distances
 
-            if len(source_indices) <= 3:
-                self.bound_entity_indices = np.array([], dtype=np.int64)
-                return []
+        cluster_potential_energy = np.sum(np.triu(potential_energy_matrix, k=1))
+        return cluster_potential_energy
 
-            center_of_mass_velocity = np.average(
-                entity_velocities[source_indices],
-                axis=0,
-                weights=entity_masses[source_indices]
-            )
+    def get_cluster_total_energy(self):
+        #
+        # E_tot = K + U
+        #
 
-        else:
-            if number_of_entities <= 3:
-                self.bound_entity_indices = np.array([], dtype=np.int64)
-                return []
+        cluster_kinetic_energy = self.get_cluster_kinetic_energy()
+        cluster_potential_energy = self.get_cluster_potential_energy()
+        cluster_total_energy = cluster_kinetic_energy + cluster_potential_energy
 
-            gravitational_constant = (
-                self.simulation.get_gravitational_constant()
-            )
-            softening = self.simulation.get_softening()
+        _rebound_total_energy = self.simulation.rebound_handle.energy()
 
-            position_differences = (
-                entity_positions[:, np.newaxis, :]
-                - entity_positions[np.newaxis, :, :]
-            )
+        if not np.isclose(cluster_total_energy, _rebound_total_energy, rtol=1e-2):
+            raise ValueError(f"TOTAL ENERGY MISMATCH:",
+                f"calculated: E_tot={cluster_total_energy} K={cluster_kinetic_energy} U={cluster_potential_energy}",
+                f"REBOUND={_rebound_total_energy}")
 
-            distances_squared = np.sum(
-                position_differences**2,
-                axis=2
-            )
+        return cluster_total_energy
 
-            distances = np.sqrt(distances_squared + softening**2)
-            np.fill_diagonal(distances, np.inf)
+    # used mainly for the virial ratio
+    def get_cluster_internal_kinetic_energy(self):
+        #  1     N
+        # ___ * sum ( m_i * |v_i - v_COM|^2 )
+        #  2    i=1
 
-            gravitational_potentials = (
-                -gravitational_constant
-                * np.sum(
-                    entity_masses[np.newaxis, :] / distances,
-                    axis=1
-                )
-            )
+        particle_masses = self.simulation.get_particle_masses()
+        particle_velocities = self.simulation.get_particle_velocities()
 
-            center_index = int(np.argmin(gravitational_potentials))
+        center_of_mass_velocity = self.get_center_of_mass_velocity()
+        relative_velocities = particle_velocities - center_of_mass_velocity
 
-            distances_from_center = np.linalg.norm(
-                entity_positions - entity_positions[center_index],
-                axis=1
-            )
+        squared_speeds = np.sum(relative_velocities**2, axis=1)
+        cluster_kinetic_energy = 0.5 * np.sum(particle_masses * squared_speeds)
+        return cluster_kinetic_energy
 
-            initial_group_indices = np.argsort(
-                distances_from_center
-            )[:min(11, number_of_entities)]
+    def get_cluster_softened_potential_energy(self):
+        #          N-1    N              m_i * m_j
+        # U = -G * sum   sum ( ------------------------------ )
+        #          i=1  j=i+1   sqrt( r_ij^2 + softening^2 )
 
-            center_of_mass_velocity = np.average(
-                entity_velocities[initial_group_indices],
-                axis=0,
-                weights=entity_masses[initial_group_indices]
-            )
+        gravitational_constant = self.simulation.simulation_configuration.gravitational_constant
+        softening = self.simulation.simulation_configuration.softening
 
-            source_indices = np.arange(number_of_entities)
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
 
-        for _ in range(10):
-            entity_energies = self._get_entity_energies(
-                entity_positions,
-                entity_velocities,
-                entity_masses,
-                source_indices,
-                center_of_mass_velocity
-            )
+        position_differences = (particle_positions[:, np.newaxis, :] - particle_positions[np.newaxis, :, :])
 
-            new_source_indices = np.flatnonzero(
-                entity_energies < 0.0
-            )
+        squared_distances = np.sum(position_differences**2, axis=2)
+        softened_distances = np.sqrt(squared_distances + softening**2)
 
-            if len(new_source_indices) <= 3:
-                self.bound_entity_indices = np.array([], dtype=np.int64)
-                return []
+        mass_products = particle_masses[:, np.newaxis] * particle_masses[np.newaxis, :]
 
-            if np.array_equal(source_indices, new_source_indices):
-                source_indices = new_source_indices
-                break
+        potential_energy_matrix = (-gravitational_constant * mass_products / softened_distances)
 
-            source_indices = new_source_indices
+        cluster_potential_energy = np.sum(np.triu(potential_energy_matrix, k=1))
+        return cluster_potential_energy
 
-            center_of_mass_velocity = np.average(
-                entity_velocities[source_indices],
-                axis=0,
-                weights=entity_masses[source_indices]
-            )
+    def _get_virial_term(self):
+        #          N-1    N           m_i * m_j * r_ij^2
+        # W = -G * sum   sum ( ------------------------------ )
+        #          i=1  j=i+1   (r_ij^2 + softening^2)^(3/2)
 
-        self.bound_entity_indices = source_indices.copy()
+        gravitational_constant = self.simulation.simulation_configuration.gravitational_constant
+        softening = self.simulation.simulation_configuration.softening
 
-        # Keep a reference group for orbital tracking after dissolution.
-        if self.tracked_entity_indices is None:
-            self.tracked_entity_indices = source_indices.copy()
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
 
-        return [
-            entities[index]
-            for index in self.bound_entity_indices
-        ]
+        position_differences = particle_positions[:, np.newaxis, :] - particle_positions[np.newaxis, :, :]
 
-    def get_bound_mass(self):
-        bound_entities = self.get_bound_entities()
+        squared_distances = np.sum(position_differences**2, axis=2)
+        mass_products = particle_masses[:, np.newaxis] * particle_masses[np.newaxis, :]
 
-        return sum(
-            entity.mass
-            for entity in bound_entities
+        virial_term_matrix = -gravitational_constant * mass_products * squared_distances / (squared_distances + softening**2)**1.5
+
+        _virial_term = np.sum(np.triu(virial_term_matrix, k=1))
+        return _virial_term
+
+    def get_cluster_virial_ratio(self):
+        #      2 * K_internal
+        # Q = ----------------
+        #           |W|
+
+        internal_kinetic_energy = self.get_cluster_internal_kinetic_energy()
+        virial_term = self._get_virial_term()
+
+        if virial_term == 0:
+            raise ValueError("Cannot calculate virial ratio: virial term is zero.")
+
+        virial_ratio = 2 * internal_kinetic_energy / abs(virial_term)
+        return virial_ratio
+
+    def _get_particle_gravitational_potential(self, particle_masses, squared_distances, source_indices):
+        #             N
+        # phi_i = -G * sum ( m_j / sqrt(r_ij^2 + softening^2) )
+        #          j in S, j != i
+
+        gravitational_constant = self.simulation.simulation_configuration.gravitational_constant
+        softening = self.simulation.simulation_configuration.softening
+
+        softened_distances = np.sqrt(
+            squared_distances[:, source_indices] + softening**2
         )
 
-    def get_bound_center_of_mass(self) -> Entity:
-        # Calculate the center of mass using bound entities only.
+        source_masses = particle_masses[source_indices]
 
-        bound_entities = self.get_bound_entities()
-
-        if not bound_entities:
-            raise ValueError(
-                "Cannot calculate the center of mass: no bound entities."
-            )
-
-        entity_positions = np.array([
-            [entity.position.x, entity.position.y, entity.position.z]
-            for entity in bound_entities
-        ], dtype=np.float64)
-
-        entity_velocities = np.array([
-            [entity.velocity.vx, entity.velocity.vy, entity.velocity.vz]
-            for entity in bound_entities
-        ], dtype=np.float64)
-
-        entity_masses = np.array([
-            entity.mass for entity in bound_entities
-        ], dtype=np.float64)
-
-        center_of_mass_position = np.average(
-            entity_positions,
-            axis=0,
-            weights=entity_masses
-        )
-
-        center_of_mass_velocity = np.average(
-            entity_velocities,
-            axis=0,
-            weights=entity_masses
-        )
-
-        return Entity(
-            name="bound_center_of_mass",
-            position=Position(
-                center_of_mass_position[0],
-                center_of_mass_position[1],
-                center_of_mass_position[2]
-            ),
-            velocity=Velocity(
-                center_of_mass_velocity[0],
-                center_of_mass_velocity[1],
-                center_of_mass_velocity[2]
-            ),
-            mass=np.sum(entity_masses)
-        )
-
-    def get_tracked_center_of_mass(self) -> Entity:
-        # R_COM = sum(m_i * r_i) / sum(m_i)
-        # V_COM = sum(m_i * v_i) / sum(m_i)
-
-        entities = self.simulation.get_entities()
-
-        if not entities:
-            raise ValueError(
-                "Cannot calculate the tracked center of mass: no entities."
-            )
-
-        if self.tracked_entity_indices is None:
-            self.get_bound_entities()
-
-        if (
-            self.tracked_entity_indices is None
-            or len(self.tracked_entity_indices) == 0
-            or np.max(self.tracked_entity_indices) >= len(entities)
-        ):
-            raise ValueError(
-                "Cannot calculate the tracked center of mass: "
-                "tracked entities are no longer available."
-            )
-
-        tracked_entities = [
-            entities[index]
-            for index in self.tracked_entity_indices
-        ]
-
-        entity_positions = np.array([
-            [entity.position.x, entity.position.y, entity.position.z]
-            for entity in tracked_entities
-        ], dtype=np.float64)
-
-        entity_velocities = np.array([
-            [entity.velocity.vx, entity.velocity.vy, entity.velocity.vz]
-            for entity in tracked_entities
-        ], dtype=np.float64)
-
-        entity_masses = np.array([
-            entity.mass for entity in tracked_entities
-        ], dtype=np.float64)
-
-        center_of_mass_position = np.average(
-            entity_positions,
-            axis=0,
-            weights=entity_masses
-        )
-
-        center_of_mass_velocity = np.average(
-            entity_velocities,
-            axis=0,
-            weights=entity_masses
-        )
-
-        return Entity(
-            name="tracked_center_of_mass",
-            position=Position(
-                center_of_mass_position[0],
-                center_of_mass_position[1],
-                center_of_mass_position[2]
-            ),
-            velocity=Velocity(
-                center_of_mass_velocity[0],
-                center_of_mass_velocity[1],
-                center_of_mass_velocity[2]
-            ),
-            mass=np.sum(entity_masses)
-        )
-
-    def get_number_of_orbits(self):
-        center_of_mass = self.get_tracked_center_of_mass()
-        current_center_of_mass_y = center_of_mass.position.y
-
-        if self.previous_center_of_mass_y is not None:
-            if (
-                self.previous_center_of_mass_y < 0.0
-                and current_center_of_mass_y >= 0.0
-            ):
-                self.number_of_orbits_done += 1
-
-        self.previous_center_of_mass_y = current_center_of_mass_y
-
-        return self.number_of_orbits_done
-
-    def get_system_kinetic_energy(self):
-        # K = 1/2 * sum(m_i * |v_i|^2)
-
-        entities = self.simulation.get_entities()
-
-        if not entities:
-            return 0.0
-
-        entity_masses = np.array([
-            entity.mass for entity in entities
-        ], dtype=np.float64)
-
-        entity_velocities = np.array([
-            [entity.velocity.vx, entity.velocity.vy, entity.velocity.vz]
-            for entity in entities
-        ], dtype=np.float64)
-
-        return 0.5 * np.sum(
-            entity_masses * np.sum(entity_velocities**2, axis=1)
-        )
-
-    def get_system_potential_energy(self):
-        # U = -G * sumi<j (m_i * m_j / sqrt(r_ij^2 + softening_epsilon^2))
-
-        entities = self.simulation.get_entities()
-
-        epsilon = self.simulation.get_softening()
-
-        if len(entities) < 2:
-            return 0.0
-
-        entity_positions = np.array([
-            [entity.position.x, entity.position.y, entity.position.z]
-            for entity in entities
-        ], dtype=np.float64)
-
-        entity_masses = np.array([
-            entity.mass for entity in entities
-        ], dtype=np.float64)
-
-        position_differences = (
-            entity_positions[:, np.newaxis, :]
-            - entity_positions[np.newaxis, :, :]
-        )
-
-        distances_squared = np.sum(position_differences**2, axis=2)
-        distances = np.sqrt(distances_squared + epsilon**2)
-
-        mass_products = (
-            entity_masses[:, np.newaxis]
-            * entity_masses[np.newaxis, :]
-        )
-
-        upper_triangle_indices = np.triu_indices(
-            len(entities),
-            k=1
-        )
-
-        return (
-            -self.simulation.get_gravitational_constant()
-            * np.sum(
-                mass_products[upper_triangle_indices]
-                / distances[upper_triangle_indices]
-            )
-        )
-
-    def get_system_galactic_potential_energy(self):
-        # U_gal = sum(m_i * Phi_galaxy(r_i))
-
-        galactic_potential = self.simulation.galactic_potential
-
-        if galactic_potential is None:
-            return 0.0
-
-        entities = self.simulation.get_entities()
-        galactic_potential_energy = 0.0
-
-        for entity in entities:
-            radius = np.sqrt(
-                entity.position.x**2
-                + entity.position.y**2
-                + entity.position.z**2
-            )
-
-            galactic_potential_energy += (
-                entity.mass
-                * galactic_potential.potential_phi(radius)
-            )
-
-        return galactic_potential_energy
-
-    def get_system_total_energy(self):
-        # E_tot = K_cluster + U_cluster + U_galaxy
-        return (
-            self.get_system_kinetic_energy()
-            + self.get_system_potential_energy()
-            + self.get_system_galactic_potential_energy()
-        )
-
-    def get_entity_potential_energy(self, entity):
-        # U_i = -G * m_i * sum(m_j / r_ij)
-
-        entities = self.simulation.get_entities()
-        entity_position = np.array([
-            entity.position.x,
-            entity.position.y,
-            entity.position.z
-        ])
-
-        potential_energy = 0.0
-        softening = self.simulation.get_softening()
-
-        for other_entity in entities:
-            if other_entity.name == entity.name:
-                continue
-
-            position_difference = (
-                entity_position
-                - np.array([
-                    other_entity.position.x,
-                    other_entity.position.y,
-                    other_entity.position.z
-                ])
-            )
-
-            distance = np.sqrt(
-                np.sum(position_difference**2) + softening**2
-            )
-
-            potential_energy -= (
-                self.simulation.get_gravitational_constant()
-                * entity.mass
-                * other_entity.mass
-                / distance
-            )
-
-        return potential_energy
-
-    def get_entity_kinetic_energy(self, entity):
-        # K_i = 1/2 * m_i * |v_i - v_COM|^2
-
-        center_of_mass = self.get_bound_center_of_mass()
-
-        center_of_mass_velocity = np.array([
-            center_of_mass.velocity.vx,
-            center_of_mass.velocity.vy,
-            center_of_mass.velocity.vz
-        ])
-
-        entity_velocity = np.array([
-            entity.velocity.vx,
-            entity.velocity.vy,
-            entity.velocity.vz
-        ])
-
-        relative_velocity = entity_velocity - center_of_mass_velocity
-
-        return (
-            0.5
-            * entity.mass
-            * np.sum(relative_velocity**2)
-        )
-
-    def get_entity_total_energy(self, entity):
-        return (
-            self.get_entity_kinetic_energy(entity)
-            + self.get_entity_potential_energy(entity)
-        )
-
-    def get_entity_total_energy_with_galactic_potential(self, entity):
-        energy = self.get_entity_total_energy(entity)
-
-        galactic_potential = self.simulation.galactic_potential
-
-        if galactic_potential is not None:
-            radius = np.sqrt(
-                entity.position.x**2
-                + entity.position.y**2
-                + entity.position.z**2
-            )
-
-            energy += (
-                entity.mass
-                * galactic_potential.potential_phi(radius)
-            )
-
-        return energy
-
-    def _get_cluster_virial_term(self):
-        # W_cluster = -G * sum_{i<j} m_i * m_j * r_ij^2
-        #             / (r_ij^2 + epsilon^2)^(3/2)
-
-        entities = self.simulation.get_entities()
-
-        if len(entities) < 2:
-            return 0.0
-
-        positions, masses = self.simulation.get_entity_arrays()
-
-        gravitational_constant = (
-            self.simulation.get_gravitational_constant()
-        )
-        softening_squared = self.simulation.get_softening() ** 2
-
-        virial_term = 0.0
-
-        for i in range(len(entities)):
-            for j in range(i + 1, len(entities)):
-                distance_squared = np.sum(
-                    (positions[j] - positions[i]) ** 2
-                )
-
-                virial_term -= (
-                    gravitational_constant
-                    * masses[i]
-                    * masses[j]
-                    * distance_squared
-                    / (distance_squared + softening_squared) ** 1.5
-                )
-
-        return virial_term
-
-    def get_virial_ratio(self):
-        # Q = 2K / |W|
-
-        kinetic_energy = self.get_system_kinetic_energy()
-        virial_term = self._get_cluster_virial_term()
-
-        if virial_term == 0.0:
-            return 0.0
-
-        return 2.0 * kinetic_energy / abs(virial_term)
-
-    def apply_virial_correction(self):
-        # 2K + W_cluster + W_tidal = 0
-        # W_tidal = sum(m_i * x_i . (a_i - a_COM))
-        # v_i,new = V_COM + lambda * (v_i - V_COM)
-        # lambda = sqrt(-(W_cluster + W_tidal) / (2K))
-
-        entities = self.simulation.get_entities()
-
-        if not entities:
-            raise ValueError(
-                "Cannot apply virial correction: no entities."
-            )
-
-        positions, masses = self.simulation.get_entity_arrays()
-        particles = self.simulation.simulation.particles
-
-        velocities = np.array([
-            [particle.vx, particle.vy, particle.vz]
-            for particle in particles
-        ], dtype=np.float64)
-
-        center_of_mass_position = np.average(
-            positions,
-            axis=0,
-            weights=masses
-        )
-
-        center_of_mass_velocity = np.average(
-            velocities,
-            axis=0,
-            weights=masses
-        )
-
-        relative_positions = positions - center_of_mass_position
-        relative_velocities = velocities - center_of_mass_velocity
-
-        kinetic_energy = 0.5 * np.sum(
-            masses
-            * np.sum(relative_velocities**2, axis=1)
-        )
-
-        if kinetic_energy <= 0.0:
-            raise ValueError(
-                "Cannot apply virial correction: "
-                "internal kinetic energy must be positive."
-            )
-
-        cluster_virial_term = self._get_cluster_virial_term()
-        tidal_virial_term = 0.0
-
-        galactic_potential = self.simulation.galactic_potential
-
-        if galactic_potential is not None:
-            gravitational_constant = (
-                self.simulation.get_gravitational_constant()
-            )
-            galaxy_mass = galactic_potential.get_galaxy_mass()
-            galaxy_radius_squared = (
-                galactic_potential.get_galaxy_radius() ** 2
-            )
-
-            center_radius_squared = np.sum(
-                center_of_mass_position**2
-            )
-
-            center_acceleration = (
-                -gravitational_constant
-                * galaxy_mass
-                * center_of_mass_position
-                / (galaxy_radius_squared + center_radius_squared) ** 1.5
-            )
-
-            for position, mass in zip(positions, masses):
-                radius_squared = np.sum(position**2)
-
-                acceleration = (
-                    -gravitational_constant
-                    * galaxy_mass
-                    * position
-                    / (galaxy_radius_squared + radius_squared) ** 1.5
-                )
-
-                relative_acceleration = (
-                    acceleration - center_acceleration
-                )
-
-                tidal_virial_term += (
-                    mass
-                    * np.dot(
-                        position - center_of_mass_position,
-                        relative_acceleration
-                    )
-                )
-
-        total_virial_term = (
-            cluster_virial_term + tidal_virial_term
-        )
-
-        if total_virial_term >= 0.0:
-            raise ValueError(
-                "Cannot apply virial correction: "
-                "the total virial term must be negative."
-            )
-
-        velocity_scale = np.sqrt(
-            -total_virial_term / (2.0 * kinetic_energy)
-        )
-
-        print(f"velocity scale: {velocity_scale}")
-
-        corrected_velocities = (
-            center_of_mass_velocity
-            + velocity_scale * relative_velocities
-        )
-
-        for particle, velocity in zip(particles, corrected_velocities):
-            particle.vx = velocity[0]
-            particle.vy = velocity[1]
-            particle.vz = velocity[2]
-
-    def get_half_mass_radius(self):
-        bound_entities = self.get_bound_entities()
-
-        if not bound_entities:
-            return 0.0
-
-        entity_positions = np.array([
-            [entity.position.x, entity.position.y, entity.position.z]
-            for entity in bound_entities
-        ], dtype=np.float64)
-
-        entity_masses = np.array([
-            entity.mass for entity in bound_entities
-        ], dtype=np.float64)
-
-        # r_HMR encloses half of the total bound mass around the bound COM.
-        center_of_mass_position = np.average(
-            entity_positions,
-            axis=0,
-            weights=entity_masses
-        )
-
-        distances = np.linalg.norm(
-            entity_positions - center_of_mass_position,
+        potential = -gravitational_constant * np.sum(
+            source_masses[np.newaxis, :] / softened_distances,
             axis=1
         )
 
-        sorted_indices = np.argsort(distances)
-        sorted_distances = distances[sorted_indices]
-        sorted_masses = entity_masses[sorted_indices]
+        source_mask = np.zeros(len(particle_masses), dtype=bool)
+        source_mask[source_indices] = True
 
-        half_mass = np.sum(sorted_masses) / 2.0
-        cumulative_mass = np.cumsum(sorted_masses)
+        if softening > 0:
+            potential[source_mask] += (
+                gravitational_constant * particle_masses[source_mask] / softening
+            )
 
-        half_mass_index = np.searchsorted(
-            cumulative_mass,
-            half_mass
+        return potential
+
+    def _get_bound_particles(self):
+        # e_i = 1/2 * |v_i - v_COM|^2 + phi_i
+        # S' = {i : e_i < 0}
+
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
+        particle_velocities = self.simulation.get_particle_velocities()
+
+        number_of_particles = len(particle_masses)
+
+        if number_of_particles <= 3:
+            return np.zeros(number_of_particles, dtype=bool)
+
+        position_differences = (
+            particle_positions[:, np.newaxis, :]
+            - particle_positions[np.newaxis, :, :]
         )
 
-        return float(sorted_distances[half_mass_index])
+        squared_distances = np.sum(position_differences**2, axis=2)
 
-    def get_unbound_entity_indices(self):
-        # E_i >= 0 -> unbound in the galactic environment
+        all_indices = np.arange(number_of_particles)
 
-        entities = self.simulation.get_entities()
+        initial_potential = self._get_particle_gravitational_potential(
+            particle_masses,
+            squared_distances,
+            all_indices
+        )
 
-        return [
-            index
-            for index, entity in enumerate(entities)
-            if self.get_entity_total_energy_with_galactic_potential(entity) >= 0.0
-        ]
+        center_index = np.argmin(initial_potential)
+        nearest_indices = np.argsort(
+            squared_distances[center_index]
+        )[:min(11, number_of_particles)]
 
-    def get_root_mean_square_radius(self):
-        entities = self.simulation.get_entities()
+        center_masses = particle_masses[nearest_indices]
+        center_of_mass_velocity = np.sum(
+            center_masses[:, np.newaxis] * particle_velocities[nearest_indices],
+            axis=0
+        ) / np.sum(center_masses)
 
-        if not entities:
-            return 0.0
+        bound_particles = np.ones(number_of_particles, dtype=bool)
 
-        center_of_mass = self.simulation.get_center_of_mass()
+        for _ in range(10):
+            bound_indices = np.flatnonzero(bound_particles)
 
-        positions = np.array([
-            [entity.position.x, entity.position.y, entity.position.z]
-            for entity in entities
-        ])
+            if len(bound_indices) <= 3:
+                return np.zeros(number_of_particles, dtype=bool)
 
-        center = np.array([
-            center_of_mass.x,
-            center_of_mass.y,
-            center_of_mass.z
-        ])
+            bound_masses = particle_masses[bound_indices]
+            center_of_mass_velocity = np.sum(
+                bound_masses[:, np.newaxis] * particle_velocities[bound_indices],
+                axis=0
+            ) / np.sum(bound_masses)
 
-        distances_squared = np.sum((positions - center)**2, axis=1)
+            relative_velocities = particle_velocities - center_of_mass_velocity
+            squared_speeds = np.sum(relative_velocities**2, axis=1)
 
-        return float(np.sqrt(np.mean(distances_squared)))
+            gravitational_potential = self._get_particle_gravitational_potential(
+                particle_masses,
+                squared_distances,
+                bound_indices
+            )
+
+            specific_energy = 0.5 * squared_speeds + gravitational_potential
+            new_bound_particles = specific_energy < 0
+
+            if np.array_equal(bound_particles, new_bound_particles):
+                break
+
+            bound_particles = new_bound_particles
+
+        if np.count_nonzero(bound_particles) <= 3:
+            return np.zeros(number_of_particles, dtype=bool)
+
+        return bound_particles
+
+    def get_bound_mass_fraction(self):
+        #             S
+        #            sum(m_i)
+        #             i
+        # f_bound = ----------
+        #             N
+        #            sum(m_i)
+        #            i=1
+        particle_masses = self.simulation.get_particle_masses()
+        bound_particles = self._get_bound_particles()
+
+        bound_mass = np.sum(particle_masses[bound_particles])
+        total_mass = np.sum(particle_masses)
+
+        bound_mass_fraction = bound_mass / total_mass
+        return bound_mass_fraction
+
+
+    def get_diagnostics(self):
+        diagnostics = Diagnostics (
+            time = self.simulation.rebound_handle.t,
+            cluster_kinetic_energy = self.get_cluster_kinetic_energy(),
+            cluster_potential_energy = self.get_cluster_potential_energy(),
+            cluster_total_energy = self.get_cluster_total_energy(),
+            cluster_kinetic_internal_energy = self.get_cluster_internal_kinetic_energy(),
+            cluster_virial_ratio = self.get_cluster_virial_ratio(),
+            cluster_bound_mass_fraction = self.get_bound_mass_fraction()
+        )
+        return diagnostics
+
+    def print_diagnostics(self, diagnostics: Diagnostics = None):
+        if diagnostics is None: diagnostics = self.get_diagnostics()
+        print(f"Time: {diagnostics.time}")
+        print(f"Kinetic energy: {diagnostics.cluster_kinetic_energy}")
+        print(f"Potential energy: {diagnostics.cluster_potential_energy}")
+        print(f"Total energy: {diagnostics.cluster_total_energy}")
+        print(f"Internal kinetic energy: {diagnostics.cluster_kinetic_internal_energy}")
+        print(f"Virial ratio: {diagnostics.cluster_virial_ratio}")
+        print(f"Bound Mass Fraction: {diagnostics.cluster_bound_mass_fraction}")

@@ -1,173 +1,165 @@
 import numpy as np
 
-GRAVITATIONAL_CONSTANT = 1 # G
-CLUSTER_MASS = 1           # M
+CLUSTER_MASS = 1.0
+GRAVITATIONAL_CONSTANT = 1.0
 
 class Plummer:
 
-    def __init__(self, plummer_radius = 1, number_of_stars = 1, seed = None, softening = 0.1):
-
-        if plummer_radius <= 0:
-            raise ValueError("plummer_radius must be greater than 0")
-
-        if number_of_stars < 1:
-            raise ValueError("number_of_stars must be at least 1")
-
-        if softening < 0:
-            raise ValueError("softening must be non-negative")
-
-        self.plummer_radius = plummer_radius   # a
-        self.number_of_stars = number_of_stars # N
-        self.softening = softening
-
-        if seed is not None:
-            self.rng = np.random.Generator(np.random.MT19937(seed))
-        else:
-            self.rng = np.random.default_rng()
+    def __init__(self, number_of_particles, cluster_radius = None, cluster_seed = None):
+        self.number_of_particles = number_of_particles
+        self.cluster_radius = cluster_radius
+        self.rng = np.random.Generator(np.random.MT19937(cluster_seed))
 
 
-    def _potential_phi(self, radius_from_center):
-
-        #               - G * M
+    def _potential_phi(self, distance_from_center):
+        #              - G * M
         # phi(r) = -----------------
         #           sqrt(a^2 + r^2)
 
         numerator = -1 * GRAVITATIONAL_CONSTANT * CLUSTER_MASS
 
-        denominator = np.sqrt(self.plummer_radius**2 + radius_from_center**2)
+        denominator = np.sqrt(self.cluster_radius**2 + distance_from_center**2)
 
-        phi = numerator / denominator
-        return phi
+        potential_phi = numerator / denominator
+        return potential_phi
 
-    def _enclosed_mass(self, radius_from_center):
-
+    def _enclosed_mass(self, distance_from_center):
         #                 M * r^3
         # mass(<r) = -------------------
         #             (a^2 + r^2)^(3/2)
 
-        numerator = CLUSTER_MASS * radius_from_center**3
+        numerator = CLUSTER_MASS * distance_from_center**3
+        denominator = (self.cluster_radius**2 + distance_from_center**2)**(3.0/2.0)
 
-        denominator = (self.plummer_radius**2 + radius_from_center**2)**(3/2)
+        enclosed_mass = numerator / denominator
+        return enclosed_mass
 
-        mass = numerator / denominator
-        return mass
+    def _normalised_random_versor(self):
+        random_versor = self.rng.normal(size = 3) # generate a random point in 3D space
+        versor_length = np.linalg.norm(random_versor)
+
+        if versor_length == 0:
+            return self._normalised_random_versor()
+
+        normalised_random_versor = random_versor / versor_length # versor length is now 1
+        return normalised_random_versor
 
     def _sample_radius(self):
+        #                 r_max^3
+        # F_max = -----------------------
+        #          (r_max^2 + a^2)^(3/2)
+
+        MAX_RADIUS = 10 * self.cluster_radius
+
+        numerator = MAX_RADIUS**3
+        denominator = (MAX_RADIUS**2 + self.cluster_radius**2)**(3.0/2.0)
+        F_max = numerator / denominator
+
+        #
+        # u ~ U (0,1) <-- random number between 0 and 1
+        #
+        u = max(self.rng.random(), np.finfo(float).tiny)
 
         #              a
         # r = --------------------
-        #      sqrt(u^(-2/3) - 1)
+        #      sqrt((u * F_max)^(-2/3) - 1)
 
-        #
-        # u ~ U(0,1) <-- random number between 0 and 1
-        #
+        numerator = self.cluster_radius
 
-        numerator = self.plummer_radius
-
-        u = self.rng.random()
-
-        denominator = u**(-2.0 / 3.0) - 1
-
+        denominator = u * F_max
+        denominator = denominator**(-2.0/3.0)
+        denominator = denominator - 1
         denominator = np.sqrt(denominator)
 
         sampled_radius = numerator / denominator
-
         return sampled_radius
 
-    def _random_versor(self):
-        versor = self.rng.normal(size = 3) # generate a random point in 3D space
-        norm = np.linalg.norm(versor) # normalise the versor so that its length is 1
-        if norm == 0:
-            return self._random_versor()
-        else:
-            return versor / norm
+    def _sample_position(self):
+        sampled_radius = self._sample_radius()
+        normalised_random_versor = self._normalised_random_versor()
 
-    def _sample_velocity(self, radius_from_center):
+        sampled_position = sampled_radius * normalised_random_versor
+        return sampled_position
+
+    def _escape_velocity(self, distance_from_center):
+        #                        2 * G * M
+        # v_esc(r) = sqrt( ------------------- )
+        #                   sqrt ( r^2 + a^2 )
+
+        numerator = 2 * GRAVITATIONAL_CONSTANT * CLUSTER_MASS
+
+        denominator = distance_from_center**2 + self.cluster_radius**2
+        denominator = np.sqrt(denominator)
+
+        escape_velocity = np.sqrt(numerator / denominator)
+        return escape_velocity
+
+    def _sample_speed_ratio(self):
+        #
+        # X ~ Beta(3/2, 9/2)
+        #
+
+        X = self.rng.beta(3.0/2.0, 9.0/2.0)
 
         #
-        # v = sqrt(x) * v_esc
+        # q = sqrt( X )
         #
 
+        sampled_speed_ratio = np.sqrt(X)
+        return sampled_speed_ratio
+
+
+    def _sample_velocity(self, position):
+        distance_from_center = np.linalg.norm(position)
+
+        escape_velocity = self._escape_velocity(distance_from_center)
+
+        speed_ratio = self._sample_speed_ratio()
+
+        sampled_velocity = escape_velocity * speed_ratio
+
+        normalised_random_versor = self._normalised_random_versor()
+
+        sampled_velocity = sampled_velocity * normalised_random_versor
+        return sampled_velocity
+
+
+    def generate_particles(self):
+        particle_positions = np.empty((self.number_of_particles, 3))
+        particle_velocities = np.empty((self.number_of_particles, 3))
+
+        for i in range(self.number_of_particles):
+            particle_positions[i] = self._sample_position()
+            particle_velocities[i] = self._sample_velocity(particle_positions[i])
+
+        return particle_positions, particle_velocities
+
+    def get_relaxation_time(self):
+        RELAXATION_FACTOR = 1_000
         #
-        # x ~ Beta(3/2, 9/2)
+        # r_h = 1.305 * a
         #
 
-        x = self.rng.beta(1.5, 4.5)
+        r_h = 1.305 * self.cluster_radius
 
-        escape_velocity = np.sqrt( -2.0 * self._potential_phi(radius_from_center))
+        #
+        # gamma = 0.4
+        #
 
-        speed = escape_velocity * np.sqrt(x)
+        GAMMA = 0.4
 
-        return speed * self._random_versor()
+        #           0.138 * N             r_h^3
+        # t_rh = --------------- * sqrt( ------- )
+        #         ln(gamma * N)           G * M
 
+        numerator = r_h**3.0
+        denominator = GRAVITATIONAL_CONSTANT * CLUSTER_MASS
+        numerator = np.sqrt(numerator / denominator)
+        numerator = 0.138 * self.number_of_particles * numerator
+        denominator = np.log(GAMMA * self.number_of_particles)
 
-    def _apply_virial_correction(self, positions, velocities):
+        relaxation_time = numerator / denominator
 
-        #                              | W |
-        # virial_scale_factor = sqrt( ------- )
-        #                               2K
+        relaxation_time = relaxation_time * RELAXATION_FACTOR
 
-        star_mass = CLUSTER_MASS / self.number_of_stars
-
-        #              G * m^2 * r_ij^2
-        # W = - sum ( ------------------------- )
-        #       i<j   (r_ij^2 + epsilon^2)^(3/2)
-
-        total_virial_term = 0.0
-
-        for i in range (self.number_of_stars):
-            for j in range (i + 1, self.number_of_stars):
-
-                distance_vector = positions[j] - positions[i]
-                distance_squared = np.sum(distance_vector**2)
-
-                softened_distance_squared = distance_squared + self.softening**2
-
-                total_virial_term -= (
-                    GRAVITATIONAL_CONSTANT
-                    * star_mass**2
-                    * distance_squared
-                    / softened_distance_squared**1.5
-                )
-
-        #      1
-        # K = --- * m * (v - v_COM)^2
-        #      2
-
-        center_of_mass_velocity = np.mean(velocities, axis=0)
-        relative_velocities = velocities - center_of_mass_velocity
-
-        total_kinetic_energy = (
-            0.5 * star_mass * np.sum(relative_velocities**2)
-        )
-
-        numerator = np.abs(total_virial_term)
-        denominator = 2.0 * total_kinetic_energy
-
-        virial_scale_factor = np.sqrt(numerator / denominator)
-
-        relative_velocities = relative_velocities * virial_scale_factor
-
-        return relative_velocities
-
-    def generate_plummer_cluster(self):
-        positions = []
-        velocities = []
-
-        for i in range(self.number_of_stars):
-
-            radius = self._sample_radius()
-            radial_versor = self._random_versor()
-
-            position = radius * radial_versor
-            positions.append(position)
-
-            velocity = self._sample_velocity(radius)
-            velocities.append(velocity)
-
-        positions = np.array(positions)
-        velocities = np.array(velocities)
-
-        velocities = self._apply_virial_correction(positions, velocities)
-
-        return positions, velocities
+        return relaxation_time

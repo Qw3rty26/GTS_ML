@@ -1,113 +1,90 @@
-import logging
+import os
 import numpy as np
-import io_manager
-from io_manager import Metadata
-from simulation import Simulation, SimulationConfig, Entity, Position, Velocity
+import rebound
+from dataclasses import dataclass
+from simulation import Simulation, Simulation_Configuration
 from plummer import Plummer
+from file_handle import File_Handle
 
-logger = logging.getLogger(__name__)
+@dataclass
+class Cluster_Configuration:
+    simulation_configuration: Simulation_Configuration = None
+    number_of_particles: int = None
+    master_seed: int = None
+    cluster_seed: int = None
+    cluster_radius: float = None
+    snapshot_interval: float = None
+    snapshot_file_path: str = None
 
 class Cluster_Generation:
 
-    def __init__(
-        self,
-        simulation_config: SimulationConfig,
-        metadata: Metadata,
-        json_and_xyzv_snapshots_dt = 1,
-    ):
-        self.json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
-        self.metadata = metadata
-        self.simulation_config = simulation_config
-        self.plummer = None
-        self.simulation = None
-        self._create_cluster()
+    def __init__(self, cluster_configuration: Cluster_Configuration):
+        self.cluster_configuration = cluster_configuration
 
-    def _save_to_file(self):
-            self.metadata.simulation_config.t = self.simulation.get_time()
-            _entities = self.simulation.get_entities()
-            _bound_center_of_mass = self.simulation.get_bound_center_of_mass()
-            io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _bound_center_of_mass)
-            io_manager.save_json_snapshot_gen(self.metadata, _entities, _bound_center_of_mass)
+        self.xyzv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.xyzv")
+        json_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.json")
+        self.json_file_descriptor = File_Handle.open_json_snapshot(json_file_path)
+        self._create_simulation()
 
-    def _create_cluster(self):
-        logger.info(f"Cluster {self.metadata.cluster_seed}: Creating...")
-        ENTITY_MASS = 1 / self.metadata.initial_number_of_entities
+    def _save_snapshot(self):
+        particle_positions = self.simulation.get_particle_positions()
+        particle_velocities = self.simulation.get_particle_velocities()
 
-        self.plummer = Plummer(
-            self.metadata.cluster_radius,
-            self.metadata.initial_number_of_entities,
-            self.metadata.cluster_seed,
-            self.simulation_config.softening
+        File_Handle.save_json_snapshot(
+            self.json_file_descriptor,
+            particle_positions,
+            particle_velocities
         )
-        self.simulation = Simulation(self.simulation_config)
+        File_Handle.save_xyzv_snapshot(
+            self.xyzv_file_path,
+            particle_positions,
+            particle_velocities
+        )
 
-        entity_positions, entity_velocities = self.plummer.generate_plummer_cluster()
+    def _create_simulation(self):
 
-        for entity_name, (entity_position, entity_velocity) in enumerate(zip(entity_positions, entity_velocities)):
-            new_entity = Entity(
-                    name = str(entity_name),
-                    position = Position(
-                        x = entity_position[0],
-                        y = entity_position[1],
-                        z = entity_position[2]
-                    ),
-                    velocity = Velocity(
-                        vx = entity_velocity[0],
-                        vy = entity_velocity[1],
-                        vz = entity_velocity[2]
-                    ),
-                    mass = ENTITY_MASS
-                )
-            self.simulation.add_entity(new_entity)
+        PARTICLE_MASS = 1.0 / self.cluster_configuration.number_of_particles
 
-        self.simulation.move_cluster_to_center_of_mass()
+        print(f"Creating the plummer_handle with N = {self.cluster_configuration.number_of_particles} and a = {self.cluster_configuration.cluster_radius}")
+        self.plummer_handle = Plummer(self.cluster_configuration.number_of_particles, self.cluster_configuration.cluster_radius, self.cluster_configuration.cluster_seed)
+
+        particle_positions, particle_velocities = self.plummer_handle.generate_particles()
+
+        print(f"Adding the particles to rebound")
+        self.simulation = Simulation(self.cluster_configuration.simulation_configuration)
+        for particle_name, (particle_position, particle_velocity) in enumerate(zip(particle_positions, particle_velocities)):
+            particle = rebound.Particle(
+                name = str(particle_name),
+                x = particle_position[0],
+                y = particle_position[1],
+                z = particle_position[2],
+                vx = particle_velocity[0],
+                vy = particle_velocity[1],
+                vz = particle_velocity[2],
+                m = PARTICLE_MASS
+            )
+            self.simulation.add_particle(particle)
+        self.simulation.diagnostics.print_diagnostics()
 
     def run(self):
-        logger.info(f"Cluster {self.metadata.cluster_seed}: Running...")
+        END_TIME = self.plummer_handle.get_relaxation_time()
 
-        #calculated through kepler's third law
-        END_TIME = (
-            20 * self.metadata.cluster_radius ** (3/2)
-            / np.sqrt(self.metadata.initial_number_of_entities)
-        )
+        print(f"Running generation in the void until {END_TIME}")
 
-        #print(f"T: {self.simulation.simulation.t}")
-        #print(f"E_tot: {self.simulation.simulation.energy()}")
-        #print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
-        #print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}")
-        #print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}")
-        #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
-        #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
+        _next_snapshot_time = self.simulation.rebound_handle.t + self.cluster_configuration.snapshot_interval
 
-        logger.debug(f"Cluster {self.metadata.cluster_seed}: END_TIME = {END_TIME:.4f}")
+        try:
+            self._save_snapshot()
+            while self.simulation.rebound_handle.t < END_TIME:
+                self.simulation.integrate()
 
-        DT_CLEANUP = 1.0
-
-        next_cleanup = self.simulation.get_time() + DT_CLEANUP
-        next_snapshot = self.simulation.get_time() + self.json_and_xyzv_snapshots_dt 
-
-        io_manager.init_json_gen(self.metadata)
-
-        self._save_to_file()
+                if self.simulation.rebound_handle.t >= _next_snapshot_time:
+                    self._save_snapshot()
+                    _next_snapshot_time += self.cluster_configuration.snapshot_interval
+            print(f"Done simulating")
+            self.simulation.diagnostics.print_diagnostics()
+        finally:
+            File_Handle.close_json_snapshot(self.json_file_descriptor)
 
 
-        while self.simulation.get_time() < END_TIME:
-            self.simulation.integrate()
 
-            if self.simulation.get_time() >= next_snapshot:
-                next_snapshot += self.json_and_xyzv_snapshots_dt
-                #print(f"T: {self.simulation.simulation.t}")
-                #print(f"E_tot: {self.simulation.simulation.energy()}")
-                #print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
-                #print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}")
-                #print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}")
-                #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
-                #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
-                self._save_to_file()
-
-            if self.simulation.get_time() >= next_cleanup:
-                next_cleanup += DT_CLEANUP
-                number_of_entities_cleaned = self.simulation.clean_unbound_entities()
-                if number_of_entities_cleaned > 0:
-                    logger.debug(f"Cluster {self.metadata.cluster_seed}: Cleaning {number_of_entities_cleaned} star/s...")
-        logger.info(f"\033[94mCluster {self.metadata.cluster_seed}: Generated.\033[0m")
