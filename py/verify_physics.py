@@ -1,9 +1,10 @@
+
 import logging
 import os
 
-import io_manager
 import numpy as np
 
+import io_manager
 from simulation import Simulation
 from cluster_diagnostics import ClusterDiagnostics
 from galactic_potential import GalacticPotential
@@ -14,17 +15,10 @@ logger = logging.getLogger(__name__)
 
 class Verify_Physics:
 
-    def __init__(
-        self,
-        cluster_json_dir_path
-    ):
+    def __init__(self, cluster_json_dir_path):
         self.cluster_json_dir_path = cluster_json_dir_path
 
-    def _create_simulation(
-        self,
-        metadata,
-        entities
-    ):
+    def _create_simulation(self, metadata, entities):
         simulation = Simulation(metadata.simulation_config)
 
         for entity in entities:
@@ -35,17 +29,76 @@ class Verify_Physics:
                 metadata.galaxy_radius,
                 metadata.galaxy_mass
             )
-
-            simulation.add_galactic_potential(
-                galactic_potential
-            )
+            simulation.add_galactic_potential(galactic_potential)
 
         return simulation
 
-    def _verify_simulation(
-        self,
-        cluster_json_file_path
-    ):
+    def _get_angular_momentum(self, simulation):
+        entities = simulation.get_entities()
+
+        if not entities:
+            return np.zeros(3)
+
+        positions = np.array([
+            [entity.position.x, entity.position.y, entity.position.z]
+            for entity in entities
+        ], dtype=np.float64)
+
+        velocities = np.array([
+            [entity.velocity.vx, entity.velocity.vy, entity.velocity.vz]
+            for entity in entities
+        ], dtype=np.float64)
+
+        masses = np.array([
+            entity.mass for entity in entities
+        ], dtype=np.float64)
+
+        return np.sum(
+            masses[:, np.newaxis] * np.cross(positions, velocities),
+            axis=0
+        )
+
+    def _get_total_energy(self, diagnostics):
+        simulation = diagnostics.simulation
+
+        internal_energy = diagnostics.get_system_total_energy()
+
+        center_of_mass = simulation.get_center_of_mass()
+
+        total_mass = sum(
+            entity.mass
+            for entity in simulation.get_entities()
+        )
+
+        center_of_mass_velocity = np.array([
+            center_of_mass.vx,
+            center_of_mass.vy,
+            center_of_mass.vz
+        ])
+
+        center_of_mass_kinetic_energy = (
+            0.5
+            * total_mass
+            * np.sum(center_of_mass_velocity**2)
+        )
+
+        galactic_potential_energy = (
+            diagnostics.get_system_galactic_potential_energy()
+        )
+
+        return (
+            internal_energy
+            + center_of_mass_kinetic_energy
+            + galactic_potential_energy
+        )
+
+    def _get_relative_drift(self, initial, final):
+        if abs(initial) < 1e-15:
+            return abs(final - initial)
+
+        return abs(final - initial) / abs(initial)
+
+    def _verify_simulation(self, cluster_json_file_path):
         filename = os.path.basename(cluster_json_file_path)
 
         metadata_start, entities_start, _ = io_manager.load_json_snapshot(
@@ -84,25 +137,22 @@ class Verify_Physics:
                 diagnostics_end
             )
 
-    def _verify_cluster(
-        self,
-        filename,
-        diagnostics_start,
-        diagnostics_end
-    ):
-        energy_start = diagnostics_start.get_total_energy()
-        energy_end = diagnostics_end.get_total_energy()
+    def _verify_cluster(self, filename, diagnostics_start, diagnostics_end):
+        energy_start = diagnostics_start.get_system_total_energy()
+        energy_end = diagnostics_end.get_system_total_energy()
 
-        if energy_start != 0.0:
-            energy_drift = (
-                abs(energy_end - energy_start)
-                / abs(energy_start)
-            )
-        else:
-            energy_drift = 0.0
+        energy_drift = self._get_relative_drift(
+            energy_start,
+            energy_end
+        )
 
-        angular_momentum_start = diagnostics_start.get_angular_momentum()
-        angular_momentum_end = diagnostics_end.get_angular_momentum()
+        angular_momentum_start = self._get_angular_momentum(
+            diagnostics_start.simulation
+        )
+
+        angular_momentum_end = self._get_angular_momentum(
+            diagnostics_end.simulation
+        )
 
         angular_momentum_drift = np.linalg.norm(
             angular_momentum_end - angular_momentum_start
@@ -111,35 +161,17 @@ class Verify_Physics:
         virial_ratio_start = diagnostics_start.get_virial_ratio()
         virial_ratio_end = diagnostics_end.get_virial_ratio()
 
-        energy_status = (
-            "[OK]"
-            if energy_drift < 0.05
-            else "[WARN]"
-        )
-
+        energy_status = "[OK]" if energy_drift < 0.05 else "[WARN]"
         angular_momentum_status = (
-            "[OK]"
-            if angular_momentum_drift < 0.05
-            else "[WARN]"
-        )
-
-        virial_status = (
-            "[OK]"
-            if abs(virial_ratio_start - 1.0) < 0.1
-            else "[WARN]"
+            "[OK]" if angular_momentum_drift < 0.05 else "[WARN]"
         )
 
         logger.info("")
         logger.info(f"Simulation: {filename}")
         logger.info("")
-
         logger.info("   ENERGY")
-        logger.info(
-            f"      E0             = {energy_start:.6e}"
-        )
-        logger.info(
-            f"      Ef             = {energy_end:.6e}"
-        )
+        logger.info(f"      E0             = {energy_start:.6e}")
+        logger.info(f"      Ef             = {energy_end:.6e}")
         logger.info(
             f"      |dE/E0|        = {energy_drift:.4e} "
             f"{energy_status}"
@@ -147,12 +179,8 @@ class Verify_Physics:
 
         logger.info("")
         logger.info("   ANGULAR MOMENTUM")
-        logger.info(
-            f"      L0             = {angular_momentum_start}"
-        )
-        logger.info(
-            f"      Lf             = {angular_momentum_end}"
-        )
+        logger.info(f"      L0             = {angular_momentum_start}")
+        logger.info(f"      Lf             = {angular_momentum_end}")
         logger.info(
             f"      |dL|           = {angular_momentum_drift:.4e} "
             f"{angular_momentum_status}"
@@ -160,50 +188,35 @@ class Verify_Physics:
 
         logger.info("")
         logger.info("   VIRIAL RATIO")
-        logger.info(
-            f"      Q_start        = {virial_ratio_start:.3f} "
-            f"{virial_status}"
-        )
-        logger.info(
-            f"      Q_end          = {virial_ratio_end:.3f}"
-        )
+        logger.info(f"      Q_start        = {virial_ratio_start:.3f}")
+        logger.info(f"      Q_end          = {virial_ratio_end:.3f}")
 
-    def _verify_gts(
-        self,
-        filename,
-        diagnostics_start,
-        diagnostics_end
-    ):
-        energy_internal_start = diagnostics_start.get_total_energy()
-        energy_internal_end = diagnostics_end.get_total_energy()
+    def _verify_gts(self, filename, diagnostics_start, diagnostics_end):
+        energy_start = self._get_total_energy(diagnostics_start)
+        energy_end = self._get_total_energy(diagnostics_end)
 
-        galactic_potential_energy_start = (
-            diagnostics_start.get_galactic_potential_energy()
+        energy_drift = self._get_relative_drift(
+            energy_start,
+            energy_end
         )
 
-        galactic_potential_energy_end = (
-            diagnostics_end.get_galactic_potential_energy()
+        angular_momentum_start = self._get_angular_momentum(
+            diagnostics_start.simulation
         )
 
-        center_of_mass_start = (
-            diagnostics_start.simulation.get_center_of_mass()
+        angular_momentum_end = self._get_angular_momentum(
+            diagnostics_end.simulation
         )
 
-        center_of_mass_end = (
-            diagnostics_end.simulation.get_center_of_mass()
+        angular_momentum_drift = np.linalg.norm(
+            angular_momentum_end - angular_momentum_start
         )
 
-        center_of_mass_velocity_start = np.array([
-            center_of_mass_start.vx,
-            center_of_mass_start.vy,
-            center_of_mass_start.vz
-        ])
+        virial_ratio_start = diagnostics_start.get_virial_ratio()
+        virial_ratio_end = diagnostics_end.get_virial_ratio()
 
-        center_of_mass_velocity_end = np.array([
-            center_of_mass_end.vx,
-            center_of_mass_end.vy,
-            center_of_mass_end.vz
-        ])
+        half_mass_radius_start = diagnostics_start.get_half_mass_radius()
+        half_mass_radius_end = diagnostics_end.get_half_mass_radius()
 
         total_mass_start = sum(
             entity.mass
@@ -215,99 +228,27 @@ class Verify_Physics:
             for entity in diagnostics_end.simulation.get_entities()
         )
 
-        center_of_mass_kinetic_energy_start = (
-            0.5
-            * total_mass_start
-            * np.sum(center_of_mass_velocity_start ** 2)
-        )
-
-        center_of_mass_kinetic_energy_end = (
-            0.5
-            * total_mass_end
-            * np.sum(center_of_mass_velocity_end ** 2)
-        )
-
-        total_energy_start = (
-            energy_internal_start
-            + center_of_mass_kinetic_energy_start
-            + galactic_potential_energy_start
-        )
-
-        total_energy_end = (
-            energy_internal_end
-            + center_of_mass_kinetic_energy_end
-            + galactic_potential_energy_end
-        )
-
-        if total_energy_start != 0.0:
-            energy_drift = (
-                abs(total_energy_end - total_energy_start)
-                / abs(total_energy_start)
-            )
-        else:
-            energy_drift = 0.0
-
-        angular_momentum_start = (
-            diagnostics_start.get_total_angular_momentum()
-        )
-
-        angular_momentum_end = (
-            diagnostics_end.get_total_angular_momentum()
-        )
-
-        angular_momentum_drift = np.linalg.norm(
-            angular_momentum_end - angular_momentum_start
-        )
-
-        virial_ratio_start = diagnostics_start.get_virial_ratio()
-        virial_ratio_end = diagnostics_end.get_virial_ratio()
-
-        half_mass_radius_start = (
-            diagnostics_start.get_half_mass_radius()
-        )
-
-        half_mass_radius_end = (
-            diagnostics_end.get_half_mass_radius()
-        )
-
-        bound_mass_start = diagnostics_start.get_bound_mass()
-        bound_mass_end = diagnostics_end.get_bound_mass()
-
         bound_mass_fraction_start = (
-            bound_mass_start / total_mass_start
-            if total_mass_start != 0.0
-            else 0.0
+            diagnostics_start.get_bound_mass() / total_mass_start
+            if total_mass_start > 0.0 else 0.0
         )
 
         bound_mass_fraction_end = (
-            bound_mass_end / total_mass_end
-            if total_mass_end != 0.0
-            else 0.0
+            diagnostics_end.get_bound_mass() / total_mass_end
+            if total_mass_end > 0.0 else 0.0
         )
 
-        energy_status = (
-            "[OK]"
-            if energy_drift < 0.05
-            else "[WARN]"
-        )
-
+        energy_status = "[OK]" if energy_drift < 0.05 else "[WARN]"
         angular_momentum_status = (
-            "[OK]"
-            if angular_momentum_drift < 0.05
-            else "[WARN]"
+            "[OK]" if angular_momentum_drift < 0.05 else "[WARN]"
         )
 
         logger.info("")
         logger.info(f"Simulation: {filename}")
         logger.info("")
-
         logger.info("   TOTAL ENERGY")
-        logger.info(
-            f"      E0             = {total_energy_start:.6e}"
-        )
-        logger.info(
-            f"      Ef             = {total_energy_end:.6e}"
-        )
+        logger.info(f"      E0             = {energy_start:.6e}")
+        logger.info(f"      Ef             = {energy_end:.6e}")
         logger.info(
             f"      |dE/E0|        = {energy_drift:.4e} "
             f"{energy_status}"
@@ -315,12 +256,8 @@ class Verify_Physics:
 
         logger.info("")
         logger.info("   TOTAL ANGULAR MOMENTUM")
-        logger.info(
-            f"      L0             = {angular_momentum_start}"
-        )
-        logger.info(
-            f"      Lf             = {angular_momentum_end}"
-        )
+        logger.info(f"      L0             = {angular_momentum_start}")
+        logger.info(f"      Lf             = {angular_momentum_end}")
         logger.info(
             f"      |dL|           = {angular_momentum_drift:.4e} "
             f"{angular_momentum_status}"
@@ -328,41 +265,23 @@ class Verify_Physics:
 
         logger.info("")
         logger.info("   VIRIAL RATIO")
-        logger.info(
-            f"      Q_start        = {virial_ratio_start:.3f}"
-        )
-        logger.info(
-            f"      Q_end          = {virial_ratio_end:.3f}"
-        )
+        logger.info(f"      Q_start        = {virial_ratio_start:.3f}")
+        logger.info(f"      Q_end          = {virial_ratio_end:.3f}")
 
         logger.info("")
         logger.info("   BOUND MASS")
-        logger.info(
-            f"      f_bound_start  = {bound_mass_fraction_start:.3f}"
-        )
-        logger.info(
-            f"      f_bound_end    = {bound_mass_fraction_end:.3f}"
-        )
+        logger.info(f"      f_bound_start  = {bound_mass_fraction_start:.3f}")
+        logger.info(f"      f_bound_end    = {bound_mass_fraction_end:.3f}")
 
         logger.info("")
         logger.info("   HALF-MASS RADIUS")
-        logger.info(
-            f"      r50_start      = {half_mass_radius_start:.3f}"
-        )
-        logger.info(
-            f"      r50_end        = {half_mass_radius_end:.3f}"
-        )
+        logger.info(f"      r50_start      = {half_mass_radius_start:.3f}")
+        logger.info(f"      r50_end        = {half_mass_radius_end:.3f}")
 
     def run(self):
-
         cluster_json_files_path = sorted(
-            os.path.join(
-                self.cluster_json_dir_path,
-                filename
-            )
-            for filename in os.listdir(
-                self.cluster_json_dir_path
-            )
+            os.path.join(self.cluster_json_dir_path, filename)
+            for filename in os.listdir(self.cluster_json_dir_path)
             if filename.endswith(".json")
         )
 
@@ -376,9 +295,7 @@ class Verify_Physics:
         logger.info("PHYSICS VERIFICATION STARTED")
 
         for cluster_json_file_path in cluster_json_files_path:
-            self._verify_simulation(
-                cluster_json_file_path
-            )
+            self._verify_simulation(cluster_json_file_path)
 
         logger.info("")
         logger.info("PHYSICS VERIFICATION COMPLETE")

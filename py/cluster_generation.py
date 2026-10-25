@@ -25,15 +25,20 @@ class Cluster_Generation:
     def _save_to_file(self):
             self.metadata.simulation_config.t = self.simulation.get_time()
             _entities = self.simulation.get_entities()
-            _percentile_center_of_mass = self.simulation.get_percentile_center_of_mass()
-            io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
-            io_manager.save_json_snapshot_gen(self.metadata, _entities, _percentile_center_of_mass)
+            _bound_center_of_mass = self.simulation.get_bound_center_of_mass()
+            io_manager.save_xyzv_snapshot_gen(self.metadata, _entities, _bound_center_of_mass)
+            io_manager.save_json_snapshot_gen(self.metadata, _entities, _bound_center_of_mass)
 
     def _create_cluster(self):
         logger.info(f"Cluster {self.metadata.cluster_seed}: Creating...")
         ENTITY_MASS = 1 / self.metadata.initial_number_of_entities
 
-        self.plummer = Plummer(self.metadata.cluster_radius, self.metadata.initial_number_of_entities, self.metadata.cluster_seed)
+        self.plummer = Plummer(
+            self.metadata.cluster_radius,
+            self.metadata.initial_number_of_entities,
+            self.metadata.cluster_seed,
+            self.simulation_config.softening
+        )
         self.simulation = Simulation(self.simulation_config)
 
         entity_positions, entity_velocities = self.plummer.generate_plummer_cluster()
@@ -66,6 +71,14 @@ class Cluster_Generation:
             / np.sqrt(self.metadata.initial_number_of_entities)
         )
 
+        #print(f"T: {self.simulation.simulation.t}")
+        #print(f"E_tot: {self.simulation.simulation.energy()}")
+        #print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
+        #print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}")
+        #print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}")
+        #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
+        #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
+
         logger.debug(f"Cluster {self.metadata.cluster_seed}: END_TIME = {END_TIME:.4f}")
 
         DT_CLEANUP = 1.0
@@ -83,6 +96,13 @@ class Cluster_Generation:
 
             if self.simulation.get_time() >= next_snapshot:
                 next_snapshot += self.json_and_xyzv_snapshots_dt
+                #print(f"T: {self.simulation.simulation.t}")
+                #print(f"E_tot: {self.simulation.simulation.energy()}")
+                #print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
+                #print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}")
+                #print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}")
+                #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
+                #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
                 self._save_to_file()
 
             if self.simulation.get_time() >= next_cleanup:

@@ -1,13 +1,11 @@
 import numpy as np
-import scipy.optimize as so
-import scipy.integrate as si
 
 GRAVITATIONAL_CONSTANT = 1 # G
 CLUSTER_MASS = 1           # M
 
 class Plummer:
 
-    def __init__(self, plummer_radius = 1, number_of_stars = 1, seed = None):
+    def __init__(self, plummer_radius = 1, number_of_stars = 1, seed = None, softening = 0.1):
 
         if plummer_radius <= 0:
             raise ValueError("plummer_radius must be greater than 0")
@@ -15,46 +13,18 @@ class Plummer:
         if number_of_stars < 1:
             raise ValueError("number_of_stars must be at least 1")
 
+        if softening < 0:
+            raise ValueError("softening must be non-negative")
+
         self.plummer_radius = plummer_radius   # a
         self.number_of_stars = number_of_stars # N
+        self.softening = softening
 
         if seed is not None:
             self.rng = np.random.Generator(np.random.MT19937(seed))
         else:
             self.rng = np.random.default_rng()
 
-
-    def _density_rho(self, radius_from_center):
-
-        #                   3 * M * a^2
-        # rho(r) = ----------------------------
-        #           4 * pi * (a^2 + r^2)^(5/2)
-
-        numerator = 3 * CLUSTER_MASS * (self.plummer_radius ** 2)
-
-        denominator = 4 * np.pi * ((self.plummer_radius ** 2 + radius_from_center**2)**(5/2))
-
-        rho = numerator / denominator
-        return rho
-
-    def _derivative_density_rho(self, radius_from_center):
-
-        #      r
-        # y = ---
-        #      a
-
-        #  d_rho     -15 * M * y * (1 + y^2)^(-7/2)
-        # ------- = ----------------------------
-        #   d_r           4 * pi * a^4
-
-        y = radius_from_center / self.plummer_radius
-
-        numerator = - 15 * CLUSTER_MASS * y * (1 + y**2)**(-7/2)
-
-        denominator = 4 * np.pi * self.plummer_radius**4
-
-        d_rho = numerator / denominator
-        return d_rho
 
     def _potential_phi(self, radius_from_center):
 
@@ -68,25 +38,6 @@ class Plummer:
 
         phi = numerator / denominator
         return phi
-
-    def _derivative_potential_phi(self, radius_from_center):
-
-        #      r
-        # y = ---
-        #      a
-
-        #  d_phi     G * M * y * (1 + y^2)^(-3/2)
-        # ------- = ------------------------------
-        #   d_r                 a^2
-
-        y = radius_from_center / self.plummer_radius
-
-        numerator = GRAVITATIONAL_CONSTANT * CLUSTER_MASS * y * (1 + y**2)**(-3/2)
-
-        denominator = self.plummer_radius**2
-
-        d_phi = numerator / denominator
-        return d_phi
 
     def _enclosed_mass(self, radius_from_center):
 
@@ -103,18 +54,23 @@ class Plummer:
 
     def _sample_radius(self):
 
-        # given u, solve:
-        # M(r) - u = 0
-        # for r
+        #              a
+        # r = --------------------
+        #      sqrt(u^(-2/3) - 1)
 
-        mass_fraction_u = self.rng.random()
+        #
+        # u ~ U(0,1) <-- random number between 0 and 1
+        #
 
-        def mass_equation(radius):
-            return self._enclosed_mass(radius) - mass_fraction_u
+        numerator = self.plummer_radius
 
-        radius_guess = self.plummer_radius # good starting guess
+        u = self.rng.random()
 
-        sampled_radius = so.fsolve(mass_equation, radius_guess)[0]
+        denominator = u**(-2.0 / 3.0) - 1
+
+        denominator = np.sqrt(denominator)
+
+        sampled_radius = numerator / denominator
 
         return sampled_radius
 
@@ -126,154 +82,88 @@ class Plummer:
         else:
             return versor / norm
 
-    def _anisotropy_beta(self, radius_from_center):
+    def _sample_velocity(self, radius_from_center):
 
-        # beta(r) = 0.0 assuming the plummer model is isotropic
+        #
+        # v = sqrt(x) * v_esc
+        #
 
-        beta = 0.0
-        return beta
+        #
+        # x ~ Beta(3/2, 9/2)
+        #
 
-    def _jeans_equation(self, radius_from_center, sigma_squared):
+        x = self.rng.beta(1.5, 4.5)
 
-        #  d_sigma^2_r(r)       d_phi(r)     2 beta(r) * sigma(r)^2     sigma(r)^2     d_rho(r)
-        # ---------------- = - ---------- - ------------------------ - ------------ * ----------
-        #       d_r               d_r                  r                   rho(r)        d_r
+        escape_velocity = np.sqrt( -2.0 * self._potential_phi(radius_from_center))
 
-        derivative = - self._derivative_potential_phi(radius_from_center)
-        derivative -= (2 * self._anisotropy_beta(radius_from_center) * sigma_squared) / radius_from_center
-        derivative -= (sigma_squared / self._density_rho(radius_from_center)) * self._derivative_density_rho(radius_from_center)
+        speed = escape_velocity * np.sqrt(x)
 
-        return derivative
+        return speed * self._random_versor()
 
-    def _solve_jeans_equation(self):
-
-        MAX_RADIUS = 10 * self.plummer_radius # approaching infinity
-        MIN_RADIUS = 1e-5                     # approaching 0 but never 0 so that we don't have undefined divisions
-
-        radius_vector = np.linspace(MAX_RADIUS, MIN_RADIUS, 2000)
-
-        sigma_squared_vector = si.odeint(
-            self._jeans_equation,
-            0.0,
-            radius_vector,
-            tfirst = True
-        )
-
-        radius_vector = np.flip(radius_vector)
-        sigma_squared_vector = np.flip(sigma_squared_vector).flatten()
-
-        return radius_vector, sigma_squared_vector
-
-    def _sample_velocity(self, radius_from_center, radius_vector, sigma_squared_vector, radial_versor):
-
-        while True:
-
-            sigma_squared = np.interp(
-                radius_from_center,
-                radius_vector,
-                sigma_squared_vector
-            )
-
-            radial_velocity = self.rng.normal(
-                scale = np.sqrt(sigma_squared)
-            )
-
-            theta_velocity = self.rng.normal(
-                scale = np.sqrt((1.0 - self._anisotropy_beta(radius_from_center)) * sigma_squared)
-            )
-
-            phi_velocity = self.rng.normal(
-                scale = np.sqrt((1.0 - self._anisotropy_beta(radius_from_center)) * sigma_squared)
-            )
-
-            theta = np.arccos(radial_versor[2])
-            phi = np.arctan2(radial_versor[1], radial_versor[0])
-
-            theta_versor = np.array([
-                np.cos(theta) * np.cos(phi),
-                np.cos(theta) * np.sin(phi),
-                -np.sin(theta)
-            ])
-
-            phi_versor = np.array([
-                -np.sin(phi),
-                np.cos(phi),
-                0.0
-            ])
-
-            velocity = (
-                radial_velocity * radial_versor +
-                theta_velocity * theta_versor +
-                phi_velocity * phi_versor
-            )
-
-            kinetic_energy = 0.5 * np.dot(velocity, velocity)
-
-            potential_energy = self._potential_phi(radius_from_center)
-
-            total_energy = kinetic_energy + potential_energy
-
-            if total_energy < 0:
-                return velocity
 
     def _apply_virial_correction(self, positions, velocities):
 
-        #                              | U |
+        #                              | W |
         # virial_scale_factor = sqrt( ------- )
         #                               2K
 
         star_mass = CLUSTER_MASS / self.number_of_stars
 
-        #              G * m^2
-        # U = - sum ( --------- )
-        #       i<j      r_ij
+        #              G * m^2 * r_ij^2
+        # W = - sum ( ------------------------- )
+        #       i<j   (r_ij^2 + epsilon^2)^(3/2)
 
-        softening_eps = 0.01 * self.plummer_radius
-        total_potential_energy = 0.0
+        total_virial_term = 0.0
 
         for i in range (self.number_of_stars):
             for j in range (i + 1, self.number_of_stars):
 
                 distance_vector = positions[j] - positions[i]
-                distance = np.sqrt(np.sum(distance_vector**2) + softening_eps**2)
+                distance_squared = np.sum(distance_vector**2)
 
-                total_potential_energy -= GRAVITATIONAL_CONSTANT * (star_mass**2) / distance
+                softened_distance_squared = distance_squared + self.softening**2
+
+                total_virial_term -= (
+                    GRAVITATIONAL_CONSTANT
+                    * star_mass**2
+                    * distance_squared
+                    / softened_distance_squared**1.5
+                )
 
         #      1
-        # K = --- * m * v^2
+        # K = --- * m * (v - v_COM)^2
         #      2
 
-        total_kinetic_energy = 0.5 * star_mass * np.sum(velocities**2)
+        center_of_mass_velocity = np.mean(velocities, axis=0)
+        relative_velocities = velocities - center_of_mass_velocity
 
-        numerator = np.abs(total_potential_energy)
+        total_kinetic_energy = (
+            0.5 * star_mass * np.sum(relative_velocities**2)
+        )
+
+        numerator = np.abs(total_virial_term)
         denominator = 2.0 * total_kinetic_energy
 
         virial_scale_factor = np.sqrt(numerator / denominator)
 
-        velocities = velocities * virial_scale_factor
+        relative_velocities = relative_velocities * virial_scale_factor
 
-        return velocities
+        return relative_velocities
 
     def generate_plummer_cluster(self):
-        MAX_RADIUS = 10 * self.plummer_radius # approaching infinity
-
         positions = []
         velocities = []
-
-        radius_vector, sigma_squared_vector = self._solve_jeans_equation()
 
         for i in range(self.number_of_stars):
 
             radius = self._sample_radius()
-            while radius > MAX_RADIUS:
-                radius = self._sample_radius()
-
             radial_versor = self._random_versor()
-            xyz = radius * radial_versor
-            positions.append(xyz)
 
-            v = self._sample_velocity(radius, radius_vector, sigma_squared_vector, radial_versor)
-            velocities.append(v)
+            position = radius * radial_versor
+            positions.append(position)
+
+            velocity = self._sample_velocity(radius)
+            velocities.append(velocity)
 
         positions = np.array(positions)
         velocities = np.array(velocities)

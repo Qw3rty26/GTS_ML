@@ -16,9 +16,8 @@ import multiprocessing as mp
 import numpy as np
 from multiprocessing import Pool
 from cluster_generation import Cluster_Generation
-from galactic_tidal_stripping import Galactic_Tidal_Stripping
+from cluster_evolution_in_void import Cluster_Evolution_In_Void
 from verify_physics import Verify_Physics
-from ml_dataset_generation import ML_Dataset_Generation
 
 from io_manager import IOPaths, Metadata
 from simulation import SimulationConfig
@@ -96,7 +95,8 @@ def _run_cluster_generation(configuration):
             cluster_seed = int(cluster_seed),
             number_of_clusters = configuration["cluster_generation"]["number_of_clusters"],
             cluster_radius = configuration["cluster_generation"]["cluster_radius"],
-            initial_number_of_entities = configuration["cluster_generation"]["number_of_stars"]
+            initial_number_of_entities = configuration["cluster_generation"]["number_of_stars"],
+            simulation_config = simulation_config
         )
         gen_args.append((simulation_config, metadata, configuration["json_and_xyzv_snapshots_dt"]))
 
@@ -115,16 +115,16 @@ def _run_cluster_generation(configuration):
     logger.info(f"")
     logger.info(f"")
 
-def _run_galactic_tidal_stripping_wrapper(args):
+def _run_cluster_evolution_in_void_wrapper(args):
     cluster_json_file, metadata, json_and_xyzv_snapshots_dt= args
-    galactic_tidal_stripping = Galactic_Tidal_Stripping(
+    cluster_evolution_in_void = Cluster_Evolution_In_Void(
         cluster_json_file = cluster_json_file,
         metadata = metadata,
         json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
     )
-    galactic_tidal_stripping.run()
+    cluster_evolution_in_void.run()
 
-def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
+def _run_cluster_evolution_in_void(configuration, cluster_json_dir_path):
 
     cluster_json_files_path = [
         os.path.join(cluster_json_dir_path, f)
@@ -136,27 +136,19 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
         logger.error(f"No cluster JSON files were found in {cluster_json_dir_path}!")
         return
 
-    orbit_semi_major_axes = configuration["ml_dataset_input"]["orbit_semi_major_axes"]
-    orbit_eccentricities = configuration["ml_dataset_input"]["orbit_eccentricities"]
 
     total_tasks = (
         len(cluster_json_files_path)
-        * len(orbit_semi_major_axes)
-        * len(orbit_eccentricities)
     )
 
 
     max_workers = configuration.get("cores_used", 1)
 
     logger.info(f"------------------------------------------")
-    logger.info(f"    GALACTIC TIDAL STRIPPING STARTED")
+    logger.info(f"    EVOLVING CLUSTER IN THE VOID")
     logger.info(f"")
     logger.info(f" Number of Simulations: {total_tasks}")
-    logger.info(f" Galaxy Mass: {configuration["galactic_environment"]["galaxy_mass"]}")
-    logger.info(f" Galaxy Radius: {configuration["galactic_environment"]["galaxy_radius"]}")
-    logger.info(f" Number of Orbits: {configuration["galactic_environment"]["number_of_orbits"]}")
-    logger.info(f" Orbit Semi Major Axes: {configuration["ml_dataset_input"]["orbit_semi_major_axes"]}")
-    logger.info(f" Orbit Eccentricities: {configuration["ml_dataset_input"]["orbit_eccentricities"]}")
+    logger.info(f" Evolving until T: {configuration["cluster_evolution_in_void"]["end_time"]}")
     logger.info(f"------------------------------------------")
     logger.info(f" dt: {configuration["simulation_config"]["dt"]}")
     logger.info(f" G: {configuration["simulation_config"]["G"]}")
@@ -172,43 +164,27 @@ def _run_galactic_tidal_stripping(configuration, cluster_json_dir_path):
     logger.info(f"")
     computing_time = time.perf_counter()
 
-    ml_grid = list(itertools.product(orbit_semi_major_axes, orbit_eccentricities))
     gts_args = []
     for cluster_json_file_path in cluster_json_files_path:
-        for orbit_semi_major_axis, orbit_eccentricity in ml_grid:
-            metadata = Metadata (
-                galaxy_mass = configuration["galactic_environment"]["galaxy_mass"],
-                galaxy_radius = configuration["galactic_environment"]["galaxy_radius"],
-                orbit_semi_major_axis = orbit_semi_major_axis,
-                orbit_eccentricity = orbit_eccentricity,
-                number_of_orbits = configuration["galactic_environment"]["number_of_orbits"]
-            )
-            gts_args.append((cluster_json_file_path, metadata, configuration["json_and_xyzv_snapshots_dt"]))
+        metadata = Metadata (
+            end_time = configuration["cluster_evolution_in_void"]["end_time"]
+        )
+        gts_args.append((cluster_json_file_path, metadata, configuration["json_and_xyzv_snapshots_dt"]))
 
     with Pool(processes=max_workers, initializer=initialise_logging_worker, initargs=(io_paths, LOGGING_VERBOSE, LOGGING_DEBUG)) as pool:
-        for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, gts_args), 1):
+        for i, _ in enumerate(pool.imap_unordered(_run_cluster_evolution_in_void_wrapper, gts_args), 1):
             if i % 5 == 0 or i == total_tasks:
                 logger.info(f"\033[32mProgress: {i}/{total_tasks} clusters simulated.\033[0m")
 
     computing_time = time.perf_counter() - computing_time
 
     logger.info(f"------------------------------------------")
-    logger.info(f"    GALACTIC TIDAL STRIPPING COMPLETE")
+    logger.info(f"    CLUSTER EVOLUTION COMPLETE")
     logger.info(f"")
     logger.info(f" Execution time: {computing_time:.3f} seconds")
     logger.info(f"------------------------------------------")
     logger.info(f"")
     logger.info(f"")
-
-def _run_verify_physics(cluster_json_dir_path):
-    verify_physics = Verify_Physics(cluster_json_dir_path)
-    verify_physics.run()
-
-def _run_ml_dataset_generation(gts_json_dir_path):
-    ml_dataset_generation = ML_Dataset_Generation(
-        gts_json_dir_path
-    )
-    ml_dataset_generation.run()
 
 def main():
     global io_paths
@@ -216,7 +192,7 @@ def main():
     global LOGGING_DEBUG
 
     parser = argparse.ArgumentParser(
-        description="Generate Plummer clusters and simulate galactic tidal strippings"
+        description="Generate Plummer clusters and simulate it in the void"
     )
     parser.add_argument(
         "--config",
@@ -256,14 +232,11 @@ def main():
     if not args.load_cluster_dir:
         _run_cluster_generation(configuration)
         cluster_json_dir_path = io_paths.gen_json_dir
-        _run_galactic_tidal_stripping(configuration, cluster_json_dir_path)
     else:
-        _run_galactic_tidal_stripping(configuration, args.load_cluster_dir)
+        cluster_json_dir_path = args.load_cluster_dir
 
-    _run_verify_physics(io_paths.gen_json_dir)
-    _run_verify_physics(io_paths.gts_json_dir)
+    _run_cluster_evolution_in_void(configuration, cluster_json_dir_path)
 
-    _run_ml_dataset_generation(io_paths.gts_json_dir)
 
 if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)

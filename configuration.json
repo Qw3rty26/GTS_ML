@@ -1,28 +1,22 @@
+
 {
     "simulation_config": {
-        "dt": 0.01,
+        "dt": 0.005,
         "t": 0,
         "G": 1.0,
-        "softening": 0.1,
+        "softening": 0.15,
         "time_warp": 1,
         "integrator": "leapfrog"
     },
     "cluster_generation": {
-        "master_seed": 262626,
+        "master_seed": 42,
         "number_of_clusters": 1,
-        "number_of_stars": 100,
+        "number_of_stars": 200,
         "cluster_radius": 1.0
     },
 
-    "galactic_environment": {
-        "galaxy_mass": 2000,
-        "galaxy_radius": 10,
-        "number_of_orbits": 2
-    },
-
-    "ml_dataset_input": {
-        "orbit_semi_major_axes": [100.0, 150.0],
-        "orbit_eccentricities": [0.0,  0.3]
+    "cluster_evolution_in_void": {
+        "end_time": 1000.0
     },
 
     "json_and_xyzv_snapshots_dt": 1,

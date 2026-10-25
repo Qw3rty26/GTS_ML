@@ -65,12 +65,12 @@ class IOPaths:
         json_path = os.path.join(self.gen_json_dir, f"{cluster_seed}.json")
         return json_path
 
-    def get_gts_xyzv_path(self, cluster_seed, orbit_semi_major_axis, orbit_eccentricity):
-        xyzv_path = os.path.join(self.gts_xyzv_dir, f"{cluster_seed}_a{orbit_semi_major_axis}_e{orbit_eccentricity}.xyzv")
+    def get_gts_xyzv_path(self, cluster_seed):
+        xyzv_path = os.path.join(self.gts_xyzv_dir, f"{cluster_seed}.xyzv")
         return xyzv_path
 
-    def get_gts_json_path(self, cluster_seed, orbit_semi_major_axis, orbit_eccentricity):
-        json_path = os.path.join(self.gts_json_dir, f"{cluster_seed}_a{orbit_semi_major_axis}_e{orbit_eccentricity}.json")
+    def get_gts_json_path(self, cluster_seed):
+        json_path = os.path.join(self.gts_json_dir, f"{cluster_seed}.json")
         return json_path
 
     def get_csv_path(self):
@@ -88,19 +88,15 @@ def get_csv_path():
 
 @dataclass
 class Metadata:
-    master_seed: int = 1
-    number_of_clusters: int = 1
-    cluster_seed: int = 1
-    cluster_radius: float = 1.0
+    master_seed: int = None
+    number_of_clusters: int = None
+    cluster_seed: int = None
+    cluster_radius: float = None
     initial_number_of_entities: int = 10
     simulation_config: SimulationConfig = field(default_factory=SimulationConfig)
-    galaxy_mass: float = None
-    galaxy_radius: float = None
-    orbit_semi_major_axis: float = None
-    orbit_eccentricity: float = None
-    number_of_orbits: int = 1
     half_mass_radius: float = None
     bound_mass_fraction: float = None
+    end_time: float = None
     #need to add energy and stuff here, like angular momentum
 
 def save_xyzv_snapshot_gen(metadata: Metadata, entities, center_of_mass: Entity):
@@ -147,7 +143,7 @@ def save_xyzv_snapshot_gen(metadata: Metadata, entities, center_of_mass: Entity)
 
 def save_xyzv_snapshot_gts(metadata: Metadata, entities, center_of_mass: Entity):
 
-    xyzv_path = _paths.get_gts_xyzv_path(metadata.cluster_seed, metadata.orbit_semi_major_axis, metadata.orbit_eccentricity)
+    xyzv_path = _paths.get_gts_xyzv_path(metadata.cluster_seed)
 
     with open(xyzv_path, "a") as xyzv_file:
 
@@ -156,10 +152,7 @@ def save_xyzv_snapshot_gts(metadata: Metadata, entities, center_of_mass: Entity)
         xyzv_file.write(
             f"seed={metadata.cluster_seed} "
             f"t={metadata.simulation_config.t:.5f} "
-            f"a={metadata.orbit_semi_major_axis} "
-            f"e={metadata.orbit_eccentricity} "
-            f"Gmass={metadata.galaxy_mass} "
-            f"Grad={metadata.galaxy_radius} "
+            f"end_t={metadata.end_time}"
             f"Properties=species:S:1:id:I:1:pos:R:3:vel:R:3 "
             f"\n"
         )
@@ -205,7 +198,7 @@ def init_json_gen(metadata: Metadata):
         "G": metadata.simulation_config.G,
         "softening": metadata.simulation_config.softening,
         "time_warp": metadata.simulation_config.time_warp,
-        "integrator": metadata.simulation_config.integrator
+        "integrator": metadata.simulation_config.integrator,
         #need to add energy and values like that here
     }
 
@@ -246,7 +239,7 @@ def save_json_snapshot_gen(metadata: Metadata, entities, center_of_mass: Entity)
 
 def init_json_gts(metadata: Metadata):
 
-    json_path = _paths.get_gts_json_path(metadata.cluster_seed, metadata.orbit_semi_major_axis, metadata.orbit_eccentricity)
+    json_path = _paths.get_gts_json_path(metadata.cluster_seed)
 
     header = {
         "master_seed": metadata.master_seed,
@@ -258,13 +251,9 @@ def init_json_gts(metadata: Metadata):
         "softening": metadata.simulation_config.softening,
         "time_warp": metadata.simulation_config.time_warp,
         "integrator": metadata.simulation_config.integrator,
-        "galaxy_mass": metadata.galaxy_mass,
-        "galaxy_radius": metadata.galaxy_radius,
-        "orbit_semi_major_axis": metadata.orbit_semi_major_axis,
-        "orbit_eccentricity": metadata.orbit_eccentricity,
-        "number_of_orbits": metadata.number_of_orbits,
         "half_mass_radius": metadata.half_mass_radius,
-        "bound_mass_fraction": metadata.bound_mass_fraction
+        "bound_mass_fraction": metadata.bound_mass_fraction,
+        "end_time": metadata.end_time
         #need to add energy and values like that here
     }
 
@@ -273,7 +262,7 @@ def init_json_gts(metadata: Metadata):
 
 def save_json_snapshot_gts(metadata: Metadata, entities, center_of_mass: Entity):
 
-    json_path = _paths.get_gts_json_path(metadata.cluster_seed, metadata.orbit_semi_major_axis, metadata.orbit_eccentricity)
+    json_path = _paths.get_gts_json_path(metadata.cluster_seed)
 
     snapshot = {
         "t": metadata.simulation_config.t,
@@ -315,22 +304,19 @@ def load_json_snapshot(json_path, snapshot_index = -1):
     line_index = snapshot_index + 1 if snapshot_index >= 0 else snapshot_index
     json_data = json.loads(lines[line_index])
 
-    metadata = Metadata (
-        master_seed = json_metadata["master_seed"],
-        cluster_seed = json_metadata["cluster_seed"],
-        simulation_config = SimulationConfig (
-            dt = json_metadata["dt"],
-            t = json_data["t"],
-            G = json_metadata["G"],
-            softening = json_metadata["softening"],
-            time_warp = json_metadata["time_warp"],
-            integrator = json_metadata["integrator"]
+    metadata = Metadata(
+        master_seed=json_metadata["master_seed"],
+        cluster_seed=json_metadata["cluster_seed"],
+        cluster_radius=json_metadata["cluster_radius"],
+        initial_number_of_entities=json_metadata["initial_number_of_entities"],
+        simulation_config=SimulationConfig(
+            dt=json_metadata["dt"],
+            t=json_data["t"],
+            G=json_metadata["G"],
+            softening=json_metadata["softening"],
+            time_warp=json_metadata["time_warp"],
+            integrator=json_metadata["integrator"]
         ),
-        galaxy_mass = json_metadata.get("galaxy_mass"),
-        galaxy_radius = json_metadata.get("galaxy_radius"),
-        orbit_semi_major_axis = json_metadata.get("orbit_semi_major_axis"),
-        orbit_eccentricity = json_metadata.get("orbit_eccentricity"),
-        number_of_orbits = json_metadata.get("number_of_orbits"),
     )
 
     entities = []

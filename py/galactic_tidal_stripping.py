@@ -29,20 +29,20 @@ class Galactic_Tidal_Stripping:
 
         entities = self.simulation.get_entities()
 
-        percentile_center_of_mass = (
-            self.simulation.get_percentile_center_of_mass()
+        bound_center_of_mass = (
+            self.simulation.get_bound_center_of_mass()
         )
 
         io_manager.save_xyzv_snapshot_gts(
             self.metadata,
             entities,
-            percentile_center_of_mass
+            bound_center_of_mass
         )
 
         io_manager.save_json_snapshot_gts(
             self.metadata,
             entities,
-            percentile_center_of_mass
+            bound_center_of_mass
         )
 
     def _create_cluster(self, cluster_json_file):
@@ -89,33 +89,23 @@ class Galactic_Tidal_Stripping:
             self.metadata.orbit_eccentricity
         )
 
-        percentile_center_of_mass = (
-            self.simulation.get_percentile_center_of_mass()
-        )
+        center_of_mass = self.simulation.get_center_of_mass()
 
         self.simulation.move_cluster(
-            -percentile_center_of_mass.position.x,
-            -percentile_center_of_mass.position.y,
-            -percentile_center_of_mass.position.z
+            -center_of_mass.x,
+            -center_of_mass.y,
+            -center_of_mass.z
         )
 
         self.simulation.speed_cluster(
-            -percentile_center_of_mass.velocity.vx,
-            -percentile_center_of_mass.velocity.vy,
-            -percentile_center_of_mass.velocity.vz
+            -center_of_mass.vx,
+            -center_of_mass.vy,
+            -center_of_mass.vz
         )
 
-        self.simulation.move_cluster(
-            r_apo,
-            0,
-            0
-        )
-
-        self.simulation.speed_cluster(
-            0,
-            v_apo,
-            0
-        )
+        self.simulation.move_cluster(r_apo,0,0)
+        self.simulation.cluster_diagnostics.apply_virial_correction()
+        self.simulation.speed_cluster(0,v_apo,0)
 
     def run(self):
 
@@ -126,17 +116,31 @@ class Galactic_Tidal_Stripping:
             f"{self.metadata.orbit_eccentricity}: "
             f"Running..."
         )
-
         theoretical_orbit_period = (
             2.0 * np.pi
             * np.sqrt(
-                self.metadata.orbit_semi_major_axis**3
+                (
+                    self.metadata.galaxy_radius**2
+                    + self.metadata.orbit_semi_major_axis**2
+                )**1.5
                 / (
                     self.metadata.simulation_config.G
                     * self.metadata.galaxy_mass
                 )
             )
         )
+
+        print(f"T: {self.simulation.simulation.t}")
+        print(f"E_tot: {self.simulation.cluster_diagnostics.get_system_total_energy()}")
+        print(f"U_gal: {self.simulation.cluster_diagnostics.get_system_galactic_potential_energy()}")
+        print(f"U_cluster: {self.simulation.cluster_diagnostics.get_system_potential_energy()}")
+        print(f"K_cluster: {self.simulation.cluster_diagnostics.get_system_kinetic_energy()}")
+        #print(f"E_tot rebound: {self.simulation.simulation.energy()}")
+        print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
+        print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}\n")
+        print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}")
+        #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
+        #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
 
         logger.debug(
             f"Cluster "
@@ -188,6 +192,15 @@ class Galactic_Tidal_Stripping:
             current_time = self.simulation.get_time()
 
             if current_time >= next_snapshot:
+                #print(f"T: {self.simulation.simulation.t}")
+                #print(f"E_tot: {self.simulation.cluster_diagnostics.get_system_total_energy()}")
+                #print(f"Q: {self.simulation.cluster_diagnostics.get_virial_ratio()}")
+                #print(f"E_tot rebound: {self.simulation.simulation.energy()}")
+                #print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
+                #print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}")
+                #print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}\n")
+                #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
+                #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
                 next_snapshot += self.json_and_xyzv_snapshots_dt
                 self._save_to_file()
 
@@ -269,6 +282,17 @@ class Galactic_Tidal_Stripping:
                 )
                 self._save_to_file()
                 break
+        print(f"T: {self.simulation.simulation.t}")
+        print(f"E_tot: {self.simulation.cluster_diagnostics.get_system_total_energy()}")
+        print(f"U_gal: {self.simulation.cluster_diagnostics.get_system_galactic_potential_energy()}")
+        print(f"U_cluster: {self.simulation.cluster_diagnostics.get_system_potential_energy()}")
+        print(f"K_cluster: {self.simulation.cluster_diagnostics.get_system_kinetic_energy()}")
+        #print(f"E_tot rebound: {self.simulation.simulation.energy()}")
+        print(f"bmf: {self.simulation.cluster_diagnostics.get_bound_mass()}")
+        print(f"hmr: {self.simulation.cluster_diagnostics.get_half_mass_radius():.3f}\n")
+        print(f"rms: {self.simulation.cluster_diagnostics.get_root_mean_square_radius()}")
+        #bound_com = self.simulation.cluster_diagnostics.get_bound_center_of_mass()
+        #print(f"bound_com: x:{bound_com.position.x} y:{bound_com.position.y} z:{bound_com.position.z}")
 
         logger.info(
             f"\033[94mCluster "

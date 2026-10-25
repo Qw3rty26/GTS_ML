@@ -37,10 +37,7 @@ class Simulation:
         self.simulation.integrator = self.simulation_config.integrator
 
     def integrate(self):
-        for _ in range(self.simulation_config.time_warp):
-            self.simulation.integrate(
-                self.simulation.t + self.simulation.dt
-            )
+        self.simulation.steps(self.simulation_config.time_warp)
 
     def get_gravitational_constant(self):
         return self.simulation_config.G
@@ -100,8 +97,8 @@ class Simulation:
     def get_center_of_mass(self):
         return self.simulation.com()
 
-    def get_percentile_center_of_mass(self):
-        return self.cluster_diagnostics.get_percentile_center_of_mass()
+    def get_bound_center_of_mass(self):
+        return self.cluster_diagnostics.get_bound_center_of_mass()
 
     def get_number_of_orbits(self):
         return self.cluster_diagnostics.get_number_of_orbits()
