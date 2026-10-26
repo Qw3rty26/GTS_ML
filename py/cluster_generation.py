@@ -35,12 +35,14 @@ class Cluster_Generation:
     def _save_snapshot(self):
         particle_positions = self.simulation.get_particle_positions()
         particle_velocities = self.simulation.get_particle_velocities()
+        particle_masses = self.simulation.get_particle_masses()
         cluster_diagnostics = self.simulation.diagnostics.get_cluster_diagnostics()
 
         File_Handle.save_json_snapshot(
             self.json_file_descriptor,
             particle_positions,
-            particle_velocities
+            particle_velocities,
+            particle_masses
         )
         File_Handle.save_xyzv_snapshot(
             self.xyzv_file_path,
@@ -75,6 +77,7 @@ class Cluster_Generation:
                 m = PARTICLE_MASS
             )
             self.simulation.add_particle(particle)
+            self.simulation.rebound_handle.move_to_com()
         #self.simulation.diagnostics.print_diagnostics()
 
     def run(self):

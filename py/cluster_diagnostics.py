@@ -143,8 +143,8 @@ class Diagnostics:
         relative_velocities = particle_velocities - center_of_mass_velocity
 
         squared_speeds = np.sum(relative_velocities**2, axis=1)
-        cluster_kinetic_energy = 0.5 * np.sum(particle_masses * squared_speeds)
-        return cluster_kinetic_energy
+        cluster_internal_kinetic_energy = 0.5 * np.sum(particle_masses * squared_speeds)
+        return cluster_internal_kinetic_energy
 
     def get_cluster_softened_potential_energy(self):
         #          N-1    N              m_i * m_j
@@ -166,8 +166,8 @@ class Diagnostics:
 
         potential_energy_matrix = (-gravitational_constant * mass_products / softened_distances)
 
-        cluster_potential_energy = np.sum(np.triu(potential_energy_matrix, k=1))
-        return cluster_potential_energy
+        cluster_softened_potential_energy = np.sum(np.triu(potential_energy_matrix, k=1))
+        return cluster_softened_potential_energy
 
     def _get_virial_term(self):
         #          N-1    N           m_i * m_j * r_ij^2
@@ -325,9 +325,9 @@ class Diagnostics:
         if total_bound_mass == 0:
             raise ValueError("Cannot calculate bound center of mass: no bound mass.")
 
-        center_of_mass_position = np.sum(bound_masses[:, np.newaxis] * bound_positions, axis=0) / total_bound_mass
-        center_of_mass_velocity = np.sum(bound_masses[:, np.newaxis] * bound_velocities, axis=0) / total_bound_mass
-        return center_of_mass_position, center_of_mass_velocity
+        bound_center_of_mass_position = np.sum(bound_masses[:, np.newaxis] * bound_positions, axis=0) / total_bound_mass
+        bound_center_of_mass_velocity = np.sum(bound_masses[:, np.newaxis] * bound_velocities, axis=0) / total_bound_mass
+        return bound_center_of_mass_position, bound_center_of_mass_velocity
 
     def get_half_mass_radius(self, bound_particles = None):
         #                                    M_bound

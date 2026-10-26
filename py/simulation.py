@@ -1,7 +1,8 @@
 import rebound
 import numpy as np
 from dataclasses import dataclass
-from cluster_diagnostics import Diagnostics
+from cluster_diagnostics import Diagnostics as Cluster_Diagnostics
+from galactic_diagnostics import Diagnostics as Galactic_Diagnostics
 
 @dataclass
 class Simulation_Configuration:
@@ -18,7 +19,7 @@ class Simulation:
 
         self.simulation_configuration = simulation_configuration
         self._initialise_rebound()
-        self.diagnostics = Diagnostics(self)
+        self.diagnostics = Cluster_Diagnostics(self)
 
     def _initialise_rebound(self):
         self.rebound_handle.dt = self.simulation_configuration.integration_time
@@ -84,9 +85,6 @@ class Simulation:
             particle.y += moved_y
             particle.z += moved_z
 
-    def move_cluster_to_center_of_mass(self):
-        self.simulation.move_to_com()
-
     def speed_cluster(self, speed_x, speed_y, speed_z):
         for particle in self.rebound_handle.particles:
             particle.vx += speed_x
@@ -108,3 +106,10 @@ class Simulation:
     def remove_entity(self, particle_name):
         self.rebound_handle.remove(particle_name)
 
+    def _add_galaxy_forces(self, rebound_simulation):
+        self.galaxy_handle.add_galaxy_forces(rebound_simulation.contents)
+
+    def add_galaxy(self, galaxy_handle):
+        self.galaxy_handle = galaxy_handle
+        self.rebound_handle.additional_forces = self._add_galaxy_forces
+        self.diagnostics = Galactic_Diagnostics(self)
