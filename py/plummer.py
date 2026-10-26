@@ -135,7 +135,7 @@ class Plummer:
         return particle_positions, particle_velocities
 
     def get_relaxation_time(self):
-        RELAXATION_FACTOR = 1_000
+        RELAXATION_FACTOR = 200
         #
         # r_h = 1.305 * a
         #

@@ -1,5 +1,8 @@
+import os
 import json
-
+import csv
+from dataclasses import fields, asdict
+from cluster_diagnostics import Cluster_Diagnostics
 
 class File_Handle:
 
@@ -48,3 +51,18 @@ class File_Handle:
     def close_json_snapshot(json_file_descriptor):
         json_file_descriptor.write("\n]}\n")
         json_file_descriptor.close()
+
+
+    @staticmethod
+    def save_tsv_snapshot(tsv_file_path, cluster_diagnostics: Cluster_Diagnostics = None):
+
+        fieldnames = [field.name for field in fields(Cluster_Diagnostics)]
+        file_exists = os.path.exists(tsv_file_path)
+
+        with open(tsv_file_path, "a", newline="") as tsv_file:
+            writer = csv.DictWriter(tsv_file, fieldnames=fieldnames, delimiter="\t")
+
+            if not file_exists or os.path.getsize(tsv_file_path) == 0:
+                writer.writeheader()
+
+            writer.writerow(asdict(cluster_diagnostics))

@@ -1,7 +1,7 @@
 import rebound
 import numpy as np
 from dataclasses import dataclass
-from cluster_diagnostics import Cluster_Diagnostics
+from cluster_diagnostics import Diagnostics
 
 @dataclass
 class Simulation_Configuration:
@@ -18,7 +18,7 @@ class Simulation:
 
         self.simulation_configuration = simulation_configuration
         self._initialise_rebound()
-        self.diagnostics = Cluster_Diagnostics(self)
+        self.diagnostics = Diagnostics(self)
 
     def _initialise_rebound(self):
         self.rebound_handle.dt = self.simulation_configuration.integration_time

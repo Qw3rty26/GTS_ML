@@ -1,10 +1,12 @@
 import os
+import time
 import numpy as np
 import rebound
 from dataclasses import dataclass
 from simulation import Simulation, Simulation_Configuration
 from plummer import Plummer
 from file_handle import File_Handle
+from cluster_diagnostics import Cluster_Diagnostics
 
 @dataclass
 class Cluster_Configuration:
@@ -21,14 +23,19 @@ class Cluster_Generation:
     def __init__(self, cluster_configuration: Cluster_Configuration):
         self.cluster_configuration = cluster_configuration
 
-        self.xyzv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.xyzv")
         json_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.json")
         self.json_file_descriptor = File_Handle.open_json_snapshot(json_file_path)
+
+        self.xyzv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.xyzv")
+
+        self.tsv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.tsv")
+
         self._create_simulation()
 
     def _save_snapshot(self):
         particle_positions = self.simulation.get_particle_positions()
         particle_velocities = self.simulation.get_particle_velocities()
+        cluster_diagnostics = self.simulation.diagnostics.get_cluster_diagnostics()
 
         File_Handle.save_json_snapshot(
             self.json_file_descriptor,
@@ -40,12 +47,16 @@ class Cluster_Generation:
             particle_positions,
             particle_velocities
         )
+        File_Handle.save_tsv_snapshot(
+            self.tsv_file_path,
+            cluster_diagnostics
+        )
 
     def _create_simulation(self):
 
         PARTICLE_MASS = 1.0 / self.cluster_configuration.number_of_particles
 
-        print(f"Creating the plummer_handle with N = {self.cluster_configuration.number_of_particles} and a = {self.cluster_configuration.cluster_radius}")
+        print(f"Creating plummer_handle")
         self.plummer_handle = Plummer(self.cluster_configuration.number_of_particles, self.cluster_configuration.cluster_radius, self.cluster_configuration.cluster_seed)
 
         particle_positions, particle_velocities = self.plummer_handle.generate_particles()
@@ -64,16 +75,14 @@ class Cluster_Generation:
                 m = PARTICLE_MASS
             )
             self.simulation.add_particle(particle)
-        self.simulation.diagnostics.print_diagnostics()
+        #self.simulation.diagnostics.print_diagnostics()
 
     def run(self):
-        END_TIME = self.plummer_handle.get_relaxation_time()
-
-        print(f"Running generation in the void until {END_TIME}")
-
-        _next_snapshot_time = self.simulation.rebound_handle.t + self.cluster_configuration.snapshot_interval
-
         try:
+            END_TIME = self.plummer_handle.get_relaxation_time()
+            print(f"Running generation in the void until {END_TIME}")
+            _computing_time = time.perf_counter()
+            _next_snapshot_time = self.simulation.rebound_handle.t + self.cluster_configuration.snapshot_interval
             self._save_snapshot()
             while self.simulation.rebound_handle.t < END_TIME:
                 self.simulation.integrate()
@@ -81,8 +90,9 @@ class Cluster_Generation:
                 if self.simulation.rebound_handle.t >= _next_snapshot_time:
                     self._save_snapshot()
                     _next_snapshot_time += self.cluster_configuration.snapshot_interval
-            print(f"Done simulating")
-            self.simulation.diagnostics.print_diagnostics()
+            _computing_time = time.perf_counter() - _computing_time
+            print(f"Done simulating in {_computing_time} seconds.")
+            #self.simulation.diagnostics.print_diagnostics()
         finally:
             File_Handle.close_json_snapshot(self.json_file_descriptor)
 
