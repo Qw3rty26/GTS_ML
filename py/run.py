@@ -14,9 +14,9 @@ import multiprocessing as mp
 import numpy as np
 from itertools import product
 from multiprocessing import Pool
-from cluster_generation import Cluster_Generation, Cluster_Configuration
+from cluster_generation import Cluster_Generation, Cluster_Configuration, Simulation_Configuration
 from galactic_tidal_stripping import Galactic_Tidal_Stripping, Galactic_Tidal_Stripping_Configuration, Galaxy_Configuration
-from simulation import Simulation_Configuration
+from generate_machine_learning_dataset import Generate_Machine_Learning_Dataset
 from file_handle import File_Handle
 
 def _run_cluster_generation_wrapper(args):
@@ -93,6 +93,7 @@ def _run_galactic_tidal_stripping(configuration, cluster_seeds, working_director
                 orbit_eccentricity = orbit_eccentricity
             ),
             number_of_orbits = configuration["galactic_tidal_stripping"]["number_of_orbits"],
+            end_time = configuration["galactic_tidal_stripping"]["end_time"],
             cluster_seed = cluster_seed,
             snapshot_interval = configuration["galactic_tidal_stripping"]["snapshot_interval"],
             snapshot_file_path = snapshot_file_path
@@ -105,6 +106,10 @@ def _run_galactic_tidal_stripping(configuration, cluster_seeds, working_director
         for i, _ in enumerate(pool.imap_unordered(_run_galactic_tidal_stripping_wrapper, galactic_tidal_stripping_arguments), 1):
             print(f"{i}/{len(galactic_tidal_stripping_arguments)} galactic tidal stripping simulations completed.")
 
+def _run_machine_learning_dataset_generation(working_directory):
+
+    generate_machine_learning_dataset = Generate_Machine_Learning_Dataset(working_directory)
+    generate_machine_learning_dataset.run()
 
 def _get_working_directory_path(output_directory):
     os.makedirs(output_directory, exist_ok=True)
@@ -142,6 +147,7 @@ def main():
 
     _run_cluster_generation(configuration, cluster_seeds, working_directory_path)
     _run_galactic_tidal_stripping(configuration, cluster_seeds, working_directory_path)
+    _run_machine_learning_dataset_generation(working_directory_path)
 
 if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)

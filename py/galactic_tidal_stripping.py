@@ -14,6 +14,7 @@ class Galactic_Tidal_Stripping_Configuration:
     simulation_configuration: Simulation_Configuration = None
     galaxy_configuration: Galaxy_Configuration = None
     number_of_orbits: int = None
+    end_time: float = None
     cluster_seed: int = None
     snapshot_interval: float = None
     snapshot_file_path: str = None
@@ -74,7 +75,8 @@ class Galactic_Tidal_Stripping:
         )
         File_Handle.save_tsv_snapshot_gts(
             self.tsv_file_path,
-            galactic_diagnostics 
+            self.galactic_tidal_stripping_configuration,
+            galactic_diagnostics
         )
 
     def _save_isolated_snapshot(self):
@@ -154,7 +156,8 @@ class Galactic_Tidal_Stripping:
             _next_snapshot_time = self.simulation.rebound_handle.t + self.galactic_tidal_stripping_configuration.snapshot_interval
             self._save_snapshot()
             self._save_isolated_snapshot()
-            while self.simulation.diagnostics.number_of_orbits_done < self.galactic_tidal_stripping_configuration.number_of_orbits:
+            while self.simulation.rebound_handle.t < self.galactic_tidal_stripping_configuration.end_time:
+            #while self.simulation.diagnostics.number_of_orbits_done < self.galactic_tidal_stripping_configuration.number_of_orbits:
                 self.simulation.integrate()
                 self.isolated_simulation.integrate()
 

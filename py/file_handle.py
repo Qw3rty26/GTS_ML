@@ -103,9 +103,9 @@ class File_Handle:
             writer.writerow(asdict(cluster_diagnostics))
 
     @staticmethod
-    def save_tsv_snapshot_gts(tsv_file_path, galactic_diagnostics: Galactic_Diagnostics = None):
-
-        fieldnames = [field.name for field in fields(Galactic_Diagnostics)]
+    def save_tsv_snapshot_gts(tsv_file_path, galactic_tidal_stripping_configuration, galactic_diagnostics: Galactic_Diagnostics = None):
+        fieldnames = ["cluster_seed", "orbit_semi_major_axis", "orbit_eccentricity"]
+        fieldnames.extend(field.name for field in fields(Galactic_Diagnostics))
         file_exists = os.path.exists(tsv_file_path)
 
         with open(tsv_file_path, "a", newline="") as tsv_file:
@@ -114,4 +114,17 @@ class File_Handle:
             if not file_exists or os.path.getsize(tsv_file_path) == 0:
                 writer.writeheader()
 
-            writer.writerow(asdict(galactic_diagnostics))
+            snapshot = asdict(galactic_diagnostics)
+            snapshot["cluster_seed"] = galactic_tidal_stripping_configuration.cluster_seed
+            snapshot["orbit_semi_major_axis"] = galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis
+            snapshot["orbit_eccentricity"] = galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity
+
+            writer.writerow(snapshot)
+
+    @staticmethod
+    def load_tsv_snapshot(tsv_file_path, snapshot_index=-1):
+        with open(tsv_file_path, "r", newline="", encoding="utf-8") as tsv_file:
+            reader = csv.DictReader(tsv_file, delimiter="\t")
+            snapshots = list(reader)
+
+        return snapshots[snapshot_index]

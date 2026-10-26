@@ -22,6 +22,7 @@
         "orbit_semi_major_axis": [100.0, 500.0, 1000.0],
         "orbit_eccentricity": [0.8],
         "number_of_orbits": 2,
+        "end_time": 10.0,
         "snapshot_interval": 1.0
     },
 
