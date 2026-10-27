@@ -4,7 +4,7 @@
         "dt": 0.005,
         "t": 0,
         "G": 1.0,
-        "softening": 0.1,
+        "softening": 0.01,
         "time_warp": 1,
         "integrator": "leapfrog"
     },
@@ -19,10 +19,10 @@
     "galactic_tidal_stripping": {
         "galaxy_mass": 3000.0,
         "galaxy_radius": 20.0,
-        "orbit_semi_major_axis": [100.0, 500.0, 1000.0],
-        "orbit_eccentricity": [0.8],
+        "orbit_semi_major_axis": [260.0],
+        "orbit_eccentricity": [0.95],
         "number_of_orbits": 2,
-        "end_time": 10.0,
+        "end_time": 700.0,
         "snapshot_interval": 1.0
     },
 

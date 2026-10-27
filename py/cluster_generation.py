@@ -58,12 +58,12 @@ class Cluster_Generation:
 
         PARTICLE_MASS = 1.0 / self.cluster_configuration.number_of_particles
 
-        print(f"Creating plummer_handle")
+        print(f"Cluster {self.cluster_configuration.cluster_seed}: Creating plummer_handle")
         self.plummer_handle = Plummer(self.cluster_configuration.number_of_particles, self.cluster_configuration.cluster_radius, self.cluster_configuration.cluster_seed)
 
         particle_positions, particle_velocities = self.plummer_handle.generate_particles()
 
-        print(f"Adding the particles to rebound")
+        print(f"Cluster {self.cluster_configuration.cluster_seed}: Adding the particles to rebound")
         self.simulation = Simulation(self.cluster_configuration.simulation_configuration)
         for particle_name, (particle_position, particle_velocity) in enumerate(zip(particle_positions, particle_velocities)):
             particle = rebound.Particle(
@@ -83,7 +83,7 @@ class Cluster_Generation:
     def run(self):
         try:
             END_TIME = self.plummer_handle.get_relaxation_time()
-            print(f"Running generation in the void until {END_TIME}")
+            print(f"Cluster {self.cluster_configuration.cluster_seed}: Running generation in the void until {END_TIME}")
             _computing_time = time.perf_counter()
             _next_snapshot_time = self.simulation.rebound_handle.t + self.cluster_configuration.snapshot_interval
             self._save_snapshot()
@@ -94,7 +94,7 @@ class Cluster_Generation:
                     self._save_snapshot()
                     _next_snapshot_time += self.cluster_configuration.snapshot_interval
             _computing_time = time.perf_counter() - _computing_time
-            print(f"Done simulating in {_computing_time} seconds.")
+            print(f"Cluster {self.cluster_configuration.cluster_seed}: Done simulating in {_computing_time} seconds.")
             #self.simulation.diagnostics.print_diagnostics()
         finally:
             File_Handle.close_json_snapshot(self.json_file_descriptor)

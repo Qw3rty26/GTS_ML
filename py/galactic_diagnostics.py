@@ -6,6 +6,8 @@ class Galactic_Diagnostics:
     time: float = None
     cluster_kinetic_energy: float = None
     cluster_potential_energy: float = None
+    cluster_softened_potential_energy: float = None
+    galactic_potential_energy: float = None
     cluster_total_energy: float = None
     cluster_relative_energy_error: float = None
     cluster_kinetic_internal_energy: float = None
@@ -100,16 +102,39 @@ class Diagnostics:
         cluster_potential_energy = np.sum(np.triu(potential_energy_matrix, k=1))
         return cluster_potential_energy
 
+    def get_galactic_potential_energy(self):
+        # U_gal = sum(m_i * Phi_gal(r_i))
+        # Phi_gal(r) = -G * M_gal / sqrt(r^2 + A_gal^2)
+
+        galaxy_handle = self.simulation.galaxy_handle
+
+        if galaxy_handle is None:
+            return 0.0
+
+        gravitational_constant = self.simulation.simulation_configuration.gravitational_constant
+        galaxy_configuration = galaxy_handle.galaxy_configuration
+        galaxy_mass = galaxy_configuration.galaxy_mass
+        galaxy_radius = galaxy_configuration.galaxy_radius
+
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
+
+        squared_radii = np.sum(particle_positions**2, axis=1)
+        galactic_potential = -gravitational_constant * galaxy_mass / np.sqrt(squared_radii + galaxy_radius**2)
+
+        return np.sum(particle_masses * galactic_potential)
+
     def get_cluster_total_energy(self):
         #
-        # E_tot = K + U
+        # E_tot = K + U_cluster + U_gal
         #
 
         cluster_kinetic_energy = self.get_cluster_kinetic_energy()
         cluster_potential_energy = self.get_cluster_potential_energy()
-        cluster_total_energy = cluster_kinetic_energy + cluster_potential_energy
+        galactic_potential_energy = self.get_galactic_potential_energy()
+        cluster_total_energy = cluster_kinetic_energy + cluster_potential_energy + galactic_potential_energy
 
-        if self.simulation.rebound_handle.t == 0.0:
+        if self.initial_cluster_total_energy is None:
             self.initial_cluster_total_energy = cluster_total_energy
 
         return cluster_total_energy
@@ -324,6 +349,27 @@ class Diagnostics:
 
         self.previous_bound_center_of_mass_position_y = bound_center_of_mass_position_y
 
+
+    # if no bound_particles are found, we follow the small cluster starting by the particle with the lowest potential energy
+    def _get_fallback_particles(self):
+        particle_masses = self.simulation.get_particle_masses()
+        particle_positions = self.simulation.get_particle_positions()
+
+        number_of_particles = len(particle_masses)
+        fallback_particles = np.zeros(number_of_particles, dtype=bool)
+
+        if number_of_particles == 0:
+            return fallback_particles
+
+        position_differences = particle_positions[:, np.newaxis, :] - particle_positions[np.newaxis, :, :]
+        squared_distances = np.sum(position_differences**2, axis=2)
+        initial_potential = self._get_particle_gravitational_potential(particle_masses, squared_distances, np.arange(number_of_particles))
+        center_index = np.argmin(initial_potential)
+        nearest_indices = np.argsort(squared_distances[center_index])[:min(11, number_of_particles)]
+
+        fallback_particles[nearest_indices] = True
+        return fallback_particles
+
     def get_bound_center_of_mass(self, bound_particles = None):
         #              sum(m_i * r_i), i in S
         # r_COM_bound = ----------------------
@@ -340,18 +386,14 @@ class Diagnostics:
         particle_positions = self.simulation.get_particle_positions()
         particle_velocities = self.simulation.get_particle_velocities()
 
-        particle_masses = particle_masses[bound_particles]
-        particle_positions = particle_positions[bound_particles]
-        particle_velocities = particle_velocities[bound_particles]
+        if not np.any(bound_particles):
+            bound_particles = self._get_fallback_particles()
 
-        bound_masses = particle_masses
-        bound_positions = particle_positions
-        bound_velocities = particle_velocities
+        bound_masses = particle_masses[bound_particles]
+        bound_positions = particle_positions[bound_particles]
+        bound_velocities = particle_velocities[bound_particles]
 
         total_bound_mass = np.sum(bound_masses)
-
-        if total_bound_mass == 0:
-            raise ValueError("Cannot calculate bound center of mass: no bound mass.")
 
         bound_center_of_mass_position = np.sum(bound_masses[:, np.newaxis] * bound_positions, axis=0) / total_bound_mass
         bound_center_of_mass_velocity = np.sum(bound_masses[:, np.newaxis] * bound_velocities, axis=0) / total_bound_mass
@@ -372,7 +414,7 @@ class Diagnostics:
         bound_mass_fraction = bound_mass / total_mass
         return bound_mass_fraction
 
-    def get_half_mass_radius(self, bound_particles = None):
+    def get_half_mass_radius(self, bound_particles=None):
         #                                    M_bound
         # r_half = r_k such that M(<r_k) >= ---------
         #                                       2
@@ -380,15 +422,17 @@ class Diagnostics:
         particle_masses = self.simulation.get_particle_masses()
         particle_positions = self.simulation.get_particle_positions()
 
-        if bound_particles is not None:
-            particle_masses = particle_masses[bound_particles]
-            particle_positions = particle_positions[bound_particles]
+        if bound_particles is None:
+            bound_particles = self._get_bound_particles()
 
-        bound_masses = particle_masses
-        bound_positions = particle_positions
+        if not np.any(bound_particles):
+            return 0.0
+
+        bound_masses = particle_masses[bound_particles]
+        bound_positions = particle_positions[bound_particles]
 
         if len(bound_masses) == 0:
-            raise ValueError("Cannot calculate half-mass radius: no bound particles.")
+            return 0.0
 
         center_of_mass_position, _ = self.get_bound_center_of_mass(bound_particles)
 
@@ -412,26 +456,24 @@ class Diagnostics:
         #              r_hmr(0)
 
         if half_mass_radius_t is None: half_mass_radius_t = self.get_half_mass_radius()
+        if self.initial_cluster_half_mass_radius == 0.0: return 0.0
 
         half_mass_radius_ratio = half_mass_radius_t / self.initial_cluster_half_mass_radius
         return half_mass_radius_ratio
 
-    def get_root_mean_square_radius(self, bound_particles = None, bound_center_of_mass_position = None):
-        #                  1      N_bound
-        # r_RMS = sqrt(--------- * sum( |r_i - r_COM_bound|^2) )
-        #               N_bound   i in S
+    def get_root_mean_square_radius(self, bound_center_of_mass_position = None):
+        #                  1      N
+        # r_RMS = sqrt(--- * sum( |r_i - r_COM_bound|^2) )
+        #                  N     i=1
 
         particle_positions = self.simulation.get_particle_positions()
 
-        bound_positions = particle_positions[bound_particles]
+        if bound_center_of_mass_position is None:
+            bound_center_of_mass_position, _ = self.get_bound_center_of_mass()
 
-        if len(bound_positions) == 0:
-            raise ValueError("Cannot calculate RMS radius: no bound particles.")
+        squared_distances = np.sum((particle_positions - bound_center_of_mass_position) ** 2, axis=1)
 
-        squared_distances = np.sum( (bound_positions - bound_center_of_mass_position) ** 2, axis=1 )
-
-        root_mean_square_radius = np.sqrt( np.mean(squared_distances) )
-        return root_mean_square_radius
+        return np.sqrt(np.mean(squared_distances))
 
     def get_cluster_angular_momentum(self):
         #          | sum(m_i * (r_i x v_i) ) |
@@ -446,24 +488,26 @@ class Diagnostics:
         return cluster_angular_momentum
 
     def get_galactic_diagnostics(self):
-        bound_particles = self._get_bound_particles()
-        bound_center_of_mass_position, bound_center_of_mass_velocity = self.get_bound_center_of_mass()
+        bound_particles_t = self._get_bound_particles()
+        bound_center_of_mass_position, bound_center_of_mass_velocity = self.get_bound_center_of_mass(bound_particles_t)
         self._check_orbit_done(bound_center_of_mass_position[1])
         total_energy_t = self.get_cluster_total_energy()
-        half_mass_radius_t = self.get_half_mass_radius()
+        half_mass_radius_t = self.get_half_mass_radius(bound_particles_t)
 
         galactic_diagnostics = Galactic_Diagnostics(
             time = self.simulation.rebound_handle.t,
             cluster_kinetic_energy = self.get_cluster_kinetic_energy(),
             cluster_potential_energy = self.get_cluster_potential_energy(),
+            cluster_softened_potential_energy = self.get_cluster_softened_potential_energy(),
+            galactic_potential_energy = self.get_galactic_potential_energy(),
             cluster_total_energy = total_energy_t,
             cluster_virial_ratio = self.get_cluster_virial_ratio(),
             cluster_relative_energy_error = self.get_relative_energy_error(total_energy_t),
             cluster_kinetic_internal_energy = self.get_cluster_internal_kinetic_energy(),
-            cluster_bound_mass_fraction = self.get_bound_mass_fraction(bound_particles),
+            cluster_bound_mass_fraction = self.get_bound_mass_fraction(bound_particles_t),
             cluster_half_mass_radius = half_mass_radius_t,
             cluster_half_mass_radius_ratio = self.get_half_mass_radius_ratio(half_mass_radius_t),
-            cluster_root_mean_square_radius = self.get_root_mean_square_radius(bound_particles, bound_center_of_mass_position),
+            cluster_root_mean_square_radius = self.get_root_mean_square_radius(bound_center_of_mass_position),
             cluster_angular_momentum = self.get_cluster_angular_momentum(),
             cluster_number_of_orbits_done = self.number_of_orbits_done
         )

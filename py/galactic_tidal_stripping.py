@@ -21,35 +21,22 @@ class Galactic_Tidal_Stripping_Configuration:
 
 class Galactic_Tidal_Stripping:
 
-    def __init__(self, galactic_tidal_stripping_configuration: Galactic_Tidal_Stripping_Configuration = None, cluster_file_path = None):
+    def __init__(self, galactic_tidal_stripping_configuration: Galactic_Tidal_Stripping_Configuration = None, cluster_file_path=None):
         self.galactic_tidal_stripping_configuration = galactic_tidal_stripping_configuration
+        # this is what being obsessed with OOP does to a mf
+        self.simulation_name = f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}"
 
-        json_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path,
-            # this is what being obsessed with OOP does to a mf
-            f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}.json"
-        )
+        json_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}.json")
         self.json_file_descriptor = File_Handle.open_json_snapshot(json_file_path)
 
-        isolated_json_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path,
-            f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}_isolated.json"
-        )
+        isolated_json_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}_isolated.json")
         self.isolated_json_file_descriptor = File_Handle.open_json_snapshot(isolated_json_file_path)
 
-        self.xyzv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path,
-            f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}.xyzv"
-        )
+        self.xyzv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}.xyzv")
+        self.tsv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}.tsv")
 
-        self.tsv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path,
-            f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}.tsv"
-        )
-
-        self.isolated_xyzv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path,
-            f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}_isolated.xyzv"
-        )
-
-        self.isolated_tsv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path,
-            f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}_isolated.tsv"
-        )
+        self.isolated_xyzv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}_isolated.xyzv")
+        self.isolated_tsv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}_isolated.tsv")
 
         self._create_simulation(cluster_file_path)
 
@@ -103,12 +90,12 @@ class Galactic_Tidal_Stripping:
 
     def _create_simulation(self, cluster_file_path):
 
-        print(f"Creating galaxy_handle")
+        print(f"Simulation {self.simulation_name}: Creating galaxy_handle")
         self.galaxy_handle = Galaxy(self.galactic_tidal_stripping_configuration.galaxy_configuration)
 
         particle_positions, particle_velocities, particle_masses = File_Handle.load_json_cluster(cluster_file_path, -1)
 
-        print(f"Adding the particles to rebound")
+        print(f"Simulation {self.simulation_name}: Adding the particles to rebound")
         self.simulation = Simulation(self.galactic_tidal_stripping_configuration.simulation_configuration)
         self.isolated_simulation = Simulation(self.galactic_tidal_stripping_configuration.simulation_configuration)
 
@@ -151,7 +138,7 @@ class Galactic_Tidal_Stripping:
 
     def run(self):
         try:
-            print(f"Running evolution around galaxy")
+            print(f"Simulation {self.simulation_name}: Running Galactic Tidal Stripping Simulation")
             _computing_time = time.perf_counter()
             _next_snapshot_time = self.simulation.rebound_handle.t + self.galactic_tidal_stripping_configuration.snapshot_interval
             self._save_snapshot()
@@ -166,7 +153,7 @@ class Galactic_Tidal_Stripping:
                     self._save_isolated_snapshot()
                     _next_snapshot_time += self.galactic_tidal_stripping_configuration.snapshot_interval
             _computing_time = time.perf_counter() - _computing_time
-            print(f"Done simulating in {_computing_time} seconds.")
+            print(f"Simulation {self.simulation_name}: Done simulating in {_computing_time} seconds.")
             #self.simulation.diagnostics.print_diagnostics()
         finally:
             File_Handle.close_json_snapshot(self.json_file_descriptor)
