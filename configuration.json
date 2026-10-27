@@ -19,11 +19,11 @@
     "galactic_tidal_stripping": {
         "galaxy_mass": 3000.0,
         "galaxy_radius": 20.0,
-        "orbit_semi_major_axis": [260.0],
-        "orbit_eccentricity": [0.95],
+        "orbit_semi_major_axis": [30.0],
+        "orbit_eccentricity": [0.5],
         "number_of_orbits": 2,
         "end_time": 700.0,
-        "snapshot_interval": 1.0
+        "snapshot_interval": 7.0
     },
 
     "cores_used": 4,

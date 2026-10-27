@@ -44,15 +44,15 @@ class Cluster_Generation:
             particle_velocities,
             particle_masses
         )
-        File_Handle.save_xyzv_snapshot(
-            self.xyzv_file_path,
-            particle_positions,
-            particle_velocities
-        )
-        File_Handle.save_tsv_snapshot(
-            self.tsv_file_path,
-            cluster_diagnostics
-        )
+        #File_Handle.save_xyzv_snapshot(
+        #    self.xyzv_file_path,
+        #    particle_positions,
+        #    particle_velocities
+        #)
+        #File_Handle.save_tsv_snapshot(
+        #    self.tsv_file_path,
+        #    cluster_diagnostics
+        #)
 
     def _create_simulation(self):
 
@@ -82,7 +82,7 @@ class Cluster_Generation:
 
     def run(self):
         try:
-            END_TIME = self.plummer_handle.get_relaxation_time()
+            END_TIME = self.plummer_handle.get_kepler_time()
             print(f"Cluster {self.cluster_configuration.cluster_seed}: Running generation in the void until {END_TIME}")
             _computing_time = time.perf_counter()
             _next_snapshot_time = self.simulation.rebound_handle.t + self.cluster_configuration.snapshot_interval
@@ -93,6 +93,7 @@ class Cluster_Generation:
                 if self.simulation.rebound_handle.t >= _next_snapshot_time:
                     self._save_snapshot()
                     _next_snapshot_time += self.cluster_configuration.snapshot_interval
+            self._save_snapshot()
             _computing_time = time.perf_counter() - _computing_time
             print(f"Cluster {self.cluster_configuration.cluster_seed}: Done simulating in {_computing_time} seconds.")
             #self.simulation.diagnostics.print_diagnostics()

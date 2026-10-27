@@ -163,3 +163,17 @@ class Plummer:
         relaxation_time = relaxation_time * RELAXATION_FACTOR
 
         return relaxation_time
+
+
+    def get_kepler_time(self):
+        #                  r^(3/2)
+        # t = T_factor * -----------
+        #                  sqrt(N)
+
+        TIME_FACTOR = 20
+
+        numerator = self.cluster_radius ** (3/2)
+        denominator = np.sqrt(self.number_of_particles)
+
+        END_TIME = TIME_FACTOR * numerator / denominator
+        return END_TIME

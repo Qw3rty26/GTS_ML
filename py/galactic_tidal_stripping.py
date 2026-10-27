@@ -47,19 +47,19 @@ class Galactic_Tidal_Stripping:
         bound_center_of_mass_position, bound_center_of_mass_velocity = self.simulation.diagnostics.get_bound_center_of_mass()
         galactic_diagnostics = self.simulation.diagnostics.get_galactic_diagnostics()
 
-        File_Handle.save_json_snapshot(
-            self.json_file_descriptor,
-            particle_positions,
-            particle_velocities,
-            particle_masses
-        )
-        File_Handle.save_xyzv_snapshot_gts(
-            self.xyzv_file_path,
-            particle_positions,
-            particle_velocities,
-            bound_center_of_mass_position,
-            bound_center_of_mass_velocity
-        )
+        #File_Handle.save_json_snapshot(
+        #    self.json_file_descriptor,
+        #    particle_positions,
+        #    particle_velocities,
+        #    particle_masses
+        #)
+        #File_Handle.save_xyzv_snapshot_gts(
+        #    self.xyzv_file_path,
+        #    particle_positions,
+        #    particle_velocities,
+        #    bound_center_of_mass_position,
+        #    bound_center_of_mass_velocity
+        #)
         File_Handle.save_tsv_snapshot_gts(
             self.tsv_file_path,
             self.galactic_tidal_stripping_configuration,
@@ -72,17 +72,17 @@ class Galactic_Tidal_Stripping:
         particle_masses = self.isolated_simulation.get_particle_masses()
         cluster_diagnostics = self.isolated_simulation.diagnostics.get_cluster_diagnostics()
 
-        File_Handle.save_json_snapshot(
-            self.isolated_json_file_descriptor,
-            particle_positions,
-            particle_velocities,
-            particle_masses
-        )
-        File_Handle.save_xyzv_snapshot(
-            self.isolated_xyzv_file_path,
-            particle_positions,
-            particle_velocities
-        )
+        #File_Handle.save_json_snapshot(
+        #    self.isolated_json_file_descriptor,
+        #    particle_positions,
+        #    particle_velocities,
+        #    particle_masses
+        #)
+        #File_Handle.save_xyzv_snapshot(
+        #    self.isolated_xyzv_file_path,
+        #    particle_positions,
+        #    particle_velocities
+        #)
         File_Handle.save_tsv_snapshot(
             self.isolated_tsv_file_path,
             cluster_diagnostics
@@ -152,6 +152,7 @@ class Galactic_Tidal_Stripping:
                     self._save_snapshot()
                     self._save_isolated_snapshot()
                     _next_snapshot_time += self.galactic_tidal_stripping_configuration.snapshot_interval
+            self._save_snapshot()
             _computing_time = time.perf_counter() - _computing_time
             print(f"Simulation {self.simulation_name}: Done simulating in {_computing_time} seconds.")
             #self.simulation.diagnostics.print_diagnostics()
