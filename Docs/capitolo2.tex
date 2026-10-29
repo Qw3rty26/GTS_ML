@@ -33,13 +33,14 @@
 \newcommand{\softeningLength}{\epsilon}                    % Softening gravitazionale
 \newcommand{\simulationEndTime}{T_{\mathrm{end}}}          % Tempo finale della simulazione
 \newcommand{\randomSeed}{s}                                % Seme di generazione
-
+\newcommand{\allClusters}{\mathcal{N}}                     % Insieme di tutti i cluster
+\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{vivo}}}    % Insieme di cluster vivi
+\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{morto}}}    % Insieme di cluster morti
 
 \chapter{Il modello fisico}
 \label{cha:modello-fisico}
 
 
-ciao
 \section{Notazione}
 \label{sec:notazione}
 La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati
@@ -300,6 +301,8 @@ La velocità iniziale all'apocentro è quindi:
 	v_{\mathrm{apo}} = \frac{L}{R_{\mathrm{apo}}}.
 	\label{eq:orbital-apocenter-velocity}
 \end{equation}
+
+\begin{comment} %TODO remove comment here
 La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali.
 \begin{figure}[H]
 	\centering
@@ -309,6 +312,7 @@ La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sov
 	\caption{Evoluzione dell'ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Il pallino rosso indica il centro galattico ($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.01$, Leapfrog).}
 	\label{fig:confronto-eccentricita}
 \end{figure}
+\end{comment}
 \subsection{Integrazione numerica}
 \label{subsec:integrazione-numerica}
 L'evoluzione del sistema viene calcolata mediante l'integratore numerico \emph{leapfrog}, un metodo simplettico del secondo ordine comunemente utilizzato nelle simulazioni dinamiche a lungo termine \cite{quinn1997timestepping}.
