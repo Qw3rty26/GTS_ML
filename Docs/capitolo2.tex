@@ -159,7 +159,7 @@ Il modulo della velocità viene campionato secondo la distribuzione prevista dal
 	\qquad 0\leq \velV\leq \escapeVelocity(\radialDistance).
 	\label{eq:plummer-speed-distribution}
 \end{equation}
-Il campionamento del modulo viene effettuato mediante una distribuzione Beta, da cui si ricava la velocità in funzione della velocità di fuga locale. La direzione viene estratta isotropicamente nello spazio tridimensionale. Il vettore velocità risultante si ottiene moltiplicando il modulo campionato per il versore casuale.
+Il modulo della velocità viene determinato in relazione alla velocità di fuga locale, mentre la direzione viene estratta isotropicamente nello spazio tridimensionale. Il vettore velocità risultante si ottiene moltiplicando il modulo per il versore casuale.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.85\textwidth]{./plots/velocity_distribution_comparison.pdf}
@@ -300,16 +300,15 @@ La velocità iniziale all'apocentro è quindi:
 	v_{\mathrm{apo}} = \frac{L}{R_{\mathrm{apo}}}.
 	\label{eq:orbital-apocenter-velocity}
 \end{equation}
-La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La %Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali.
-%TODO make this not a comment
-%\begin{figure}[H]
-	%\centering
-	%\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
-	%\hfill
-	%\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
-	%\caption{Evoluzione dell'ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Il pallino rosso indica il centro galattico ($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.01$, Leapfrog).}
-%	\label{fig:confronto-eccentricita}
-%\end{figure}
+La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
+	\hfill
+	\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
+	\caption{Evoluzione dell'ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Il pallino rosso indica il centro galattico ($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.01$, Leapfrog).}
+	\label{fig:confronto-eccentricita}
+\end{figure}
 \subsection{Integrazione numerica}
 \label{subsec:integrazione-numerica}
 L'evoluzione del sistema viene calcolata mediante l'integratore numerico \emph{leapfrog}, un metodo simplettico del secondo ordine comunemente utilizzato nelle simulazioni dinamiche a lungo termine \cite{quinn1997timestepping}.
@@ -329,10 +328,16 @@ Le equazioni di aggiornamento sono:
 \end{align}
 Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simulazioni. Per verificare il comportamento dell'integrazione numerica, viene monitorata la variazione relativa dell'energia totale rispetto al valore iniziale, definita come
 \begin{equation}
-	\Delta E(t)=\frac{E(t)-E(0)}{|E(0)|}\,100
+	\Delta E(t)=\frac{E(t)-E(0)}{|E(0)|}
 	\label{eq:energy-drift}
 \end{equation}
 dove $E(t)$ è l'energia totale del sistema all'istante $t$ ed $E(0)$ è il suo valore iniziale. Questa quantità permette di valutare quanto l'energia del sistema si discosti dal valore iniziale durante l'evoluzione numerica.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{./plots/energy_drift.pdf}
+	\caption{Andamento della deriva energetica relativa $\Delta E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyParameter = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, $\epsilon = 0.01$, Leapfrog)}
+	\label{fig:energy-drift}
+\end{figure}
 \subsection{Individuazione delle stelle legate all'ammasso}
 \label{subsec:stelle-legate}
 Una stella è considerata gravitazionalmente legata all'ammasso se la sua energia meccanica specifica è negativa. Definiamo quindi l'insieme delle stelle legate $\boundSet$ come:
