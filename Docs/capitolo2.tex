@@ -1,4 +1,4 @@
-\newcommand{\totalMass}{M}                         % Massa totale
+\newcommand{\totalMass}{M_{\mathrm{tot}}}          % Massa totale
 \newcommand{\starMass}{m}                          % Massa singola stella
 \newcommand{\numberOfStars}{N}                     % Numero di stelle
 \newcommand{\radialDistance}{r}                    % Distanza radiale
@@ -19,10 +19,27 @@
 \newcommand{\galaxyDistance}{R}                    % Distanza centro galattico
 \newcommand{\velocityRescalingFactor}{\lambda}     % Fattore di riscalo per velocità
 \newcommand{\deltat}{\Delta t}                     % Passo temporale integrativo
+\newcommand{\boundSet}{S_{\mathrm{bound}}}                 % Insieme delle stelle legate
+\newcommand{\boundMass}{M_{\mathrm{bound}}}                % Massa legata
+\newcommand{\boundMassFraction}{f_{\mathrm{bound}}}        % Frazione di massa legata
+\newcommand{\halfMassRadius}{r_{1/2}}                      % Raggio di metà massa
+\newcommand{\kineticEnergy}{K_i}                           % Energia cinetica specifica della stella i
+\newcommand{\specificPotential}{\Phi_i}                    % Potenziale gravitazionale specifico della stella i
+\newcommand{\specificEnergy}{E_i}                          % Energia meccanica specifica della stella i
+\newcommand{\boundCenterPosition}{\mathbf{x}_{\mathrm{CM,bound}}} % Posizione del centro di massa delle stelle legate
+\newcommand{\boundCenterVelocity}{\mathbf{v}_{\mathrm{CM,bound}}} % Velocità del centro di massa delle stelle legate
+\newcommand{\stellarDistance}{d_i}                         % Distanza della stella i dal centro di massa
+\newcommand{\halfMassRadiusRatio}{\mathcal{R}_{1/2}}       % Rapporto tra raggio di metà massa finale ed iniziale
+\newcommand{\softeningLength}{\epsilon}                    % Softening gravitazionale
+\newcommand{\simulationEndTime}{T_{\mathrm{end}}}          % Tempo finale della simulazione
+\newcommand{\randomSeed}{s}                                % Seme di generazione
+
 
 \chapter{Il modello fisico}
 \label{cha:modello-fisico}
 
+
+ciao
 \section{Notazione}
 \label{sec:notazione}
 La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati
@@ -39,7 +56,7 @@ nel capitolo.
 		$\starMass$ & Massa di una singola stella \\
 		$\totalMass$ & Massa totale dell'ammasso \\
 		$\radialDistance$ & Distanza dal centro dell'ammasso \\
-		$\clusterRadius$ & Parametro di scala del modello di Plummer \\
+		$\clusterRadius$ & Parametro di scala del modello di Plummer\\
 		$\mathbf{x}_i$ & Vettore posizione della stella $i$ \\
 		$\mathbf{v}_i$ & Vettore velocità della stella $i$ \\
 		$\gravitationalConstant$ & Costante gravitazionale \\
@@ -252,9 +269,8 @@ L'accelerazione totale è quindi la somma del contributo interno e di quello gal
 	\label{eq:total-acceleration}
 \end{equation}
 Questa formulazione permette di descrivere simultaneamente la dinamica interna dell'ammasso e la sua risposta al campo gravitazionale esterno. Le interazioni reciproche determinano l'evoluzione della struttura stellare, mentre il potenziale galattico influenza il moto complessivo dell'ammasso e può favorire la perdita di stelle gravitazionalmente non più legate alla sua componente interna \cite{binneytremaine2008}.
-
 \subsection{Parametri orbitali iniziali}
-\label{subsec:parametri-orbitali}
+\label{subsec:parametri-orbitali-iniziali}
 L'orbita iniziale dell'ammasso stellare viene definita attraverso il semiasse maggiore $\semiMajorAxis$ e l'eccentricità $\orbitEccentricity$. Questi parametri determinano le distanze massima e minima dal centro galattico:
 \begin{equation}
 	R_{\mathrm{apo}} = \semiMajorAxis(1+\orbitEccentricity),
@@ -284,42 +300,16 @@ La velocità iniziale all'apocentro è quindi:
 	v_{\mathrm{apo}} = \frac{L}{R_{\mathrm{apo}}}.
 	\label{eq:orbital-apocenter-velocity}
 \end{equation}
-La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali. Per descriverne il moto complessivo e determinarne il numero di orbite completate, è necessario individuare un punto rappresentativo del sistema. Il metodo adottato, basato sul centro di massa percentile, è illustrato nella Sezione~\ref{subsec:com-percentile}.
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
-	\hfill
-	\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
-	\caption{Evoluzione dell'ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Il pallino rosso indica il centro galattico ($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.01$, Leapfrog).}
-	\label{fig:confronto-eccentricita}
-\end{figure}
-\subsection{Centro di massa percentile}
-\label{subsec:com-percentile}
-Durante la rimozione mareale, le stelle periferiche possono spostare il centro di massa classico. Per seguire più stabilmente il moto della regione centrale, si utilizza una media pesata sulle masse, calcolata su un insieme progressivamente ristretto di stelle.
-Il metodo adottato si basa su principi di statistica robusta, volti a limitare l'influenza dei valori estremi sulle stime \cite{wilcox2023guide}.\\
-Si parte dal centro di massa classico e si selezionano, a ogni passaggio, le stelle più vicine al centro corrente. Le selezioni utilizzano percentili di distanza pari a $80$, $65$, $50$, $35$ e $20$, ricalcolando il centro a ogni passaggio. La procedura termina quando rimangono meno di cinque stelle.
-\begin{equation}
-	\mathbf{x}_{\mathrm{COM}} =
-	\frac{\displaystyle\sum_{i\in S}m_i\mathbf{x}_i}
-	{\displaystyle\sum_{i\in S}m_i}
-	\label{eq:com-percentile}
-\end{equation}
-dove $S$ è l'insieme delle stelle selezionate, $m_i$ la massa e $\mathbf{x}_i$ la posizione della stella $i$. La stessa procedura applicata alle velocità determina la velocità del centro percentile.
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.7\textwidth]{./plots/com_trajectories.pdf}
-	\caption[Traiettorie del centro di massa percentilico per diverse eccentricità]{Traiettorie del centro di massa percentilico per due eccentricità orbitali.\\($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity \in \{0.3, 0.6\}$, $\deltat = 0.01$, Leapfrog)}
-	\label{fig:gts-orbit-comparison}
-\end{figure}
-\subsection{Conteggio delle orbite}
-\label{subsec:conteggio-orbite}
-Il numero di orbite completate viene stimato monitorando la coordinata $y$ del centro di massa percentile, calcolato secondo il metodo descritto nella Sezione~\ref{subsec:com-percentile}. A ogni passo temporale viene verificato se la traiettoria attraversa l'asse $x$ passando dalla regione $y < 0$ a quella $y \geq 0$:
-\begin{equation}
-	y_{\mathrm{COM}}(t_{k-1}) < 0,
-	\qquad
-	y_{\mathrm{COM}}(t_k) \geq 0.
-	\label{eq:orbital-crossing}
-\end{equation}
+La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La %Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali.
+%TODO make this not a comment
+%\begin{figure}[H]
+	%\centering
+	%\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
+	%\hfill
+	%\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
+	%\caption{Evoluzione dell'ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Il pallino rosso indica il centro galattico ($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.01$, Leapfrog).}
+%	\label{fig:confronto-eccentricita}
+%\end{figure}
 \subsection{Integrazione numerica}
 \label{subsec:integrazione-numerica}
 L'evoluzione del sistema viene calcolata mediante l'integratore numerico \emph{leapfrog}, un metodo simplettico del secondo ordine comunemente utilizzato nelle simulazioni dinamiche a lungo termine \cite{quinn1997timestepping}.
@@ -337,52 +327,88 @@ Le equazioni di aggiornamento sono:
 	+ \frac{\deltat}{2}\mathbf{a}_{i}^{n+1}
 	\label{eq:leapfrog-update}
 \end{align}
-Nel lavoro vengono utilizzati passi temporali $\deltat=0.01$ e $\deltat=0.005$, a seconda della configurazione della simulazione. Per valutare gli effetti di queste scelte sull'accuratezza dell'integrazione, introduciamo la deriva energetica relativa, espressa in percentuale e definita come
+Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simulazioni. Per verificare il comportamento dell'integrazione numerica, viene monitorata la variazione relativa dell'energia totale rispetto al valore iniziale, definita come
 \begin{equation}
 	\Delta E(t)=\frac{E(t)-E(0)}{|E(0)|}\,100
 	\label{eq:energy-drift}
 \end{equation}
-dove $E(t)$ è l'energia totale del sistema all'istante $t$ ed $E(0)$ è il suo valore iniziale. Il confronto viene effettuato su due simulazioni con condizioni iniziali identiche, variando esclusivamente il passo temporale.
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.7\textwidth]{./plots/energy_drift.pdf}
-	\caption{Confronto della deriva energetica e della distanza del centro di massa percentile dal centro galattico per due passi temporali.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyParameter = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat \in \{0.01, 0.005\}$, $\epsilon = 0.01$, Leapfrog)}
-	\label{fig:energy-drift}
-\end{figure}
-\subsection{Massa legata e raggio di metà massa}
-%\label{subsec:diagnostiche-ammasso}
-%Per descrivere l'evoluzione dell'ammasso stellare si utilizzano la frazione di massa legata e il raggio di metà massa.
-%La frazione di massa legata è il rapporto tra la massa delle stelle legate gravitazionalmente all'ammasso e la sua massa totale:
-%\begin{equation}
-%	f_{\mathrm{bound}} = \frac{M_{\mathrm{bound}}}{M_{\mathrm{tot}}}
-%	\label{eq:bound-mass-fraction}
-%\end{equation}
-%Per individuare le stelle legate, si calcola l'energia meccanica di ciascuna stella rispetto al centro di massa dell'ammasso:
-%\begin{equation}
-%	E_i = \frac{1}{2}m_i\left|\mathbf{v}_i-\mathbf{v}_{\mathrm{CM}}\right|^2
-%	-\sum_{j\neq i}\frac{Gm_i m_j}{\sqrt{|\mathbf{r}_i-\mathbf{r}_j|^2+\epsilon^2}}
-%	\label{eq:stellar-energy}
-%\end{equation}
-%dove $m_i$, $\mathbf{r}_i$ e $\mathbf{v}_i$ sono rispettivamente la massa, la posizione e la velocità della stella $i$, $\mathbf{r}_{\mathrm{CM}}$ e $\mathbf{v}_{\mathrm{CM}}$ sono la posizione e la velocità del centro di massa, e $\epsilon$ è il parametro di ammorbidimento gravitazionale. La massa legata si ottiene sommando le masse delle stelle con energia negativa:
-%\begin{equation}
-%	M_{\mathrm{bound}} = \sum_{i:E_i<0} m_i
-%	\label{eq:bound-mass}
-%\end{equation}
-%Il raggio di metà massa $r_{1/2}$ è la distanza dal centro di massa entro cui è contenuta metà della massa totale dell'ammasso. Per determinarlo, si ordinano le stelle in base alla distanza dal centro di massa,
-%\begin{equation}
-%	d_i = |\mathbf{r}_i-\mathbf{r}_{\mathrm{CM}}|
-%	\label{eq:stellar-distance}
-%\end{equation}
-%e si calcola la massa cumulativa delle stelle ordinate per distanza crescente. Indicando con $M(<r)$ la massa cumulativa contenuta entro il raggio $r$, il raggio di metà massa è definito dalla relazione
-%\begin{equation}
-%	r_{1/2} = r\left(\frac{M_{\mathrm{tot}}}{2}\right)
-%	\label{eq:half-mass-radius}
-%\end{equation}
-%dove $r(M)$ indica il raggio corrispondente alla massa cumulativa $M$. Si seleziona la distanza della prima stella per cui la massa cumulativa raggiunge o supera $M_{\mathrm{tot}}/2$.\\Il calcolo considera tutte le stelle presenti nella simulazione.\\
-%\begin{figure}[H]
-%	\centering
-%	\includegraphics[width=\textwidth]{./plots/cluster_evolution.pdf}
-%	\caption[Confronto delle diagnostiche dell'ammasso per diverse eccentricità]{Evoluzione della frazione di massa legata (sinistra) e del raggio di metà massa (destra) per due eccentricità orbitali. \\($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity \in \{0.3, 0.6\}$, $\deltat = 0.01$, Leapfrog)}
-%	\label{fig:gts-diagnostics-comparison}
-%\end{figure}
-%Come mostrato in Figura~\ref{fig:gts-diagnostics-comparison}, il confronto tra le simulazioni con eccentricità $e=0.3$ ed $e=0.6$ mostra che, nel secondo caso, intorno a $t \simeq 1000$ il raggio di metà massa aumenta rapidamente, mentre la frazione di massa legata diminuisce. Questo comportamento indica una progressiva dispersione dell'ammasso ed è compatibile con l'effetto delle perturbazioni mareali, potenzialmente più intense lungo l'orbita più eccentrica.
+dove $E(t)$ è l'energia totale del sistema all'istante $t$ ed $E(0)$ è il suo valore iniziale. Questa quantità permette di valutare quanto l'energia del sistema si discosti dal valore iniziale durante l'evoluzione numerica.
+\subsection{Individuazione delle stelle legate all'ammasso}
+\label{subsec:stelle-legate}
+Una stella è considerata gravitazionalmente legata all'ammasso se la sua energia meccanica specifica è negativa. Definiamo quindi l'insieme delle stelle legate $\boundSet$ come:
+\begin{equation}
+	\boundSet = \left\{i \mid \specificEnergy < 0\right\},
+	\qquad \specificEnergy = \kineticEnergy + \specificPotential
+	\label{eq:bound-stars}
+\end{equation}
+dove $\kineticEnergy$ e $\specificPotential$ sono rispettivamente l'energia cinetica specifica e il potenziale gravitazionale specifico della stella $i$.
+L'energia cinetica specifica è calcolata rispetto alla velocità del centro di massa della componente legata:
+\begin{equation}
+	\kineticEnergy = \frac{1}{2}
+	\left|\mathbf{v}_i-\boundCenterVelocity\right|^2
+	\label{eq:stellar-kinetic-energy}
+\end{equation}
+dove $\mathbf{v}_i$ è la velocità della stella $i$ e $\boundCenterVelocity$ è la velocità del centro di massa delle stelle legate, definita nella Sezione~\ref{subsec:centro-massa-legato}.\\
+Il potenziale gravitazionale specifico è calcolato sommando i contributi di tutte le altre stelle appartenenti a $\boundSet$:
+\begin{equation}
+	\specificPotential = -\gravitationalConstant \sum_{\substack{j \in \boundSet \\ j \neq i}}
+	\frac{m_j}{|\mathbf{x}_i-\mathbf{x}_j|}
+	\label{eq:stellar-potential}
+\end{equation}
+dove $\gravitationalConstant$ è la costante di gravitazione universale, $m_j$ è la massa della stella $j$ e $\mathbf{x}_i$ e $\mathbf{x}_j$ sono le posizioni delle stelle.\\
+La selezione è iterativa e aggiorna $\boundSet$ e la velocità del relativo centro di massa a ogni passaggio:
+\begin{enumerate}
+	\item Si individua la stella con il potenziale gravitazionale più basso e si selezionano le undici stelle più vicine. La loro velocità media pesata sulle masse fornisce una stima iniziale della velocità del centro di massa.
+	\item Si inizializza $\boundSet$ con tutte le stelle dell'ammasso e si calcolano le energie specifiche. Le stelle con energia negativa formano il nuovo insieme $\boundSet$.
+	\item Si ricalcolano le energie usando la velocità aggiornata del centro di massa e il potenziale generato dalle sole stelle appartenenti a $\boundSet$. Si ripete il passaggio fino a quando $\boundSet$ non cambia più, per un massimo di dieci iterazioni. Se rimangono al massimo tre stelle, non viene identificata una componente legata.
+\end{enumerate}
+\subsection{Centro di massa delle stelle legate all'ammasso}
+\label{subsec:centro-massa-legato}
+Dopo aver individuato l'insieme $\boundSet$ delle stelle legate, secondo la procedura descritta nella Sezione~\ref{subsec:stelle-legate}, si calcolano la posizione e la velocità del centro di massa della componente legata come medie pesate sulle masse:
+\begin{equation}
+	\boundCenterPosition =
+	\frac{\displaystyle\sum_{i\in\boundSet}m_i\mathbf{x}_i}
+	{\displaystyle\sum_{i\in\boundSet}m_i}
+	\label{eq:com-bound-position}
+\end{equation}
+La velocità del centro di massa si calcola allo stesso modo:
+\begin{equation}
+	\boundCenterVelocity =
+	\frac{\displaystyle\sum_{i\in\boundSet}m_i\mathbf{v}_i}
+	{\displaystyle\sum_{i\in\boundSet}m_i}
+	\label{eq:com-bound-velocity}
+\end{equation}
+In queste espressioni, $m_i$, $\mathbf{x}_i$ e $\mathbf{v}_i$ indicano rispettivamente la massa, la posizione e la velocità della stella $i$.
+\subsection{Frazione di massa legata}
+\label{subsec:frazione-massa-legata}
+La frazione di massa legata esprime la parte della massa totale che rimane gravitazionalmente legata all'ammasso. Indicando con $m_i$ la massa della stella $i$, la massa legata è:
+\begin{equation}
+	\boundMass = \sum_{i\in\boundSet}m_i
+	\label{eq:bound-mass}
+\end{equation}
+La frazione di massa legata si ottiene dividendo questa quantità per la massa totale $\totalMass$ di tutte le stelle:
+\begin{equation}
+	\boundMassFraction =
+	\frac{\boundMass}{M_{\mathrm{tot}}}
+	\label{eq:bound-mass-fraction}
+\end{equation}
+\subsection{Raggio di metà massa}
+\label{subsec:raggio-meta-massa}
+Il raggio di metà massa indica la distanza dal centro di massa entro la quale è contenuta almeno metà della massa legata. Per ogni stella appartenente a $\boundSet$, si calcola la distanza dal centro di massa:
+\begin{equation}
+	\stellarDistance =
+	\left|\mathbf{x}_i-\boundCenterPosition\right|,
+	\qquad i\in\boundSet
+	\label{eq:stellar-distance}
+\end{equation}
+Si ordinano quindi le stelle per distanza crescente e si calcola la massa cumulativa. La massa cumulativa entro una distanza $r$, indicata con $M(<r)$, è:
+\begin{equation}
+	M(<r) = \sum_{\substack{i\in\boundSet\\d_i\leq r}}m_i
+	\label{eq:cumulative-bound-mass}
+\end{equation}
+Il raggio di metà massa è la minima distanza per cui la massa cumulativa raggiunge almeno metà della massa legata:
+\begin{equation}
+	\halfMassRadius = \min\left\{r : M(<r)\geq\frac{\boundMass}{2}\right\}
+	\label{eq:half-mass-radius}
+\end{equation}
+Se non vengono individuate stelle legate, il raggio di metà massa viene posto uguale a zero.
