@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{baumgardt2003}
 Holger Baumgardt and Junichiro Makino.
@@ -48,5 +48,12 @@ H.~C. Plummer.
 Thomas Quinn, Neal Katz, Joachim Stadel, and George Lake.
 \newblock Time stepping n-body simulations.
 \newblock {\em The Astrophysical Journal}, 1997.
+
+\bibitem{stukowski2010}
+Alexander Stukowski.
+\newblock Visualization and analysis of atomistic simulation data with {OVITO}
+  -- the open visualization tool.
+\newblock {\em Modelling and Simulation in Materials Science and Engineering},
+  18(1):015012, 2010.
 
 \end{thebibliography}

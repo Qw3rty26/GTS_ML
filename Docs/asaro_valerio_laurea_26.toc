@@ -35,12 +35,11 @@
 \contentsline {subsection}{\numberline {3.3.1}Classificazione degli ammassi stellari}{18}{subsection.3.3.1}%
 \contentsline {subsection}{\numberline {3.3.2}Definizione formale degli insiemi}{18}{subsection.3.3.2}%
 \contentsline {subsection}{\numberline {3.3.3}Variabili di ingresso e di uscita}{19}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{20}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{19}{subsection.3.3.4}%
 \contentsline {subsection}{\numberline {3.3.5}Standardizzazione delle variabili}{20}{subsection.3.3.5}%
 \contentsline {section}{\numberline {3.4}Applicazione dei modelli di machine learning}{20}{section.3.4}%
 \contentsline {subsection}{\numberline {3.4.1}Support Vector Classifier}{20}{subsection.3.4.1}%
 \contentsline {subsection}{\numberline {3.4.2}Multi-Layer Perceptron}{21}{subsection.3.4.2}%
-\contentsline {subsection}{\numberline {3.4.3}Regioni decisionali}{21}{subsection.3.4.3}%
-\contentsline {subsection}{\numberline {3.4.4}Confronto tramite F1-score}{21}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.3}Confronto tramite F1-score}{21}{subsection.3.4.3}%
 \contentsline {chapter}{\numberline {4}Conclusioni}{22}{chapter.4}%
 \contentsline {chapter}{Bibliografia}{22}{chapter.4}%
