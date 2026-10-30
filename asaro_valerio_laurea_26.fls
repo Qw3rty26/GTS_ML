@@ -1,0 +1,5 @@
+PWD /home/qwerty/Documents/GTS_ML
+INPUT /nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/web2c/texmf.cnf
+INPUT /nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT asaro_valerio_laurea_26.tex
+OUTPUT asaro_valerio_laurea_26.log

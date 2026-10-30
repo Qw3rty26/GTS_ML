@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex asaro_valerio_laurea_26"] 1793336320.36883 "asaro_valerio_laurea_26.aux" "asaro_valerio_laurea_26.bbl" "asaro_valerio_laurea_26" 1793336326.58861 0
+["bibtex asaro_valerio_laurea_26"] 1793336320.36883 "asaro_valerio_laurea_26.aux" "asaro_valerio_laurea_26.bbl" "asaro_valerio_laurea_26" 1793357748.61691 0
   "./biblio.bib" 1793333610.68379 7230 3933240f2b1af82261385a15badad4af ""
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/bibtex/bst/base/plain.bst" 1 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "asaro_valerio_laurea_26.aux" 1793336326.11859 21732 196ebab23d34e547c1e04e18ebe39b83 "pdflatex"
+  "asaro_valerio_laurea_26.aux" 1793357748.09693 21732 196ebab23d34e547c1e04e18ebe39b83 "pdflatex"
   (generated)
   "asaro_valerio_laurea_26.bbl"
   "asaro_valerio_laurea_26.blg"
   (rewritten before read)
-["pdflatex"] 1793336320.4092 "asaro_valerio_laurea_26.tex" "asaro_valerio_laurea_26.pdf" "asaro_valerio_laurea_26" 1793336326.58905 0
+["pdflatex"] 1793357742.04692 "asaro_valerio_laurea_26.tex" "asaro_valerio_laurea_26.pdf" "asaro_valerio_laurea_26" 1793357748.61734 0
   "/nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1 334042 b0bb6c3f818e504ab831c860dc214e0c ""
   "/nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/web2c/pdftex/pdflatex.fmt" 1 8021441 97995a4de8f21274b7ae9151572c4806 ""
   "/nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/web2c/texmf.cnf" 1 42643 83eec79818b584997cb0682995bfb0fe ""
@@ -163,11 +163,11 @@
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/latex/ucs/utf8x.def" 1 8944 e3433baec74c4b7b278c6b6a547ff9ec ""
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/latex/url/url.sty" 1 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/latex/xcolor/xcolor.sty" 1 55487 80a65caedd3722f4c20a14a69e785d8f ""
-  "asaro_valerio_laurea_26.aux" 1793336326.11859 21732 196ebab23d34e547c1e04e18ebe39b83 "pdflatex"
+  "asaro_valerio_laurea_26.aux" 1793357748.09693 21732 196ebab23d34e547c1e04e18ebe39b83 "pdflatex"
   "asaro_valerio_laurea_26.bbl" 1793336320.39952 1986 c3b468459d0a4bdbeb502f5eb9c2d4d5 "bibtex asaro_valerio_laurea_26"
-  "asaro_valerio_laurea_26.out" 1793336326.12259 8647 debcb4208e63ce204f495f7249e77322 "pdflatex"
+  "asaro_valerio_laurea_26.out" 1793357748.10293 8647 debcb4208e63ce204f495f7249e77322 "pdflatex"
   "asaro_valerio_laurea_26.tex" 1793316071.61567 7285 8815396068eb95b5c247d94e8aa729a6 ""
-  "asaro_valerio_laurea_26.toc" 1793336326.12359 4058 f117d49e3a53975355ba1dbb5814d89a "pdflatex"
+  "asaro_valerio_laurea_26.toc" 1793357748.10393 4058 f117d49e3a53975355ba1dbb5814d89a "pdflatex"
   "capitolo1.tex" 1793316071.61667 1952 4f0ca30784a06e73c518e109c778c0b7 ""
   "capitolo2.tex" 1793336055.25256 25458 72a55eb08cc57e931c5a084ea50153dd ""
   "capitolo3.tex" 1793336313.52444 17633 7f539c358ca1f3cd36786188edabc63f ""
@@ -182,7 +182,7 @@
   "plots/cluster_alive.png" 1793335775.59031 131410 93c2786ea98c3eadcfa74fdab44bd7c1 ""
   "plots/cluster_dead.png" 1793336185.32824 177876 cd689bc4cc1847f77bfe48d326ccbb7c ""
   "plots/distribution_alive_dead_clusters.pdf" 1793327298.50626 153540 01131b90a8ef40cc37234ff75189830c ""
-  "plots/distribuzioni_bmf_hmr.pdf" 1793316071.66167 23805 bb77da9ca0d2aa949b34de49e5f3d642 ""
+  "plots/distribuzioni_bmf_hmr.pdf" 1793357638.35167 23951 6ef0a53122cfff3dcb31a793d01d9241 ""
   "plots/energy_drift.pdf" 1793316071.66167 19349 cbf3872bbc3495e76cb9627d3319a3f3 ""
   "plots/galactic_plummer_potential.pdf" 1793316071.66267 28348 1c900a3e465c1905497a6873bcb998aa ""
   "plots/initial_positions.pdf" 1793316071.66667 170259 f8b715c29dbcf95524b2ceacbb76631c ""
