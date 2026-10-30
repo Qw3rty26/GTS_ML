@@ -22,6 +22,11 @@ Luca Ciotti.
 \newblock {\em Introduction to Stellar Dynamics}.
 \newblock Cambridge University Press, 2021.
 
+\bibitem{cortes1995support}
+Corinna Cortes and Vladimir Vapnik.
+\newblock Support-vector networks.
+\newblock {\em Machine Learning}, 20:273--297, 1995.
+
 \bibitem{goldstein2002}
 Herbert Goldstein, Charles Poole, and John Safko.
 \newblock {\em Classical Mechanics}.

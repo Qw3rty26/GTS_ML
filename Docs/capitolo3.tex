@@ -82,7 +82,7 @@ Per analizzare i risultati delle simulazioni, vengono considerati gli istogrammi
 Dalla figura~\ref{fig:distribuzione-grandezze-finali} si nota che entrambe le distribuzioni presentano un andamento bimodale, caratterizzato da due gruppi di valori distinti. Si osserva che in $4689$ simulazioni, pari al $27.42\%$ del dataset, sia la frazione di massa legata $\boundMassFraction$ sia il rapporto tra i raggi di metà massa $\halfMassRadiusRatio$ sono nulli. In questi casi, nessuna stella risulta più legata all'ammasso e le stelle si sono totalmente disperse sotto l'effetto delle forze mareali galattiche.
 \subsection{Relazione tra parametri orbitali ed esiti delle simulazioni}
 \label{subsec:relazione-parametri-esiti}
-La Figura~\ref{fig:heatmap-bmf-hmr} mostra le mappe di calore della frazione di massa legata finale $\boundMassFraction$ e del raggio di metà massa finale $R_{1/2}$, in funzione del semiasse maggiore $\semiMajorAxis$ e dell'eccentricità $\orbitEccentricity$. Ogni cella rappresenta la media dei risultati delle $15$ realizzazioni iniziali per una determinata configurazione orbitale.
+La Figura~\ref{fig:heatmap-bmf-hmr} mostra le mappe di calore della frazione di massa legata finale $\boundMassFraction$ e del raggio di metà massa $R_{1/2}$, in funzione del semiasse maggiore $\semiMajorAxis$ e dell'eccentricità $\orbitEccentricity$. Ogni cella rappresenta la media dei risultati delle $15$ realizzazioni iniziali per una determinata configurazione orbitale.
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{./plots/mappa_calore_bmf_hmr.pdf}
@@ -97,34 +97,35 @@ Per applicare i metodi di apprendimento automatico, il dataset viene organizzato
 \subsection{Classificazione degli ammassi stellari}
 \label{subsec:classificazione-ammassi}
 Al termine della simulazione, gli ammassi stellari possono presentare esiti evolutivi differenti: alcuni conservano una struttura compatta e gravitazionalmente legata, mentre altri subiscono una perdita di massa e una variazione dell'estensione spaziale tali da modificarne significativamente la struttura iniziale. Queste differenze consentono di distinguere due classi di esito evolutivo: gli ammassi sopravvissuti, indicati come vivi, e gli ammassi dissolti, indicati come morti. Nel presente lavoro, tale distinzione viene adottata per formulare un problema di classificazione binaria, nel quale a ciascun ammasso viene assegnata un'etichetta corrispondente all'insieme di appartenenza.
-\begin{comment}
-
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{./plots/cluster_vivo.png}
-		\caption*{(a) Ammasso vivo}
+		\includegraphics[width=\textwidth]{./plots/cluster_alive.png}
+		\vspace{0.3em}
+		
+		\small Ammasso stellare vivo \\ ($\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.5$) \\ ($\boundMassFraction = 0.93$, $\halfMassRadiusRatio = 1.002$)
 	\end{minipage}
 	\hfill
 	\begin{minipage}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{./plots/cluster_morto.png}
-		\caption*{(b) Ammasso morto}
+		\includegraphics[width=\textwidth]{./plots/cluster_dead.png}
+		\vspace{0.3em}
+		
+		\small Ammasso stellare morto \\ ($\semiMajorAxis = 140.0$, $\orbitEccentricity = 0.8$) \\ ($\boundMassFraction = 0.065$, $\halfMassRadiusRatio = 0.246$)
 	\end{minipage}
-	\caption{Esempi di configurazioni finali di ammassi appartenenti alle due classi, visualizzate mediante OVITO.}
+	\caption{Evoluzione di uno stesso ammasso stellare, generato a partire dalla medesima configurazione iniziale e sottoposto a differenti condizioni orbitali. Le immagini mostrano le configurazioni raggiunte al tempo $\simulationEndTime$: in un caso l'ammasso sopravvive, mentre nell'altro si dissolve. Le configurazioni sono visualizzate mediante OVITO: le stelle sono rappresentate in bianco, il centro galattico in rosso e il centro di massa delle stelle legate in arancione.}
 	\label{fig:esempi-ammassi}
 \end{figure}
-\end{comment}
 \subsection{Definizione formale degli insiemi}
 \label{subsec:criterio-vivi-morti}
-Si indica con $\allClusters$ l'insieme di tutti gli ammassi stellari $i$. Come descritto nella Sezione~\ref{subsec:classificazione-ammassi}, gli ammassi vengono suddivisi in due sottoinsiemi, $\aliveCluster$ e $\deadCluster$. Tale suddivisione si basa su due grandezze associate a ciascun ammasso $i$: la frazione di massa legata $\boundMassFraction_i$ e il rapporto tra il raggio di metà massa finale e quello iniziale $\halfMassRadiusRatio_i$. I valori soglia sono stati individuati attraverso un'analisi delle configurazioni degli ammassi nelle fasi iniziali e finali delle simulazioni, nonché delle distribuzioni delle grandezze finali presentate nelle Sezioni~\ref{subsec:distribuzione-grandezze-finali} e~\ref{subsec:relazione-parametri-esiti}.
+Sia $\allClusters$ l'insieme di tutti gli ammassi stellari $i$. Come descritto nella Sezione~\ref{subsec:classificazione-ammassi}, gli ammassi vengono suddivisi in due sottoinsiemi, $\aliveCluster$ e $\deadCluster$. Tale suddivisione si basa su due grandezze associate a ciascun ammasso $i$: la frazione di massa legata $f_{\mathrm{bound}, i}$ e il rapporto tra il raggio di metà massa finale e quello iniziale $\mathcal{R}_{1/2, i}$. I valori soglia, entrambi pari a $0.1$, sono stati individuati attraverso un'analisi delle configurazioni degli ammassi nelle fasi iniziali e finali delle simulazioni, nonché delle distribuzioni delle grandezze finali presentate nelle Sezioni~\ref{subsec:distribuzione-grandezze-finali} e~\ref{subsec:relazione-parametri-esiti}.
 Gli insiemi $\aliveCluster$ e $\deadCluster$ sono definiti come segue:
 \[
-\aliveCluster = \left\{ i \in \allClusters \,\middle|\, \boundMassFraction_i > 0.1 \;\land\; \halfMassRadiusRatio_i > 0.1 \right\}
+\aliveCluster = \left\{ i \in \allClusters \,\middle|\, f_{\mathrm{bound}, i} > 0.1 \;\land\; \mathcal{R}_{1/2, i} > 0.1 \right\}
 \]
 \[
-\deadCluster = \left\{ i \in \allClusters \,\middle|\, \boundMassFraction_i \leq 0.1 \;\lor\; \halfMassRadiusRatio_i \leq 0.1 \right\}
+\deadCluster = \left\{ i \in \allClusters \,\middle|\, f_{\mathrm{bound}, i} \leq 0.1 \;\lor\; \mathcal{R}_{1/2, i} \leq 0.1 \right\}
 \]
 I due insiemi sono disgiunti ed esaustivi rispetto a $\allClusters$, poiché soddisfano le seguenti proprietà:
 \[
@@ -132,27 +133,42 @@ I due insiemi sono disgiunti ed esaustivi rispetto a $\allClusters$, poiché sod
 \qquad
 \aliveCluster \cup \deadCluster = \allClusters.
 \]
+Sul totale di $|\allClusters|=17\,100$  simulazioni analizzate, l'insieme $\aliveCluster$ contiene 11\,695 ammassi, pari al $68.39\%$ del totale, mentre $\deadCluster$ contiene 5\,405 ammassi, pari al $31.61\%$.
 
 \subsection{Variabili di ingresso e di uscita}
 \label{subsec:variabili-ingresso-uscita}
 Per ogni simulazione, il vettore delle variabili di ingresso è definito come
-\[
-\mathbf{x} =
-\begin{bmatrix}
-	\semiMajorAxis \\
-	\orbitEccentricity
-\end{bmatrix},
-\]
-dove $\semiMajorAxis$ è il semiasse maggiore dell'orbita e $\orbitEccentricity$ è la sua eccentricità. Questi parametri descrivono le condizioni orbitali iniziali e costituiscono le informazioni disponibili al modello per prevedere l'esito della simulazione.
-Indicando con $N_{\mathrm{sim}}$ il numero totale di simulazioni, l'insieme degli ingressi è rappresentato dalla matrice
-\[
-X \in \mathbb{R}^{N_{\mathrm{sim}}\times 2},
-\]
-mentre le etichette delle classi formano il vettore
-\[
-Y \in \{0,1\}^{N_{\mathrm{sim}}}.
-\]
-A ciascuna simulazione viene assegnata l'etichetta $Y=1$ se l'ammasso è classificato come vivo, ossia se soddisfa entrambe le condizioni definite nella Sezione~\ref{subsec:criterio-vivi-morti}, e $Y=0$ se è classificato come morto. Il modello utilizza quindi le condizioni orbitali iniziali per prevedere la classe finale dell'ammasso.
+\begin{equation}
+	\mathbf{x} =
+	\begin{bmatrix}
+		\semiMajorAxis \\
+		\orbitEccentricity
+	\end{bmatrix}
+\end{equation}
+Questi parametri descrivono le condizioni orbitali iniziali e costituiscono le informazioni disponibili al modello per prevedere l'esito della simulazione.
+Considerando tutte le simulazioni, la matrice degli ingressi è rappresentata da
+\begin{equation}
+	X \in \mathbb{R}^{|\allClusters|\times 2}
+\end{equation}
+mentre le etichette associate alle simulazioni formano il vettore
+\begin{equation}
+	Y \in \{0,1\}^{|\allClusters|}
+\end{equation}
+Utilizzando gli insiemi $\aliveCluster$ e $\deadCluster$, definiti nella Sezione~\ref{subsec:criterio-vivi-morti}, a ciascuna simulazione $i$ viene assegnata un'etichetta secondo la seguente definizione:
+\begin{equation}
+	Y_i =
+	\begin{cases}
+		1 & \text{se } i \in \aliveCluster\\
+		0 & \text{se } i \in \deadCluster
+	\end{cases}
+\end{equation}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.75\textwidth]{plots/distribution_alive_dead_clusters.pdf}
+	\caption{Esito della classificazione binaria degli ammassi stellari.}
+	\label{fig:distribuzione-ammassi}
+\end{figure}
+
 \subsection{Suddivisione in training set e test set}
 \label{subsec:suddivisione-dataset}
 Per valutare la capacità di generalizzazione dei modelli, il dataset viene suddiviso in un insieme di addestramento (training set), contenente l'80\% delle simulazioni, e un insieme di test (test set), contenente il restante 20\%. Il primo viene utilizzato per apprendere la relazione tra i parametri orbitali e le etichette, mentre il secondo viene impiegato esclusivamente per valutare le prestazioni su simulazioni non utilizzate durante l'addestramento.
@@ -165,11 +181,31 @@ x' = \frac{x-\mu}{\sigma},
 \]
 dove $x$ è il valore originale, mentre $\mu$ e $\sigma$ sono rispettivamente la media e la deviazione standard calcolate sul training set. Gli stessi parametri vengono utilizzati per trasformare il test set, senza ricalcolarli sui dati di test.
 La standardizzazione è particolarmente rilevante per la Support Vector Machine e il Multi-Layer Perceptron, poiché il loro processo di apprendimento può risentire delle differenti scale numeriche delle variabili di ingresso.
-\subsection{Support Vector Machine}
+
+\section{Applicazione dei modelli di machine learning}
+Di seguito si considerano due modelli di machine learning, che affrontano il problema della classificazione secondo principi differenti: uno basato sulla ricerca di una frontiera decisionale, l'altro sull'apprendimento mediante una rete neurale.
+\subsection{Support Vector Classifier}
 \label{subsec:svm}
-prova prova
+Il primo modello considerato è un Support Vector Classifier (SVC), una variante della Support Vector Machine utilizzata per problemi di classificazione. Il modello impiega un kernel a funzione di base radiale (RBF), che permette di individuare frontiere decisionali non lineari nello spazio delle variabili di ingresso \cite{cortes1995support}.\\
+La configurazione prevede un parametro di regolarizzazione $C=1$, che controlla quanto il modello penalizza gli errori di classificazione durante l'addestramento. Valori maggiori rendono il modello meno tollerante agli errori sui dati di addestramento, mentre valori inferiori favoriscono una separazione più regolare, anche a costo di accettare alcune classificazioni errate.\\
+Come evidenziato nella Sezione~\ref{subsec:criterio-vivi-morti}, gli ammassi vivi e morti non sono presenti in proporzioni uguali nel dataset. Per tenere conto di questo sbilanciamento, viene adottata una ponderazione inversamente proporzionale alla frequenza delle etichette nel training set. In questo modo, gli errori di classificazione relativi all'insieme meno rappresentato assumono un peso maggiore durante l'addestramento.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.65\textwidth]{plots/svm_decision_boundaries.pdf}
+	\caption{Regioni decisionali del classificatore SVC con kernel a funzione di base radiale. Lo sfondo rappresenta le previsioni del modello (verde - vivo, rosso - morto).}
+	\label{fig:svm-decision-boundaries}
+\end{figure}
+
 \subsection{Multi-Layer Perceptron}
 \label{subsec:mlp}
+Il secondo modello considerato è un Multi-Layer Perceptron (MLP), una rete neurale artificiale costituita da strati di neuroni interconnessi. L'architettura adottata comprende due livelli nascosti, rispettivamente di 50 e 25 neuroni, e un livello di uscita per la classificazione binaria.
+Per tenere conto dello sbilanciamento tra gli ammassi vivi e morti, evidenziato nella Sezione~\ref{subsec:criterio-vivi-morti}, il training set viene bilanciato mediante oversampling. Questa procedura consiste nel duplicare con reinserimento i campioni dell'insieme meno rappresentato fino a raggiungere la numerosità di quello più numeroso. L'operazione viene applicata esclusivamente al training set, lasciando invariata la distribuzione originale del test set.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.65\textwidth]{plots/mlp_decision_boundaries.pdf}
+	\caption{Regioni decisionali del classificatore MLP. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate.}
+	\label{fig:mlp-decision-boundaries}
+\end{figure}
 \subsection{Regioni decisionali}
 \label{subsec:regioni-decisionali}
 \subsection{Confronto tramite F1-score}
