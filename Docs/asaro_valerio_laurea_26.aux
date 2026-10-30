@@ -159,27 +159,41 @@
 \newlabel{fig:distribuzione-ammassi}{{3.4}{19}{Esito della classificazione binaria degli ammassi stellari}{figure.3.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{19}{subsection.3.3.4}\protected@file@percent }
 \newlabel{subsec:suddivisione-dataset}{{3.3.4}{19}{Suddivisione in training set e test set}{subsection.3.3.4}{}}
+\citation{kaufman2012leakage}
 \citation{cortes1995support}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}Standardizzazione delle variabili}{20}{subsection.3.3.5}\protected@file@percent }
-\newlabel{subsec:standardizzazione-variabili}{{3.3.5}{20}{Standardizzazione delle variabili}{subsection.3.3.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}Applicazione dei modelli di machine learning}{20}{section.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Support Vector Classifier}{20}{subsection.3.4.1}\protected@file@percent }
-\newlabel{subsec:svm}{{3.4.1}{20}{Support Vector Classifier}{subsection.3.4.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Regioni decisionali del classificatore SVC con kernel a funzione di base radiale. Lo sfondo rappresenta le previsioni del modello (verde - vivo, rosso - morto).}}{21}{figure.3.5}\protected@file@percent }
-\newlabel{fig:svm-decision-boundaries}{{3.5}{21}{Regioni decisionali del classificatore SVC con kernel a funzione di base radiale. Lo sfondo rappresenta le previsioni del modello (verde - vivo, rosso - morto)}{figure.3.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Multi-Layer Perceptron}{21}{subsection.3.4.2}\protected@file@percent }
-\newlabel{subsec:mlp}{{3.4.2}{21}{Multi-Layer Perceptron}{subsection.3.4.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Regioni decisionali del classificatore MLP. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate.}}{21}{figure.3.6}\protected@file@percent }
-\newlabel{fig:mlp-decision-boundaries}{{3.6}{21}{Regioni decisionali del classificatore MLP. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate}{figure.3.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}Confronto tramite F1-score}{21}{subsection.3.4.3}\protected@file@percent }
-\newlabel{subsec:confronto-f1-score}{{3.4.3}{21}{Confronto tramite F1-score}{subsection.3.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}Confronto tramite F1-score}{20}{subsection.3.3.5}\protected@file@percent }
+\newlabel{subsec:confronto-f1-score}{{3.3.5}{20}{Confronto tramite F1-score}{subsection.3.3.5}{}}
+\newlabel{eq:precisione}{{3.6}{20}{Confronto tramite F1-score}{equation.3.3.6}{}}
+\newlabel{eq:richiamo}{{3.7}{20}{Confronto tramite F1-score}{equation.3.3.7}{}}
+\newlabel{eq:f1-score}{{3.8}{20}{Confronto tramite F1-score}{equation.3.3.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.6}Standardizzazione delle variabili}{20}{subsection.3.3.6}\protected@file@percent }
+\newlabel{subsec:standardizzazione-variabili}{{3.3.6}{20}{Standardizzazione delle variabili}{subsection.3.3.6}{}}
+\newlabel{eq:standardizzazione}{{3.9}{20}{Standardizzazione delle variabili}{equation.3.3.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.7}Support Vector Classifier}{20}{subsection.3.3.7}\protected@file@percent }
+\newlabel{subsec:svm}{{3.3.7}{20}{Support Vector Classifier}{subsection.3.3.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Modello}{20}{subsubsection*.3}\protected@file@percent }
+\newlabel{eq:svm-polynomial-kernel}{{3.10}{21}{Modello}{equation.3.3.10}{}}
+\newlabel{eq:svm-gamma}{{3.11}{21}{Modello}{equation.3.3.11}{}}
+\newlabel{eq:svm-polynomial-kernel-expanded}{{3.12}{21}{Modello}{equation.3.3.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}}{21}{figure.3.5}\protected@file@percent }
+\newlabel{fig:svm-decision-boundaries}{{3.5}{21}{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}{figure.3.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Risultati}{21}{subsubsection*.4}\protected@file@percent }
+\newlabel{eq:svm-decision-boundary}{{3.13}{22}{Risultati}{equation.3.3.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Rappresentazione grafica della frontiera di decisione analitica definita dall'Equazione~\ref {eq:svm-decision-boundary}. La regione verde rappresenta l'isola di stabilità e sopravvivenza degli ammassi ($f(a,e) > 0$), mentre la regione in rosso denota la regione di dissoluzione degli ammassi ($f(a,e) < 0$).}}{22}{figure.3.6}\protected@file@percent }
+\newlabel{fig:svm-analytical-boundary}{{3.6}{22}{Rappresentazione grafica della frontiera di decisione analitica definita dall'Equazione~\ref {eq:svm-decision-boundary}. La regione verde rappresenta l'isola di stabilità e sopravvivenza degli ammassi ($f(a,e) > 0$), mentre la regione in rosso denota la regione di dissoluzione degli ammassi ($f(a,e) < 0$)}{figure.3.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.8}Multi-Layer Perceptron}{22}{subsection.3.3.8}\protected@file@percent }
+\newlabel{subsec:mlp}{{3.3.8}{22}{Multi-Layer Perceptron}{subsection.3.3.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Modello}{22}{subsubsection*.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}}{23}{figure.3.7}\protected@file@percent }
+\newlabel{fig:mlp-decision-boundaries}{{3.7}{23}{Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}{figure.3.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Risultati}{23}{subsubsection*.6}\protected@file@percent }
 \bibstyle{plain}
 \bibdata{biblio}
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Conclusioni}{22}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Conclusioni}{24}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{cha:conclusioni}{{4}{22}{Conclusioni}{chapter.4}{}}
-\@writefile{toc}{\contentsline {chapter}{Bibliografia}{22}{chapter.4}\protected@file@percent }
+\newlabel{cha:conclusioni}{{4}{24}{Conclusioni}{chapter.4}{}}
+\@writefile{toc}{\contentsline {chapter}{Bibliografia}{24}{chapter.4}\protected@file@percent }
 \bibcite{baumgardt2003}{1}
 \bibcite{binneytremaine2008}{2}
 \bibcite{cai2016evolution}{3}
@@ -187,7 +201,8 @@
 \bibcite{cortes1995support}{5}
 \bibcite{goldstein2002}{6}
 \bibcite{hairer2006geometric}{7}
-\bibcite{plummer1911}{8}
-\bibcite{quinn1997timestepping}{9}
-\bibcite{stukowski2010}{10}
-\gdef \@abspage@last{25}
+\bibcite{kaufman2012leakage}{8}
+\bibcite{plummer1911}{9}
+\bibcite{quinn1997timestepping}{10}
+\bibcite{stukowski2010}{11}
+\gdef \@abspage@last{27}

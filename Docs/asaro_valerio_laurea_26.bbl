@@ -38,6 +38,12 @@ Ernst Hairer, Christian Lubich, and Gerhard Wanner.
   for Ordinary Differential Equations}.
 \newblock Springer, 2 edition, 2006.
 
+\bibitem{kaufman2012leakage}
+Shachar Kaufman, Saharon Rosset, Claudia Perlich, and Oren Stitelman.
+\newblock Leakage in data mining: Formulation, detection, and avoidance.
+\newblock {\em ACM Transactions on Knowledge Discovery from Data}, 6(4):1--21,
+  2012.
+
 \bibitem{plummer1911}
 H.~C. Plummer.
 \newblock On the problem of distribution in globular star clusters.

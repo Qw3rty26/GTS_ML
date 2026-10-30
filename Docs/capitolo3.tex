@@ -173,38 +173,100 @@ Utilizzando gli insiemi $\aliveCluster$ e $\deadCluster$, definiti nella Sezione
 \label{subsec:suddivisione-dataset}
 Per valutare la capacità di generalizzazione dei modelli, il dataset viene suddiviso in un insieme di addestramento (training set), contenente l'80\% delle simulazioni, e un insieme di test (test set), contenente il restante 20\%. Il primo viene utilizzato per apprendere la relazione tra i parametri orbitali e le etichette, mentre il secondo viene impiegato esclusivamente per valutare le prestazioni su simulazioni non utilizzate durante l'addestramento.
 La suddivisione è stratificata rispetto alle etichette, in modo da mantenere nei due insiemi proporzioni comparabili di ammassi vivi e morti.
+
+\subsection{Confronto tramite F1-score}
+\label{subsec:confronto-f1-score}
+Per valutare le prestazioni dei modelli è necessario considerare due aspetti complementari della classificazione. Il primo è la precisione, che misura l'affidabilità delle previsioni positive, indicando quale proporzione degli ammassi classificati come sopravvissuti è effettivamente sopravvissuta:
+\begin{equation}
+	\mathrm{Precisione} = \frac{TP}{TP+FP}
+	\label{eq:precisione}
+\end{equation}
+Il secondo è il richiamo (recall), che misura la capacità del modello di individuare gli ammassi sopravvissuti, indicando quale proporzione di quelli effettivamente sopravvissuti viene riconosciuta correttamente:
+\begin{equation}
+	\mathrm{Richiamo} = \frac{TP}{TP+FN}
+	\label{eq:richiamo}
+\end{equation}
+In queste espressioni, $TP$ (veri positivi) indica il numero di ammassi sopravvissuti classificati correttamente, $FP$ (falsi positivi) il numero di ammassi dissolti classificati erroneamente come sopravvissuti e $FN$ (falsi negativi) il numero di ammassi sopravvissuti classificati erroneamente come dissolti.
+Per riassumere entrambe le misure in un unico valore si utilizza l'F1-score, definito come la loro media armonica:
+\begin{equation}
+	F_1 = 2 \cdot \frac{\mathrm{Precisione}\cdot\mathrm{Richiamo}}{\mathrm{Precisione}+\mathrm{Richiamo}}.
+	\label{eq:f1-score}
+\end{equation}
+La media armonica penalizza gli squilibri tra precisione e richiamo: un valore elevato di una misura non è sufficiente a compensare un valore basso dell'altra. L'F1-score assume valori compresi tra $0$ e $1$, dove $1$ rappresenta il caso ideale in cui tutti gli ammassi sopravvissuti vengono riconosciuti correttamente e non si verificano falsi positivi.
+
 \subsection{Standardizzazione delle variabili}
 \label{subsec:standardizzazione-variabili}
-Prima dell'addestramento, le variabili di ingresso vengono standardizzate per renderne confrontabili le scale. Per ciascuna variabile viene applicata la trasformazione
-\[
-x' = \frac{x-\mu}{\sigma},
-\]
-dove $x$ è il valore originale, mentre $\mu$ e $\sigma$ sono rispettivamente la media e la deviazione standard calcolate sul training set. Gli stessi parametri vengono utilizzati per trasformare il test set, senza ricalcolarli sui dati di test.
-La standardizzazione è particolarmente rilevante per la Support Vector Machine e il Multi-Layer Perceptron, poiché il loro processo di apprendimento può risentire delle differenti scale numeriche delle variabili di ingresso.
+Prima dell'addestramento, le variabili di ingresso vengono standardizzate per uniformarne la scala ed evitare che differenze nell'ordine di grandezza influenzino il processo di apprendimento. La trasformazione applicata a ciascuna variabile è definita come:
+\begin{equation}
+	x' = \frac{x-\mu}{\sigma}
+	\label{eq:standardizzazione}
+\end{equation}
+dove $x$ rappresenta il valore originale, mentre $\mu$ e $\sigma$ indicano rispettivamente la media e la deviazione standard della variabile. Questi parametri vengono calcolati esclusivamente sul training set e successivamente utilizzati, senza modificarli, per standardizzare il test set.
+Questa procedura evita la contaminazione dei dati di addestramento da parte delle informazioni contenute nel test set. Se i parametri di standardizzazione fossero calcolati sull'intero dataset, anche i dati destinati alla valutazione contribuirebbero indirettamente alla fase di addestramento, compromettendo l'indipendenza del test set e rendendo meno attendibile la valutazione delle prestazioni del modello \cite{ kaufman2012leakage}.
 
-\section{Applicazione dei modelli di machine learning}
-Di seguito si considerano due modelli di machine learning, che affrontano il problema della classificazione secondo principi differenti: uno basato sulla ricerca di una frontiera decisionale, l'altro sull'apprendimento mediante una rete neurale.
 \subsection{Support Vector Classifier}
 \label{subsec:svm}
-Il primo modello considerato è un Support Vector Classifier (SVC), una variante della Support Vector Machine utilizzata per problemi di classificazione. Il modello impiega un kernel a funzione di base radiale (RBF), che permette di individuare frontiere decisionali non lineari nello spazio delle variabili di ingresso \cite{cortes1995support}.\\
-La configurazione prevede un parametro di regolarizzazione $C=1$, che controlla quanto il modello penalizza gli errori di classificazione durante l'addestramento. Valori maggiori rendono il modello meno tollerante agli errori sui dati di addestramento, mentre valori inferiori favoriscono una separazione più regolare, anche a costo di accettare alcune classificazioni errate.\\
-Come evidenziato nella Sezione~\ref{subsec:criterio-vivi-morti}, gli ammassi vivi e morti non sono presenti in proporzioni uguali nel dataset. Per tenere conto di questo sbilanciamento, viene adottata una ponderazione inversamente proporzionale alla frequenza delle etichette nel training set. In questo modo, gli errori di classificazione relativi all'insieme meno rappresentato assumono un peso maggiore durante l'addestramento.
+\subsubsection{Modello}
+Il primo classificatore utilizzato è il Support Vector Classifier (SVC), basato sulle Support Vector Machine (SVM) \cite{cortes1995support}. Il suo obiettivo è individuare una frontiera decisionale che separi gli ammassi sopravvissuti da quelli dissolti nello spazio definito dal semiasse maggiore e dall'eccentricità orbitale. La posizione della frontiera dipende dai campioni più vicini ad essa, chiamati vettori di supporto, che contribuiscono a determinarne la forma.
+Per consentire una separazione non lineare viene adottato un kernel polinomiale di secondo grado, definito come:
+\begin{equation}
+	K(\mathbf{x},\mathbf{z})=(\gamma\,\mathbf{x}\cdot\mathbf{z}+r)^2
+	\label{eq:svm-polynomial-kernel}
+\end{equation}
+dove $\mathbf{x}$ e $\mathbf{z}$ rappresentano due vettori contenenti i parametri orbitali standardizzati, mentre $\mathbf{x}\cdot\mathbf{z}$ indica il loro prodotto scalare. Il parametro $\gamma$ determina la scala del prodotto scalare e viene calcolato secondo la relazione:
+\begin{equation}
+	\gamma = \frac{1}{n_{\mathrm{feature}}\cdot\operatorname{Var}(X)}
+	\label{eq:svm-gamma}
+\end{equation}
+dove $n_{\mathrm{feature}}$ indica il numero di variabili di ingresso e $\operatorname{Var}(X)$ la loro varianza media. Nel nostro caso, le variabili considerate sono il semiasse maggiore e l'eccentricità. Tuttavia, come descritto nella Sezione~\ref{subsec:standardizzazione-variabili}, entrambe vengono standardizzate prima dell'addestramento, assumendo quindi varianza unitaria. Avendo due variabili di ingresso, si ottiene:
+\[
+\gamma = \frac{1}{2\cdot 1}=0.5
+\]
+Il parametro $r$, corrispondente al termine costante del kernel, viene impostato a $0$. Sostituendo questo valore nell'Equazione~\ref{eq:svm-polynomial-kernel}, si ottiene:
+\begin{equation}
+	K(\mathbf{x},\mathbf{z}) = \gamma^2(\mathbf{x}\cdot\mathbf{z})^2
+	\label{eq:svm-polynomial-kernel-expanded}
+\end{equation}
+In questo modo, il kernel considera esclusivamente termini quadratici, comprese le interazioni tra le variabili di ingresso, senza introdurre contributi lineari o costanti.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.65\textwidth]{plots/svm_decision_boundaries.pdf}
-	\caption{Regioni decisionali del classificatore SVC con kernel a funzione di base radiale. Lo sfondo rappresenta le previsioni del modello (verde - vivo, rosso - morto).}
+	\includegraphics[width=0.8\textwidth]{plots/svc_decision_boundaries.pdf}
+	\caption{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}
 	\label{fig:svm-decision-boundaries}
+\end{figure}
+\subsubsection{Risultati}
+Sul test set, il classificatore raggiunge un F1-score, definito nella Sezione~\ref{subsec:confronto-f1-score}, pari a $0.6505$. Considerando separatamente le due categorie, l'F1-score è pari a $0.53$ per gli ammassi dissolti e a $0.72$ per quelli sopravvissuti. Il modello mostra quindi prestazioni differenti nel riconoscimento delle due categorie, con risultati migliori per gli ammassi sopravvissuti.
+\\Sebbene le prestazioni ottenute non siano particolarmente elevate, la separazione appresa può essere descritta mediante un'equazione quadratica, coerentemente con il kernel polinomiale introdotto nella Sezione~\ref{subsec:svm}. Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
+\begin{equation}
+	\begin{aligned}
+		f(a, e) = \, & -0.000126024\,a^2
+		- 3.052125993\,e^2
+		+ 0.009638306\,ae \\
+		& + 0.034576916\,a
+		+ 1.320091691\,e
+		- 1.737562166
+	\end{aligned}
+	\label{eq:svm-decision-boundary}
+\end{equation}
+L'equazione permette di ricondurre la classificazione a una relazione esplicita tra il semiasse maggiore $a$ e l'eccentricità $e$, rendendo direttamente descrivibile la frontiera decisionale appresa dal modello.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.65\textwidth]{plots/svc_analytical_boundary.pdf}
+	\caption{Rappresentazione grafica della frontiera di decisione analitica definita dall'Equazione~\ref{eq:svm-decision-boundary}. La regione verde rappresenta l'isola di stabilità e sopravvivenza degli ammassi ($f(a,e) > 0$), mentre la regione in rosso denota la regione di dissoluzione degli ammassi ($f(a,e) < 0$).}
+	\label{fig:svm-analytical-boundary}
 \end{figure}
 
 \subsection{Multi-Layer Perceptron}
 \label{subsec:mlp}
-Il secondo modello considerato è un Multi-Layer Perceptron (MLP), una rete neurale artificiale costituita da strati di neuroni interconnessi. L'architettura adottata comprende due livelli nascosti, rispettivamente di 50 e 25 neuroni, e un livello di uscita per la classificazione binaria.
-Per tenere conto dello sbilanciamento tra gli ammassi vivi e morti, evidenziato nella Sezione~\ref{subsec:criterio-vivi-morti}, il training set viene bilanciato mediante oversampling. Questa procedura consiste nel duplicare con reinserimento i campioni dell'insieme meno rappresentato fino a raggiungere la numerosità di quello più numeroso. L'operazione viene applicata esclusivamente al training set, lasciando invariata la distribuzione originale del test set.
+\subsubsection{Modello}
+Il secondo classificatore utilizzato è un Multi-Layer Perceptron (MLP), una rete neurale artificiale costituita da strati di neuroni interconnessi. L'architettura adottata comprende due livelli nascosti, rispettivamente di 16 e 8 neuroni, e un livello di uscita per la classificazione binaria. Come funzione di attivazione dei livelli nascosti viene utilizzata la funzione ReLU, mentre l'ottimizzazione dei pesi della rete è affidata all'algoritmo Adam. L'addestramento prevede un massimo di 500 iterazioni.
+Come descritto nella Sezione~\ref{subsec:standardizzazione-variabili}, prima dell'addestramento le variabili di ingresso vengono standardizzate utilizzando i parametri calcolati sul training set. Il modello viene addestrato mantenendo la distribuzione originale degli ammassi sopravvissuti e dissolti, senza applicare procedure di bilanciamento.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.65\textwidth]{plots/mlp_decision_boundaries.pdf}
-	\caption{Regioni decisionali del classificatore MLP. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate.}
+	\includegraphics[width=0.8\textwidth]{plots/mlp_decision_boundaries.pdf}
+	\caption{Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}
 	\label{fig:mlp-decision-boundaries}
 \end{figure}
-\subsection{Confronto tramite F1-score}
-\label{subsec:confronto-f1-score}
+\subsubsection{Risultati}
+Sul test set, il classificatore raggiunge un F1-score pesato pari a $0.9642$, nettamente superiore al valore $0.6505$ ottenuto dall'SVC. Considerando separatamente le due categorie, l'F1-score è pari a $0.95$ per gli ammassi dissolti e a $0.97$ per quelli sopravvissuti. Il modello mostra quindi prestazioni elevate e più uniformi nel riconoscimento delle due categorie rispetto al classificatore precedente.
+La Figura~\ref{fig:mlp-decision-boundaries} mostra le regioni decisionali individuate dal modello nello spazio dei parametri orbitali. A differenza dell'SVC, la frontiera decisionale dell'MLP non può essere ricondotta a una semplice equazione quadratica: la sua forma dipende dalla combinazione dei pesi e delle funzioni di attivazione dei diversi neuroni. La separazione appresa risulta quindi più complessa da descrivere mediante una singola relazione analitica.
