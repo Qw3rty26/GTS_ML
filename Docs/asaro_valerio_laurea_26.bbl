@@ -44,6 +44,11 @@ Shachar Kaufman, Saharon Rosset, Claudia Perlich, and Oren Stitelman.
 \newblock {\em ACM Transactions on Knowledge Discovery from Data}, 6(4):1--21,
   2012.
 
+\bibitem{krumholz2019}
+Mark~R. Krumholz, Christopher~F. McKee, and Joss Bland-Hawthorn.
+\newblock Star clusters across cosmic time.
+\newblock {\em Annual Review of Astronomy and Astrophysics}, 57:227--303, 2019.
+
 \bibitem{plummer1911}
 H.~C. Plummer.
 \newblock On the problem of distribution in globular star clusters.
@@ -54,6 +59,27 @@ H.~C. Plummer.
 Thomas Quinn, Neal Katz, Joachim Stadel, and George Lake.
 \newblock Time stepping n-body simulations.
 \newblock {\em The Astrophysical Journal}, 1997.
+
+\bibitem{rodriguez2022}
+Jos{\'e}-V{\'i}ctor Rodr{\'i}guez, Ignacio Rodr{\'i}guez-Rodr{\'i}guez, and
+  Wai~Lok Woo.
+\newblock On the application of machine learning in astronomy and astrophysics:
+  A text-mining-based scientometric analysis.
+\newblock {\em WIREs Data Mining and Knowledge Discovery}, 12(5):e1476, 2022.
+
+\bibitem{springel2005}
+Volker Springel, Simon D.~M. White, Adrian Jenkins, Carlos~S. Frenk, Naoki
+  Yoshida, Liang Gao, Julio Navarro, Robert Thacker, Darren Croton, John Helly,
+  John~A. Peacock, Shaun Cole, Peter Thomas, Hugh Couchman, August Evrard,
+  J{\"o}rg Colberg, and Frazer Pearce.
+\newblock Simulations of the formation, evolution and clustering of galaxies
+  and quasars.
+\newblock {\em Nature}, 435(7042):629--636, 2005.
+
+\bibitem{spurzem2023}
+Rainer Spurzem and Albrecht Kamlah.
+\newblock Computational methods for collisional stellar systems.
+\newblock {\em Living Reviews in Computational Astrophysics}, 9:3, 2023.
 
 \bibitem{stukowski2010}
 Alexander Stukowski.

@@ -104,7 +104,7 @@ def plot_initial_positions():
     )
 
     colorbar = fig.colorbar(scatter, ax=positions_ax, pad=0.025)
-    colorbar.set_label(r"Raggio 3D, $r/a$")
+    colorbar.set_label(r"Raggio 3D, $r_i/A$")
     colorbar.ax.tick_params(direction="in", labelsize=10)
 
     half_mass_circle = plt.Circle(
@@ -118,8 +118,8 @@ def plot_initial_positions():
     )
     positions_ax.add_patch(half_mass_circle)
 
-    positions_ax.set_xlabel(r"$x/a$")
-    positions_ax.set_ylabel(r"$y/a$")
+    positions_ax.set_xlabel(r"$x_i/A$")
+    positions_ax.set_ylabel(r"$y_i/A$")
     positions_ax.set_title("Posizioni stellari proiettate")
 
     positions_ax.set_aspect("equal", adjustable="box")
@@ -150,8 +150,8 @@ def plot_initial_positions():
 
     half_mass_text = (
         "Raggio di metà massa:\n"
-        f"$M(<r) = 0.5\\,M$\n"
-        f"$r_{{1/2}} \\approx {half_mass_radius:.3f}\\,a$"
+        r"$M(<r_{1/2}) = 0.5\,M_{\mathrm{tot}}$" "\n"
+        f"$r_{{1/2}} \\approx {half_mass_radius:.3f}\\,A$"
     )
 
     mass_ax.text(
@@ -172,8 +172,8 @@ def plot_initial_positions():
 
     mass_ax.set_xlim(0.0, MAX_NORMALIZED_RADIUS)
     mass_ax.set_ylim(0.0, 1.02)
-    mass_ax.set_xlabel(r"Raggio tridimensionale, $r/a$")
-    mass_ax.set_ylabel(r"Frazione di massa racchiusa, $M(<r)/M$")
+    mass_ax.set_xlabel(r"Raggio tridimensionale, $r_i/A$")
+    mass_ax.set_ylabel(r"Frazione di massa racchiusa, $M(<r_i)/M_{\mathrm{tot}}$")
     mass_ax.set_title("Profilo di massa racchiusa")
 
     mass_ax.grid(True, linestyle=":", linewidth=0.5, color="0.75", alpha=0.6)
@@ -219,7 +219,7 @@ def plot_initial_positions():
     print(f"Generate {number_of_stars:,} stelle.")
     print(f"Raggio di Plummer: {PLUMMER_RADIUS}")
     print(f"Seed casuale: {SEED}")
-    print(f"Frazione di stelle entro r/a <= {MAX_NORMALIZED_RADIUS}: {fraction_within_range:.4f}")
+    print(f"Frazione di stelle entro r/A <= {MAX_NORMALIZED_RADIUS}: {fraction_within_range:.4f}")
     print(f"Grafico salvato in: {OUTPUT_PATH}")
 
 

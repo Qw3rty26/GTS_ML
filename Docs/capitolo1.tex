@@ -1,29 +1,64 @@
 \chapter{Introduzione}
 \label{cha:introduzione}
-\section{Gli ammassi stellari}
-\label{sec:ammassi-stellari}
-Gli ammassi stellari sono insiemi di stelle legate dalla reciproca attrazione gravitazionale. La loro evoluzione dipende dalle interazioni tra le stelle e dall'ambiente gravitazionale in cui si trovano \cite{binneytremaine2008}.
+Alzando lo sguardo verso un limpido cielo notturno, ci troviamo di fronte a uno degli spettacoli più maestosi che la natura possa offrire: la volta celeste.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.55\textwidth]{./images/volto-stellato.jpg}
+	\caption{La volta celeste sopra l'Osservatorio di Paranal, in Cile (Crediti: R. Wesson/ESO).}
+	\label{fig:volta-celeste}
+\end{figure}
+\noindent La volta celeste restituisce l'immagine di un universo apparentemente immobile, in cui le stelle sembrano punti luminosi fissi, separati da distanze difficilmente immaginabili. In realtà, ciò che osserviamo è soltanto un'istantanea di un cosmo in continua evoluzione. Nello spazio interstellare, immense concentrazioni di gas e polveri, conosciute come nebulose, possono collassare sotto l'effetto della forza di gravità, dando origine a nuove stelle. Su scale ancora più vaste, la stessa forza contribuisce a organizzare la materia in strutture sempre più complesse, dai sistemi planetari alle intere galassie.
 \begin{figure}[H]
 	\centering
 	\makebox[\textwidth][c]{
-		\includegraphics[width=0.25\textwidth]{./images/m62.jpg}
+		\includegraphics[width=0.3\textwidth]{./images/nebulosa-orione.jpg}
 		\hspace{0.03\textwidth}
-		\includegraphics[width=0.25\textwidth]{./images/m80.jpg}
+		\includegraphics[width=0.31\textwidth]{./images/nebulosa-carena.jpg}
 	}
-	\caption{L'ammasso Messier 62 (a sinistra) e Messier 80 (a destra) (Crediti: ESA/Hubble \& NASA).}
-	\label{fig:confronto-ammassi}
+	\caption{La nebulosa di Orione (a sinistra, crediti: ESO/G. Beccari) e la nebulosa della Carena (a destra, crediti: ESO. Riconoscimenti: VPHAS+ Consortium/Cambridge Astronomical Survey Unit).}
+	\label{fig:nebulose}
 \end{figure}
-\section{Rimozione mareale galattica}
-\label{sec:galactic-tidal-stripping}
-Quando un ammasso stellare orbita attorno al centro galattico, le forze mareali esercitate dalla galassia possono provocare la perdita di alcune delle sue stelle. Questo processo, noto come rimozione mareale galattica, può modificare nel tempo la massa e la struttura dell'ammasso \cite{baumgardt2003}.
+\section{Gli ammassi stellari}
+\label{sec:ammassi-stellari}
+Quando numerose stelle nascono nella stessa regione dello spazio, possono rimanere legate dalla reciproca attrazione gravitazionale, dando origine a sistemi autogravitanti noti come ammassi stellari.\\In questi sistemi, ciascuna stella contribuisce al campo gravitazionale complessivo e risente continuamente dell'attrazione esercitata da tutte le altre componenti \cite{krumholz2019}.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.25\textwidth]{./images/palomar5.jpg}
-	\caption{Flusso stellare associato all'ammasso globulare Palomar 5 (crediti: SDSS).}
-	\label{fig:tidal-stripping-examples}
+	\makebox[\textwidth][c]{
+		\includegraphics[width=0.29\textwidth]{./images/m62.jpg}
+		\hspace{0.03\textwidth}
+		\includegraphics[width=0.285\textwidth]{./images/m80.jpg}
+	}
+	\caption{Gli ammassi globulari Messier 62 (a sinistra) e Messier 80 (a destra) (Crediti: ESA/Hubble \& NASA).}
+	\label{fig:confronto-ammassi}
 \end{figure}
+\noindent Queste magnifiche ed imponenti strutture sono particolarmente sensibili alle interazioni gravitazionali con l'ambiente circostante. L'influenza esercitata dalla galassia che li ospita può infatti alterare profondamente la loro struttura e comprometterne il delicato equilibrio gravitazionale.
+\section{La rimozione mareale galattica}
+\label{sec:galactic-tidal-stripping}
+Orbitando attorno a una galassia, ciascuna stella di un ammasso risente dell'attrazione gravitazionale galattica in misura differente, a seconda della propria posizione. Queste differenze nell'intensità dell'attrazione gravitazionale  generano le cosiddette forze mareali, che possono alterare profondamente l'equilibrio e l'evoluzione dell'ammasso.
+La perdita progressiva di stelle causata da questo fenomeno prende il nome di rimozione mareale galattica e, nei casi più estremi, può condurre alla completa disgregazione dell'ammasso, accompagnata dalla formazione di lunghe strutture stellari che seguono l'orbita del sistema originario, note come code mareali \cite{baumgardt2003}.
+\begin{figure}[H]
+	\centering
+	\makebox[\textwidth][c]{
+		\includegraphics[width=0.40\textwidth]{./images/palomar5.jpg}
+		\hspace{0.03\textwidth}
+		\includegraphics[width=0.40\textwidth]{./images/iadi.jpg}
+	}
+	\caption{Code mareali dell'ammasso globulare Palomar 5 (a sinistra, crediti: SDSS) e rappresentazione delle code mareali dell'ammasso aperto delle Iadi, evidenziate in rosa (a destra, crediti: ESA/Gaia/DPAC; riconoscimenti: S. Jordan/T. Sagrista).}
+	\label{fig:code-mareali}
+\end{figure}
+\noindent Comprendere la natura e l'intensità di questo fenomeno è fondamentale per studiare l'evoluzione e la sopravvivenza degli ammassi stellari. Tuttavia, questi processi si sviluppano su scale temporali estremamente lunghe, che possono raggiungere decine di milioni di anni.
+\section{L'astrofisica computazionale}
+\label{sec:astrofisica-computazionale}
+Molti fenomeni astronomici si sviluppano su scale temporali che non possono essere seguite direttamente attraverso le osservazioni. Per studiarli, l'astrofisica moderna si affida sempre più a modelli matematici e strumenti computazionali. Questo approccio, noto come astrofisica computazionale, permette di ricostruire numericamente sistemi complessi e analizzarne l'evoluzione. Un esempio significativo è la Millennium Simulation, che ha permesso di studiare la formazione delle strutture cosmiche attraverso il tracciamento di miliardi di particelle di materia oscura \cite{springel2005}.
+\section{Le simulazioni numeriche}
+\label{sec:simulazioni-numeriche}
+Per descrivere l'evoluzione di un ammasso stellare è possibile rappresentare ogni stella come una particella dotata di massa, posizione e velocità, calcolandone il moto attraverso le leggi della gravitazione. Questo approccio prende il nome di simulazione $N$-corpi e consente di seguire numericamente le interazioni tra tutte le componenti del sistema, includendo anche l'influenza di una forza gravitazionale galattica esterna.
+La difficoltà principale risiede nel costo computazionale: nel metodo di somma diretta, il numero di interazioni gravitazionali da calcolare cresce proporzionalmente al quadrato del numero di stelle presenti, rendendo rapidamente onerosa la simulazione di sistemi numerosi. Simulare numerose configurazioni iniziali può quindi richiedere risorse e tempi considerevoli \cite{spurzem2023}. Da questa esigenza nasce l'interesse verso strumenti capaci di sfruttare i risultati delle simulazioni per formulare nuove previsioni in tempi molto più brevi.
+\section{L'apprendimento automatico}
+\label{sec:apprendimento-automatico}
+L'apprendimento automatico, è un insieme di tecniche informatiche che permette agli algoritmi di $imparare$ relazioni e schemi ricorrenti a partire dai dati. In astrofisica viene utilizzato, tra le altre applicazioni, per classificare oggetti celesti, analizzare osservazioni e costruire modelli predittivi \cite{rodriguez2022}.
+Applicato ai risultati delle simulazioni numeriche, permette di apprendere la relazione tra le condizioni iniziali di un sistema e il suo comportamento finale. In questo modo, un modello addestrato può fornire stime per nuove configurazioni senza dover necessariamente ripetere ogni volta l'intera simulazione, offrendo uno strumento complementare ai tradizionali metodi numerici.
 \section{Obiettivo}
 \label{sec:obiettivo}
-Studiare l'evoluzione degli ammassi stellari nel potenziale gravitazionale galattico per un tempo di evoluzione fissato, definendo un criterio basato sulle proprietà finali per stabilire se un sistema risulta sopravvissuto (vivo) o disgregato (morto). Analizzando la relazione tra i parametri orbitali iniziali e lo stato finale, i risultati delle simulazioni numeriche saranno utilizzati per addestrare modelli di apprendimento automatico in grado di prevedere lo stato di sopravvivenza a partire dalle condizioni iniziali, con l'obiettivo di ridurre il costo computazionale necessario per ottenere queste stime.
-
-
+Studiare l'evoluzione degli ammassi stellari soggetti alla rimozione mareale galattica, analizzando come i parametri orbitali iniziali influenzino la loro sopravvivenza. Successivamente, la realizzazione delle simulazioni numeriche degli ammassi stellari, seguendone l'evoluzione e analizzandone le proprietà finali
+I dati ottenuti vengono infine utilizzati per addestrare modelli di apprendimento automatico, con l'obiettivo di prevedere lo stato finale degli ammassi a partire dalle condizioni orbitali iniziali e ridurre il costo computazionale necessario per effettuare tali stime.

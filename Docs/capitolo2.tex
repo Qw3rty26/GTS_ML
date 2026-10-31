@@ -39,6 +39,11 @@
 
 \chapter{Il modello fisico}
 \label{cha:modello-fisico}
+Il modello fisico adottato descrive gli ammassi stellari come sistemi composti da stelle puntiformi, soggette sia alla reciproca attrazione gravitazionale sia all'azione del campo gravitazionale della galassia. Per rappresentare la distribuzione iniziale delle stelle si è scelto il modello di Plummer. Si tratta di una scelta relativamente semplice e ampiamente studiata, che permette di riprodurre qualitativamente le principali proprietà gravitazionali di sistemi sferici.
+La prima fase consiste nella generazione delle posizioni e delle velocità iniziali delle stelle, a partire dalla distribuzione di Plummer. Il modello e il procedimento utilizzato per estrarre le posizioni e le velocità sono descritti rispettivamente nelle Sezioni~\ref{subsec:plummer}, \ref{subsec:posizioni-iniziali} e~\ref{subsec:velocita-iniziali}. Per ottenere una configurazione iniziale prossima all'equilibrio viriale, si calcolano l'energia cinetica e quella potenziale dell'ammasso (Sezione~\ref{subsec:equilibrio-viriale}) e si applica un riscalamento delle velocità generate (Sezione~\ref{subsec:riscalamento-velocita}).
+Una volta definita la struttura dell'ammasso, si passa alla descrizione della galassia attorno alla quale esso si muove. Anche in questo caso si utilizza il modello di Plummer, introducendo un potenziale gravitazionale esterno (Sezione~\ref{subsec:plummer-galattico}). Si definiscono quindi le equazioni del moto di Newton, considerando sia le interazioni gravitazionali tra le stelle sia l'azione della galassia (Sezione~\ref{subsec:equazioni-moto}). Le condizioni orbitali iniziali dell'ammasso vengono stabilite attraverso il semiasse maggiore e l'eccentricità, da cui si ricavano la posizione e la velocità iniziali rispetto al centro galattico (Sezione~\ref{subsec:parametri-orbitali-iniziali}).
+Definite le condizioni iniziali, si procede con l'integrazione numerica delle equazioni del moto. Per tutte le simulazioni si utilizza l'integratore Leapfrog, con un passo temporale costante pari a $\deltat=0.005$. Il tempo finale $\simulationEndTime$ viene stabilito in modo da seguire l'evoluzione di ciascun ammasso per due orbite complete. Il metodo di integrazione adottato e il controllo della variazione dell'energia durante le simulazioni sono descritti nella Sezione~\ref{subsec:integrazione-numerica}.
+Infine, per valutare l'evoluzione degli ammassi e gli effetti della rimozione mareale, si definiscono alcune grandezze utilizzate per descriverne lo stato finale. Si individua innanzitutto l'insieme delle stelle che rimangono gravitazionalmente legate all'ammasso (Sezione~\ref{subsec:stelle-legate}); rispetto a queste si calcolano il centro di massa (Sezione~\ref{subsec:centro-massa-legato}), la frazione di massa legata (Sezione~\ref{subsec:frazione-massa-legata}) e il raggio di metà massa (Sezione~\ref{subsec:raggio-meta-massa}). I valori ottenuti al termine delle simulazioni vengono raccolti e utilizzati per l'analisi presentata nel capitolo successivo.
 
 
 \section{Notazione}
@@ -83,46 +88,42 @@ e delle velocità delle stelle nel contesto galattico.\cite{plummer1911}
 
 \subsection{Il modello di Plummer}
 \label{subsec:plummer}
-Il modello di Plummer descrive un sistema
-sferico autogravitante attraverso la sua distribuzione di massa.
-È caratterizzato dalla massa totale $\totalMass$ e dal parametro
-di scala $\clusterRadius$, che determina l'estensione della
-distribuzione.\\
-La densità volumetrica di massa in funzione della distanza
-radiale $\radialDistance$ dal centro è \cite{plummer1911}:
+Il modello di Plummer descrive un sistema sferico autogravitante attraverso la sua distribuzione di massa. È caratterizzato dalla massa totale $\totalMass$ e dal parametro di scala $\clusterRadius$, che determina l'estensione della distribuzione. Nel sistema considerato, l'ammasso è composto da $\numberOfStars$ stelle, ciascuna di massa $\starMass$. La massa totale è quindi data dalla somma delle masse delle singole stelle:
+\begin{equation}
+	\totalMass = \numberOfStars \starMass
+	\label{eq:total-cluster-mass}
+\end{equation}
+Il parametro di scala $\clusterRadius$, invece, definisce la dimensione caratteristica dell'ammasso: a parità di massa totale, valori maggiori corrispondono a una distribuzione più estesa e meno concentrata, mentre valori minori descrivono un sistema più compatto.
+Seguendo Plummer \cite{plummer1911}, la densità volumetrica di massa in funzione della distanza radiale $\radialDistance$ dal centro è:
 \begin{equation}
 	\densityRho(\radialDistance) =
 	\frac{3\totalMass}{4\pi \clusterRadius^3}
 	\left(1+\frac{\radialDistance^2}{\clusterRadius^2}\right)^{-5/2}
 	\label{eq:plummer-density}
 \end{equation}
-Il potenziale gravitazionale associato alla distribuzione di
-massa descritta dall'equazione~\eqref{eq:plummer-density}
-si ottiene risolvendo l'equazione di Poisson
-\cite{binneytremaine2008}:
+Binney e Tremaine \cite{binneytremaine2008} mostrano che, applicando l'equazione di Poisson alla distribuzione di massa descritta nell'equazione~\eqref{eq:plummer-density}, si ricava il seguente potenziale gravitazionale:
 \begin{equation}
 	\potentialPhi(\radialDistance) =
 	-\frac{\gravitationalConstant\totalMass}
 	{\sqrt{\radialDistance^2+\clusterRadius^2}}
 	\label{eq:plummer-potential}
 \end{equation}
-
 \subsection{Distribuzione delle posizioni}
 \label{subsec:posizioni-iniziali}
-Le posizioni iniziali delle stelle vengono estratte in modo da riprodurre la distribuzione spaziale descritta dal modello di Plummer. Integrando la densità definita nell'equazione~\eqref{eq:plummer-density} entro il raggio $\radialDistance$, si ottiene la frazione di massa racchiusa:
+Le posizioni iniziali delle stelle vengono estratte in modo da riprodurre la distribuzione spaziale descritta dal modello di Plummer. Indicando con $r_i$ la distanza della stella $i$ dal centro dell'ammasso, integrando la densità definita nell'equazione~\eqref{eq:plummer-density} fino a tale distanza si ottiene la frazione di massa racchiusa:
 \begin{equation}
-	\frac{M(\radialDistance)}{\totalMass}
+	\frac{M(<r_i)}{\totalMass}
 	=
-	\frac{\radialDistance^3}{(\radialDistance^2+\clusterRadius^2)^{3/2}}
+	\frac{r_i^3}{(r_i^2+\clusterRadius^2)^{3/2}}
 	\label{eq:plummer-enclosed-mass}
 \end{equation}
-Questa quantità rappresenta la probabilità cumulativa di trovare una stella entro il raggio $\radialDistance$. Estraendo un numero casuale uniforme $u$ nell'intervallo $(0,1)$ e uguagliandolo a tale probabilità, si ricava il raggio iniziale di ciascuna stella:
+Questa quantità rappresenta la probabilità cumulativa di trovare una stella a una distanza dal centro inferiore o uguale a $r_i$. Estraendo un numero casuale uniforme $u$ nell'intervallo $(0,1)$ e uguagliandolo a tale probabilità, si ricava la distanza iniziale della stella $i$:
 \begin{equation}
-	\radialDistance =
+	r_i =
 	\frac{\clusterRadius}{\sqrt{u^{-2/3}-1}}
 	\label{eq:plummer-radius-sampling}
 \end{equation}
-Una volta determinato il raggio $r_i$, si estrae la direzione della posizione in modo isotropo. Il vettore posizione della stella $i$ in coordinate cartesiane è:
+Una volta determinata la distanza $r_i$, si estrae la direzione della posizione in modo isotropo. Il vettore posizione della stella $i$ in coordinate cartesiane è:
 \begin{equation}
 	\mathbf{x}_i =
 	\begin{pmatrix}
@@ -137,71 +138,76 @@ Ripetendo il procedimento per tutte le $\numberOfStars$ stelle, si ottiene una d
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./plots/initial_positions.pdf}
-	\caption[Distribuzione spaziale iniziale del cluster]{Distribuzione tridimensionale delle posizioni iniziali delle stelle generate secondo il modello di Plummer ($N = 20000$, $\clusterRadius = 1.0$).}
+	\caption[Distribuzione spaziale iniziale del cluster]{Distribuzione tridimensionale delle posizioni iniziali delle stelle generate secondo il modello di Plummer. ($N = 2000$, $\clusterRadius = 1.0$)}
 	\label{fig:initial-positions}
 \end{figure}
 \subsection{Distribuzione delle velocità}
 \label{subsec:velocita-iniziali}
-Le velocità iniziali vengono generate campionando la distribuzione teorica del modello isotropo di Plummer. Il potenziale gravitazionale del cluster è:
+Una volta determinate le posizioni iniziali, le velocità delle singole stelle vengono generate in funzione della loro distanza $r_i$ dal centro dell'ammasso. Per ciascuna stella si calcola innanzitutto la velocità di fuga locale:
 \begin{equation}
-	\potentialPhi(\radialDistance)=-\frac{\gravitationalConstant\totalMass}{\sqrt{\radialDistance^2+\clusterRadius^2}},
-	\label{eq:plummer-potential-velocity}
-\end{equation}
-dove $\totalMass$ è la massa totale del cluster, $\clusterRadius$ è il parametro di scala di Plummer e $\radialDistance$ è la distanza dal centro. La velocità di fuga locale è:
-\begin{equation}
-	\escapeVelocity(\radialDistance)=\sqrt{-2\potentialPhi(\radialDistance)}
-	=\sqrt{\frac{2\gravitationalConstant\totalMass}{\sqrt{\radialDistance^2+\clusterRadius^2}}}.
+	\escapeVelocity(r_i)=\sqrt{-2\potentialPhi(r_i)}
+	=\sqrt{\frac{2\gravitationalConstant\totalMass}{\sqrt{r_i^2+\clusterRadius^2}}}
 	\label{eq:escape-velocity}
 \end{equation}
-Il modulo della velocità viene campionato secondo la distribuzione prevista dal modello di Plummer:
+Il modulo della velocità viene campionato secondo la distribuzione teorica prevista dal modello isotropo di Plummer:
 \begin{equation}
-	p(\velV\mid\radialDistance)\propto \velV^2
-	\left(1-\frac{\velV^2}{\escapeVelocity^2(\radialDistance)}\right)^{7/2},
-	\qquad 0\leq \velV\leq \escapeVelocity(\radialDistance).
+	p(\velV_i\mid r_i)\propto \velV_i^2
+	\left(1-\frac{\velV_i^2}{\escapeVelocity^2(r_i)}\right)^{7/2},
+	\qquad 0\leq \velV_i\leq \escapeVelocity(r_i)
 	\label{eq:plummer-speed-distribution}
 \end{equation}
-Il modulo della velocità viene determinato in relazione alla velocità di fuga locale, mentre la direzione viene estratta isotropicamente nello spazio tridimensionale. Il vettore velocità risultante si ottiene moltiplicando il modulo per il versore casuale.
+Questa distribuzione garantisce che le velocità iniziali siano inferiori alla velocità di fuga locale, evitando di generare stelle inizialmente non legate all'ammasso. Per estrarre i campioni da questa distribuzione si utilizza una variabile casuale $X_i$ generata secondo una distribuzione Beta:
+\begin{equation}
+	X_i\sim\mathrm{Beta}\left(\frac{3}{2},\frac{9}{2}\right)
+	\label{eq:beta-velocity-sampling}
+\end{equation}
+Il modulo della velocità della stella $i$ si ottiene quindi attraverso la relazione:
+\begin{equation}
+	\velV_i=\escapeVelocity(r_i)\sqrt{X_i}
+	\label{eq:initial-speed}
+\end{equation}
+Una volta determinato il modulo, la direzione della velocità viene estratta isotropicamente nello spazio tridimensionale. Il vettore velocità della stella $i$ si ottiene moltiplicando il modulo per un versore di direzione casuale $\hat{\mathbf{n}}_i$:
+\begin{equation}
+	\mathbf{v}_i=\velV_i\hat{\mathbf{n}}_i
+	\label{eq:initial-velocity}
+\end{equation}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.85\textwidth]{./plots/velocity_distribution_comparison.pdf}
-	\caption[Confronto tra le distribuzioni delle velocità iniziali]{Distribuzioni delle velocità normalizzate rispetto alla velocità locale di fuga\\($\numberOfStars = 2000$, $\clusterRadius = 1.0$).}
+	\caption[Confronto tra le distribuzioni delle velocità iniziali]{Distribuzioni dei moduli delle velocità normalizzati rispetto alla velocità locale di fuga.\\($\numberOfStars = 2000$, $\clusterRadius = 1.0$)}
 	\label{fig:velocity-distribution-comparison}
 \end{figure}
 \subsection{Condizione di equilibrio viriale}
 \label{subsec:equilibrio-viriale}
 Per valutare l'equilibrio dinamico iniziale dell'ammasso si considerano l'energia cinetica totale $\totalCineticEnergy$ e l'energia potenziale gravitazionale $\totalPotentialEnergy$ \cite{ciotti2021}. L'energia cinetica è data dalla somma dei contributi di tutte le stelle:
 \begin{equation}
-	\totalCineticEnergy = \sum_{i=1}^{N}\frac{1}{2}m_i|\velV_i|^2.
+	\totalCineticEnergy = \sum_{i=1}^{N}\frac{1}{2}m_i\left\|\velV_i\right\|^2
 	\label{eq:kinetic-energy}
 \end{equation}
 L'energia potenziale gravitazionale è ottenuta sommando le interazioni tra tutte le coppie di stelle:
 \begin{equation}
 	\totalPotentialEnergy = -\sum_{i=1}^{N-1}\sum_{j=i+1}^{N}
-	\frac{\gravitationalConstant m_i m_j}{|\mathbf{x}_i-\mathbf{x}_j|}.
+	\frac{\gravitationalConstant m_i m_j}{\left\|\mathbf{x}_i-\mathbf{x}_j\right\|}
 	\label{eq:gravitational-potential-energy}
 \end{equation}
 Per un sistema autogravitante in equilibrio viriale, le due energie soddisfano la relazione:
 \begin{equation}
-	2\totalCineticEnergy+\totalPotentialEnergy=0.
+	2\totalCineticEnergy+\totalPotentialEnergy=0
 	\label{eq:virial-theorem}
 \end{equation}
 Il rapporto viriale permette di quantificare lo scostamento da questa condizione:
 \begin{equation}
-	Q=\frac{2\totalCineticEnergy}{|\totalPotentialEnergy|}.
+	Q=\frac{2\totalCineticEnergy}{|\totalPotentialEnergy|}
 	\label{eq:virial-ratio}
 \end{equation}
 Il valore $Q=1$ corrisponde all'equilibrio viriale.
-
-%TODO rimuovi questo
-NOTA: Questi spazi bianchi verranno rimossi una volta completata la stesura completa del documento 
-
 \subsection{Riscalamento delle velocità}
 \label{subsec:riscalamento-velocita}
-Il campionamento delle velocità iniziali determina un'energia cinetica che, in generale, non soddisfa esattamente la condizione di equilibrio viriale. Per ottenere una configurazione iniziale virializzata, le velocità vengono quindi moltiplicate per un fattore comune $\velocityRescalingFactor$, mantenendo invariate le posizioni delle stelle. Questo procedimento modifica l'energia cinetica totale senza alterare l'energia potenziale gravitazionale, che dipende esclusivamente dalle posizioni delle particelle.
+Nel modello continuo di Plummer, la distribuzione teorica delle velocità è compatibile con la condizione di equilibrio viriale descritta nella Sezione~\ref{subsec:equilibrio-viriale}, che viene soddisfatta nel limite di un numero di stelle tendente all'infinito ($N\rightarrow\infty$). Nelle simulazioni, tuttavia, il numero di stelle è finito e il campionamento casuale può determinare un'energia cinetica che non soddisfa esattamente tale condizione. Per correggere questo scostamento, le velocità vengono moltiplicate per un fattore comune $\velocityRescalingFactor$, mantenendo invariate le posizioni delle stelle. Questo procedimento non altera l'energia potenziale gravitazionale, che dipende esclusivamente dalle posizioni delle particelle.
 Poiché l'energia cinetica è proporzionale al quadrato delle velocità, dopo il riscalamento si ottiene:
 \begin{equation}
 	\totalCineticEnergy' =
-	\velocityRescalingFactor^2 \totalCineticEnergy.
+	\velocityRescalingFactor^2 \totalCineticEnergy
 	\label{eq:rescaled-kinetic-energy}
 \end{equation}
 Imponendo che il rapporto viriale finale sia $\virialRatio'=1$, il fattore di riscalamento si ricava dalle energie calcolate prima della correzione:
@@ -210,13 +216,13 @@ Imponendo che il rapporto viriale finale sia $\virialRatio'=1$, il fattore di ri
 	\sqrt{\frac{|\totalPotentialEnergy|}
 		{2\totalCineticEnergy}}
 	=
-	\frac{1}{\sqrt{\virialRatio}}.
+	\frac{1}{\sqrt{\virialRatio}}
 	\label{eq:velocity-rescaling-factor}
 \end{equation}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.85\textwidth]{./plots/velocity_rescaling.pdf}
-	\caption[Effetto del riscalamento viriale sulle velocità]{Distribuzioni dei moduli delle velocità normalizzati prima e dopo il riscalamento ($\numberOfStars = 2000$, $\clusterRadius = 1.0$).}
+	\caption[Effetto del riscalamento viriale sulle velocità]{Distribuzioni dei moduli delle velocità normalizzati prima e dopo il riscalamento.\\($\numberOfStars = 2000$, $\clusterRadius = 1.0$)}
 	\label{fig:velocity-rescaling}
 \end{figure}
 \section{Evoluzione e dinamica orbitale}
@@ -276,7 +282,7 @@ L'accelerazione totale è quindi la somma del contributo interno e di quello gal
 Questa formulazione permette di descrivere simultaneamente la dinamica interna dell'ammasso e la sua risposta al campo gravitazionale esterno. Le interazioni reciproche determinano l'evoluzione della struttura stellare, mentre il potenziale galattico influenza il moto complessivo dell'ammasso e può favorire la perdita di stelle gravitazionalmente non più legate alla sua componente interna \cite{binneytremaine2008}.
 \subsection{Parametri orbitali iniziali}
 \label{subsec:parametri-orbitali-iniziali}
-L'orbita iniziale dell'ammasso stellare viene definita attraverso il semiasse maggiore $\semiMajorAxis$ e l'eccentricità $\orbitEccentricity$. Questi parametri determinano le distanze massima e minima dal centro galattico:
+L'orbita iniziale dell'ammasso stellare viene definita attraverso il semiasse maggiore $\semiMajorAxis$ e l'eccentricità $\orbitEccentricity$. Questi parametri determinano la distanza massima $R_{\mathrm{apo}}$ e quella minima $R_{\mathrm{peri}}$ dal centro galattico:
 \begin{equation}
 	R_{\mathrm{apo}} = \semiMajorAxis(1+\orbitEccentricity),
 	\qquad
@@ -305,14 +311,13 @@ La velocità iniziale all'apocentro è quindi:
 	v_{\mathrm{apo}} = \frac{L}{R_{\mathrm{apo}}}.
 	\label{eq:orbital-apocenter-velocity}
 \end{equation}
-
 La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
 	\hfill
 	\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
-	\caption{Evoluzione dell'ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Il pallino rosso indica il centro galattico ($\numberOfStars = 400$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.01$, Leapfrog).}
+	\caption{Evoluzione dello stesso ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Le traiettorie bianche vengono tracciate dal movimento delle stelle ed il pallino rosso indica il centro galattico.\\ ($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.005$, Leapfrog)}
 	\label{fig:confronto-eccentricita}
 \end{figure}
 \subsection{Integrazione numerica}
@@ -332,16 +337,17 @@ Le equazioni di aggiornamento sono:
 	+ \frac{\deltat}{2}\mathbf{a}_{i}^{n+1}
 	\label{eq:leapfrog-update}
 \end{align}
-Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simulazioni. Per verificare il comportamento dell'integrazione numerica, viene monitorata la variazione relativa dell'energia totale rispetto al valore iniziale, definita come
+Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simulazioni.\\ Per verificare il comportamento dell'integrazione numerica, viene monitorata la variazione relativa dell'energia totale rispetto al valore iniziale. Indicando con $E(t)$ l'energia totale del sistema all'istante $t$ e con $E_0=E(0)$ il suo valore iniziale, tale variazione è definita come:
 \begin{equation}
-	\Delta E(t)=\frac{E(t)-E(0)}{|E(0)|}
+	\delta_E(t)=\frac{\Delta E(t)}{E_0}
+	=\frac{E(t)-E(0)}{E(0)}
 	\label{eq:energy-drift}
 \end{equation}
-dove $E(t)$ è l'energia totale del sistema all'istante $t$ ed $E(0)$ è il suo valore iniziale. Questa quantità permette di valutare quanto l'energia del sistema si discosti dal valore iniziale durante l'evoluzione numerica.
+Questa quantità è adimensionale e permette di valutare lo scostamento relativo dell'energia rispetto al valore iniziale.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth]{./plots/energy_drift.pdf}
-	\caption{Andamento della deriva energetica relativa $\Delta E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyParameter = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, $\epsilon = 0.01$, Leapfrog)}
+	\caption{Andamento della deriva energetica relativa $\delta_E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyParameter = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, Leapfrog)}
 	\label{fig:energy-drift}
 \end{figure}
 \subsection{Individuazione delle stelle legate all'ammasso}
