@@ -33,26 +33,21 @@
 \newcommand{\softeningLength}{\epsilon}                    % Softening gravitazionale
 \newcommand{\simulationEndTime}{T_{\mathrm{end}}}          % Tempo finale della simulazione
 \newcommand{\randomSeed}{s}                                % Seme di generazione
-\newcommand{\allClusters}{\mathcal{N}}                     % Insieme di tutti i cluster
-\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{vivo}}}    % Insieme di cluster vivi
-\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{morto}}}    % Insieme di cluster morti
+\newcommand{\allClusters}{\mathcal{N}}                           % Insieme di tutti i cluster 
+\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{sopravvissuti}}} % Insieme di cluster vivi
+\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{dissolti}}}       % Insieme di cluster morti
 
 \chapter{Il modello fisico}
 \label{cha:modello-fisico}
-Il modello fisico adottato descrive gli ammassi stellari come sistemi composti da stelle puntiformi, soggette sia alla reciproca attrazione gravitazionale sia all'azione del campo gravitazionale della galassia. Per rappresentare la distribuzione iniziale delle stelle si è scelto il modello di Plummer. Si tratta di una scelta relativamente semplice e ampiamente studiata, che permette di riprodurre qualitativamente le principali proprietà gravitazionali di sistemi sferici.
-La prima fase consiste nella generazione delle posizioni e delle velocità iniziali delle stelle, a partire dalla distribuzione di Plummer. Il modello e il procedimento utilizzato per estrarre le posizioni e le velocità sono descritti rispettivamente nelle Sezioni~\ref{subsec:plummer}, \ref{subsec:posizioni-iniziali} e~\ref{subsec:velocita-iniziali}. Per ottenere una configurazione iniziale prossima all'equilibrio viriale, si calcolano l'energia cinetica e quella potenziale dell'ammasso (Sezione~\ref{subsec:equilibrio-viriale}) e si applica un riscalamento delle velocità generate (Sezione~\ref{subsec:riscalamento-velocita}).
-Una volta definita la struttura dell'ammasso, si passa alla descrizione della galassia attorno alla quale esso si muove. Anche in questo caso si utilizza il modello di Plummer, introducendo un potenziale gravitazionale esterno (Sezione~\ref{subsec:plummer-galattico}). Si definiscono quindi le equazioni del moto di Newton, considerando sia le interazioni gravitazionali tra le stelle sia l'azione della galassia (Sezione~\ref{subsec:equazioni-moto}). Le condizioni orbitali iniziali dell'ammasso vengono stabilite attraverso il semiasse maggiore e l'eccentricità, da cui si ricavano la posizione e la velocità iniziali rispetto al centro galattico (Sezione~\ref{subsec:parametri-orbitali-iniziali}).
-Definite le condizioni iniziali, si procede con l'integrazione numerica delle equazioni del moto. Per tutte le simulazioni si utilizza l'integratore Leapfrog, con un passo temporale costante pari a $\deltat=0.005$. Il tempo finale $\simulationEndTime$ viene stabilito in modo da seguire l'evoluzione di ciascun ammasso per due orbite complete. Il metodo di integrazione adottato e il controllo della variazione dell'energia durante le simulazioni sono descritti nella Sezione~\ref{subsec:integrazione-numerica}.
-Infine, per valutare l'evoluzione degli ammassi e gli effetti della rimozione mareale, si definiscono alcune grandezze utilizzate per descriverne lo stato finale. Si individua innanzitutto l'insieme delle stelle che rimangono gravitazionalmente legate all'ammasso (Sezione~\ref{subsec:stelle-legate}); rispetto a queste si calcolano il centro di massa (Sezione~\ref{subsec:centro-massa-legato}), la frazione di massa legata (Sezione~\ref{subsec:frazione-massa-legata}) e il raggio di metà massa (Sezione~\ref{subsec:raggio-meta-massa}). I valori ottenuti al termine delle simulazioni vengono raccolti e utilizzati per l'analisi presentata nel capitolo successivo.
-
-
+Il modello fisico adottato descrive gli ammassi stellari come sistemi di stelle puntiformi, soggette alla reciproca attrazione gravitazionale e al campo esterno della galassia. Per rappresentare la distribuzione iniziale delle stelle si utilizza il modello di Plummer, da cui vengono generate le posizioni e le velocità iniziali. Si verifica quindi l'equilibrio viriale dell'ammasso e si applica un riscalamento delle velocità per ottenere una configurazione iniziale più vicina all'equilibrio. Anche la galassia viene descritta attraverso un potenziale di Plummer. Si definiscono poi le equazioni del moto, considerando sia le interazioni gravitazionali tra le stelle sia l'azione della galassia, e si stabiliscono le condizioni orbitali iniziali attraverso il semiasse maggiore e l'eccentricità.
+Definite le condizioni iniziali, si procede con l'integrazione numerica delle equazioni del moto mediante il metodo Leapfrog e si controlla la conservazione dell'energia durante l'evoluzione del sistema. Infine, per valutare gli effetti della rimozione mareale, si individuano le stelle che rimangono gravitazionalmente legate all'ammasso e si calcolano il centro di massa, la frazione di massa legata e il raggio di metà massa. Queste grandezze permettono di descrivere l'evoluzione dell'ammasso e quantificare la perdita di massa e la variazione della sua struttura.
 \section{Notazione}
 \label{sec:notazione}
 La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati
-nel capitolo.
+nel documento.
 \begin{table}[htbp]
 	\centering
-	\caption{Notazione utilizzata nel capitolo.}
+	\caption{Notazione utilizzata nel documento.}
 	\label{tab:notazione}
 	\begin{tabular}{ll}
 		\hline
@@ -258,18 +253,24 @@ A partire dal potenziale definito nell'equazione~\eqref{eq:galactic-plummer-pote
 \label{subsec:equazioni-moto}
 L'evoluzione dell'ammasso stellare è descritta dalle equazioni di Newton per un sistema di particelle gravitazionalmente interagenti. Indicando con $\mathbf{x}_i$ la posizione della stella $i$ e con $m_i$ la sua massa, le equazioni del moto sono:
 \begin{equation}
-	\frac{d\mathbf{x}_i}{dt} = \mathbf{v}_i,
+	\frac{d\mathbf{x}_i}{dt} = \mathbf{v}_i
 	\qquad
 	\frac{d\mathbf{v}_i}{dt} = \mathbf{a}_i
 	\label{eq:equations-of-motion}
 \end{equation}
-L'accelerazione di ciascuna stella riceve due contributi: l'interazione gravitazionale con le altre stelle dell'ammasso e il campo esterno generato dalla galassia. Nel caso newtoniano, il contributo interno è espresso da:
+Per regolarizzare il potenziale gravitazionale durante gli incontri ravvicinati tra le stelle, si introduce un parametro di ammorbidimento $\softeningLength$. L'energia potenziale di interazione tra due stelle $i$ e $j$ diventa quindi:
+\begin{equation}
+	U_{ij}=-\frac{\gravitationalConstant m_i m_j}
+	{\sqrt{\left\|\mathbf{x}_i-\mathbf{x}_j\right\|^2+\softeningLength^2}}
+	\label{eq:softened-potential}
+\end{equation}
+Il contributo interno, tenendo conto del parametro di ammorbidimento, è espresso da:
 \begin{equation}
 	\mathbf{a}_{i,\mathrm{int}} =
 	-G\sum_{\substack{j=1\\j\neq i}}^N
 	m_j
 	\frac{\mathbf{x}_i-\mathbf{x}_j}
-	{|\mathbf{x}_i-\mathbf{x}_j|^3}
+	{\left(\left\|\mathbf{x}_i-\mathbf{x}_j\right\|^2+\softeningLength^2\right)^{3/2}}
 	\label{eq:internal-gravitational-acceleration}
 \end{equation}
 L'accelerazione totale è quindi la somma del contributo interno e di quello galattico definito nella Sezione~\ref{subsec:plummer-galattico}:
@@ -317,7 +318,7 @@ La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sov
 	\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
 	\hfill
 	\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
-	\caption{Evoluzione dello stesso ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Le traiettorie bianche vengono tracciate dal movimento delle stelle ed il pallino rosso indica il centro galattico.\\ ($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\deltat = 0.005$, Leapfrog)}
+	\caption{Evoluzione dello stesso ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Le traiettorie bianche vengono tracciate dal movimento delle stelle ed il pallino rosso indica il centro galattico. ($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\semiMajorAxis = 300.0$, $\deltat = 0.005$, Leapfrog)}
 	\label{fig:confronto-eccentricita}
 \end{figure}
 \subsection{Integrazione numerica}
@@ -347,7 +348,7 @@ Questa quantità è adimensionale e permette di valutare lo scostamento relativo
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth]{./plots/energy_drift.pdf}
-	\caption{Andamento della deriva energetica relativa $\delta_E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyParameter = 10.0$, $\gravitationalConstant = 1.0$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, Leapfrog)}
+	\caption{Andamento della deriva energetica relativa $\delta_E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, Leapfrog)}
 	\label{fig:energy-drift}
 \end{figure}
 \subsection{Individuazione delle stelle legate all'ammasso}
@@ -362,22 +363,22 @@ dove $\kineticEnergy$ e $\specificPotential$ sono rispettivamente l'energia cine
 L'energia cinetica specifica è calcolata rispetto alla velocità del centro di massa della componente legata:
 \begin{equation}
 	\kineticEnergy = \frac{1}{2}
-	\left|\mathbf{v}_i-\boundCenterVelocity\right|^2
+	\left\|\mathbf{v}_i-\boundCenterVelocity\right\|^2
 	\label{eq:stellar-kinetic-energy}
 \end{equation}
-dove $\mathbf{v}_i$ è la velocità della stella $i$ e $\boundCenterVelocity$ è la velocità del centro di massa delle stelle legate, definita nella Sezione~\ref{subsec:centro-massa-legato}.\\
-Il potenziale gravitazionale specifico è calcolato sommando i contributi di tutte le altre stelle appartenenti a $\boundSet$:
+dove $\mathbf{v}_i$ è la velocità della stella $i$ e $\boundCenterVelocity$ è la velocità del centro di massa delle stelle legate, definita nella Sezione~\ref{subsec:centro-massa-legato}.
+Il potenziale gravitazionale specifico della stella $i$ è calcolato sommando i contributi di tutte le altre stelle appartenenti a $\boundSet$:
 \begin{equation}
 	\specificPotential = -\gravitationalConstant \sum_{\substack{j \in \boundSet \\ j \neq i}}
-	\frac{m_j}{|\mathbf{x}_i-\mathbf{x}_j|}
+	\frac{m_j}{\left\|\mathbf{x}_i-\mathbf{x}_j\right\|}
 	\label{eq:stellar-potential}
 \end{equation}
-dove $\gravitationalConstant$ è la costante di gravitazione universale, $m_j$ è la massa della stella $j$ e $\mathbf{x}_i$ e $\mathbf{x}_j$ sono le posizioni delle stelle.\\
-La selezione è iterativa e aggiorna $\boundSet$ e la velocità del relativo centro di massa a ogni passaggio:
+dove $\gravitationalConstant$ è la costante di gravitazione universale, $m_j$ è la massa della stella $j$ e $\mathbf{x}_i$ e $\mathbf{x}_j$ sono le posizioni delle stelle.
+Il calcolo dell'energia specifica dipende quindi dall'insieme $\boundSet$: quest'ultimo determina sia la velocità del centro di massa utilizzata per calcolare l'energia cinetica, sia il potenziale gravitazionale utilizzato per calcolare l'energia potenziale. Per risolvere questa dipendenza reciproca, la selezione viene eseguita iterativamente, aggiornando $\boundSet$ e la velocità del relativo centro di massa a ogni passaggio:
 \begin{enumerate}
 	\item Si individua la stella con il potenziale gravitazionale più basso e si selezionano le undici stelle più vicine. La loro velocità media pesata sulle masse fornisce una stima iniziale della velocità del centro di massa.
 	\item Si inizializza $\boundSet$ con tutte le stelle dell'ammasso e si calcolano le energie specifiche. Le stelle con energia negativa formano il nuovo insieme $\boundSet$.
-	\item Si ricalcolano le energie usando la velocità aggiornata del centro di massa e il potenziale generato dalle sole stelle appartenenti a $\boundSet$. Si ripete il passaggio fino a quando $\boundSet$ non cambia più, per un massimo di dieci iterazioni. Se rimangono al massimo tre stelle, non viene identificata una componente legata.
+	\item Si ricalcolano le energie utilizzando la velocità del centro di massa aggiornata e il potenziale generato dalle sole stelle appartenenti al nuovo insieme $\boundSet$. Si ripete il procedimento fino a quando $\boundSet$ non cambia più, per un massimo di dieci iterazioni. Se rimangono al massimo tre stelle, non viene identificata una componente legata.
 \end{enumerate}
 \subsection{Centro di massa delle stelle legate all'ammasso}
 \label{subsec:centro-massa-legato}
@@ -406,26 +407,27 @@ La frazione di massa legata esprime la parte della massa totale che rimane gravi
 La frazione di massa legata si ottiene dividendo questa quantità per la massa totale $\totalMass$ di tutte le stelle:
 \begin{equation}
 	\boundMassFraction =
-	\frac{\boundMass}{M_{\mathrm{tot}}}
+	\frac{\boundMass}{\totalMass}
 	\label{eq:bound-mass-fraction}
 \end{equation}
+Il valore $\boundMassFraction=1.0$ corrisponde al 100\% della massa iniziale ancora gravitazionalmente legata all'ammasso, mentre un valore pari a zero indica che non rimane alcuna massa legata.
 \subsection{Raggio di metà massa}
 \label{subsec:raggio-meta-massa}
 Il raggio di metà massa indica la distanza dal centro di massa entro la quale è contenuta almeno metà della massa legata. Per ogni stella appartenente a $\boundSet$, si calcola la distanza dal centro di massa:
 \begin{equation}
 	\stellarDistance =
-	\left|\mathbf{x}_i-\boundCenterPosition\right|,
+	\left\|\mathbf{x}_i-\boundCenterPosition\right\|,
 	\qquad i\in\boundSet
 	\label{eq:stellar-distance}
 \end{equation}
-Si ordinano quindi le stelle per distanza crescente e si calcola la massa cumulativa. La massa cumulativa entro una distanza $r$, indicata con $M(<r)$, è:
+Si ordinano quindi le stelle per distanza crescente e si calcola la massa cumulativa della componente legata. La massa contenuta entro una distanza $r$, indicata con $M_{\mathrm{bound}}(<r)$, è:
 \begin{equation}
-	M(<r) = \sum_{\substack{i\in\boundSet\\d_i\leq r}}m_i
+	M_{\mathrm{bound}}(<r) = \sum_{\substack{i\in\boundSet\\d_i\leq r}}m_i
 	\label{eq:cumulative-bound-mass}
 \end{equation}
 Il raggio di metà massa è la minima distanza per cui la massa cumulativa raggiunge almeno metà della massa legata:
 \begin{equation}
-	\halfMassRadius = \min\left\{r : M(<r)\geq\frac{\boundMass}{2}\right\}
+	\halfMassRadius = \min\left\{r : M_{\mathrm{bound}}(<r)\geq\frac{\boundMass}{2}\right\}
 	\label{eq:half-mass-radius}
 \end{equation}
-Se non vengono individuate stelle legate, il raggio di metà massa viene posto uguale a zero.
+Se non viene identificata una componente gravitazionalmente legata, il raggio di metà massa viene posto uguale a zero.

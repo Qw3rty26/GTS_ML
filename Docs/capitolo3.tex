@@ -1,33 +1,40 @@
-\chapter{Dataset e Machine Learning}
+\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{dissolti}}}       % Insieme di cluster morti
 
-
+\chapter{Dataset e apprendimento automatico}
+Il capitolo descrive la costruzione del dataset a partire dalle simulazioni, definendo i parametri dell'ammasso stellare, del potenziale galattico e delle orbite, oltre alle condizioni di integrazione numerica. I risultati vengono poi analizzati attraverso la distribuzione delle grandezze finali, per studiare la relazione tra i parametri orbitali e l'evoluzione degli ammassi.
+A partire da questa analisi, si definisce un problema di classificazione binaria, stabilendo i criteri per distinguere gli ammassi sopravvissuti da quelli dissolti, le variabili di ingresso e la suddivisione del dataset per l'addestramento e la valutazione. Viene inoltre introdotto l'F1-score, utilizzato per misurare le prestazioni dei classificatori. Infine, vengono presentati i classificatori SVC e MLP, descrivendone il funzionamento e confrontandone i risultati.
 \section{Generazione del dataset}
 \label{sec:costruzione-dataset}
-Per ottenere un dataset affidabile, è necessario definire i parametri delle simulazioni, stabilendo quali mantenere costanti e quali variare. Questa scelta permette di studiare come le condizioni orbitali influenzino l'evoluzione degli ammassi stellari, mantenendo invariate le altre caratteristiche del sistema.
+Le simulazioni vengono eseguite mantenendo costanti le caratteristiche del sistema e variando esclusivamente i parametri orbitali dell'ammasso. I risultati ottenuti costituiscono il dataset utilizzato per studiare come le diverse condizioni orbitali influenzino l'evoluzione degli ammassi stellari.
 \subsection{Parametri dell'ammasso stellare}
 \label{subsec:condizioni-iniziali}
-L'ammasso stellare viene inizializzato secondo il modello di Plummer, descritto nella Sezione~\ref{subsec:plummer}. In tutte le simulazioni vengono fissati il numero di stelle, $\numberOfStars=200$, il parametro di scala $\clusterRadius=1.0$ e la massa totale $\totalMass=1.0$.\\
+L'ammasso stellare viene inizializzato secondo il modello di Plummer, descritto nella Sezione~\ref{subsec:plummer}. In tutte le simulazioni sono stati fissati il numero di stelle, $\numberOfStars=200$, il parametro di scala $\clusterRadius=1.0$ e la massa totale $\totalMass=1.0$.\\
 Le stelle hanno tutte la stessa massa, calcolata come:
 \begin{equation}
 	\starMass=\frac{\totalMass}{\numberOfStars}=0.005.
 	\label{eq:massa-singola-stella}
 \end{equation}
-Per ottenere diverse realizzazioni iniziali dell'ammasso vengono utilizzati 15 semi di generazione distinti, che determinano differenti distribuzioni iniziali delle posizioni e delle velocità stellari. In questo modo è possibile valutare l'influenza delle condizioni iniziali sui risultati, evitando di basare l'analisi su una singola realizzazione dell'ammasso.
+Per ottenere diverse realizzazioni iniziali dell'ammasso sono stati utilizzati 15 semi di generazione distinti, che determinano differenti distribuzioni iniziali delle posizioni e delle velocità stellari. In questo modo è possibile valutare l'influenza delle condizioni iniziali sui risultati, evitando di basare l'analisi su una singola realizzazione dell'ammasso.
 \subsection{Parametri galattici ed orbitali}
 \label{subsec:parametri-orbitali}
 Il potenziale gravitazionale esterno è descritto dal modello di Plummer, introdotto nella Sezione~\ref{subsec:plummer-galattico}, con massa galattica $\galaxyMass=3000.0$ e parametro di scala $\galaxyRadius=20.0$, mantenuti costanti in tutte le simulazioni.
 Le orbite sono definite mediante il semiasse maggiore $\semiMajorAxis$ e l'eccentricità $\orbitEccentricity$. Il primo assume 30 valori compresi tra $10.0$ e $300.0$, con incrementi di $10.0$:
 \[
-\semiMajorAxis \in \{10,20,30,\ldots,290,300\}.
+\semiMajorAxis \in \{10,20,30,\ldots,290,300\}
 \]
 L'eccentricità assume invece 38 valori compresi tra $0.0$ e $0.925$, con incrementi di $0.025$:
 \[
-\orbitEccentricity \in \{0,0.025,0.050,\ldots,0.900,0.925\}.
+\orbitEccentricity\in\{0,0.025,0.050,\ldots,0.900,0.925\}
 \]
-Considerando tutte le combinazioni dei due parametri, si ottengono $30\times38=1140$ configurazioni orbitali. Ciascuna viene utilizzata per diverse realizzazioni iniziali dell'ammasso, così da studiare l'evoluzione del sistema al variare delle dimensioni e della forma dell'orbita.
+Considerando tutte le combinazioni dei due parametri, si ottengono $30\times38=1140$ configurazioni orbitali. Ciascuna viene simulata utilizzando le 15 realizzazioni iniziali dell'ammasso descritte nella Sezione~\ref{subsec:condizioni-iniziali}. Il dataset comprende quindi un totale di $15\times1140=17100$ simulazioni.
+Per la presentazione dei risultati, il semiasse maggiore viene inoltre espresso in rapporto al parametro di scala galattico, introducendo la grandezza adimensionale:
+\begin{equation}
+	\tilde{a}=\frac{\semiMajorAxis}{\galaxyRadius}
+	\label{eq:normalized-semi-major-axis}
+\end{equation}
 \subsection{Parametri di integrazione}
 \label{subsec:parametri-integrazione}
-Le simulazioni adottano una costante gravitazionale $\gravitationalConstant=1.0$, scelta che consente di esprimere tutte le grandezze in un sistema di unità coerente, evitando conversioni tra diverse unità di misura. L'integrazione numerica viene eseguita con il metodo leapfrog \cite{hairer2006geometric}, utilizzando un passo temporale $\deltat=0.005$. Per regolarizzare il potenziale gravitazionale durante gli incontri ravvicinati tra le stelle, viene adottato un parametro di ammorbidimento pari a $\softeningLength=0.01$.
+Le simulazioni adottano una costante gravitazionale $\gravitationalConstant=1.0$, scelta che consente di esprimere tutte le grandezze in un sistema di unità coerente, evitando conversioni tra diverse unità di misura. L'integrazione numerica viene eseguita con il metodo leapfrog \cite{hairer2006geometric}, utilizzando un passo temporale $\deltat=0.005$. Il parametro di ammorbidimento $\softeningLength$, introdotto nella Sezione~\ref{subsec:equazioni-moto}, viene fissato a $0.01$.
 Il tempo finale delle simulazioni è fissato a $\simulationEndTime=700.0$, per contenere l'influenza della dissoluzione dell'ammasso dovuta alla sua evoluzione dinamica interna e concentrarsi sugli effetti della rimozione mareale galattica \cite{cai2016evolution}.
 \subsection{Riepilogo dei parametri}
 \label{subsec:riepilogo-parametri}
@@ -66,37 +73,36 @@ La Tabella~\ref{tab:parametri-dataset} riassume i parametri adottati per le simu
 \end{table}
 \section{Analisi del dataset}
 \label{sec:analisi-dataset}
-Come descritto nelle Sezioni~\ref{subsec:condizioni-iniziali} e~\ref{subsec:parametri-orbitali}, vengono considerate $15$ realizzazioni iniziali dell'ammasso, ciascuna evoluta per $1140$ configurazioni orbitali, ottenute combinando i $30$ valori del semiasse maggiore con i $38$ valori dell'eccentricità. Il dataset comprende quindi un totale di $15\times1140=17100$ simulazioni.
 \subsection{Distribuzione delle grandezze finali}
 \label{subsec:distribuzione-grandezze-finali}
 Per analizzare i risultati delle simulazioni, vengono considerati gli istogrammi della frazione di massa legata finale $\boundMassFraction$ e del rapporto tra il raggio di metà massa finale e quello iniziale, definito come:
-\[
-\halfMassRadiusRatio=\frac{r_{1/2}}{r_{1/2,0}}
-\]
+\begin{equation}
+	\halfMassRadiusRatio = \frac{\halfMassRadius}{r_{1/2,0}}
+	\label{eq:half-mass-radius-ratio}
+\end{equation}
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{./plots/distribuzioni_bmf_hmr.pdf}
-	\caption{Distribuzione della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del rapporto tra il raggio di metà massa finale e iniziale $\halfMassRadiusRatio$ (a destra).}
+	\caption{Distribuzione della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del raggio di metà massa relativo $\halfMassRadiusRatio$ (a destra).}
 	\label{fig:distribuzione-grandezze-finali}
 \end{figure}
-Dalla figura~\ref{fig:distribuzione-grandezze-finali} si nota che entrambe le distribuzioni presentano un andamento bimodale, caratterizzato da due gruppi di valori distinti. Si osserva che in $4689$ simulazioni, pari al $27.42\%$ del dataset, sia la frazione di massa legata $\boundMassFraction$ sia il rapporto tra i raggi di metà massa $\halfMassRadiusRatio$ sono nulli. In questi casi, nessuna stella risulta più legata all'ammasso e le stelle si sono totalmente disperse sotto l'effetto delle forze mareali galattiche.
+\noindent Dalla Figura~\ref{fig:distribuzione-grandezze-finali} si nota che entrambe le distribuzioni presentano un andamento bimodale, caratterizzato da due gruppi di valori distinti. Si osserva che in $4689$ simulazioni, pari al $27.42\%$ del dataset, sia la frazione di massa legata $\boundMassFraction$ sia il raggio di metà massa relativo $\halfMassRadiusRatio$ sono nulli. In questi casi, nessuna stella risulta più legata all'ammasso e le stelle si sono totalmente disperse sotto l'effetto delle forze mareali galattiche.
 \subsection{Relazione tra parametri orbitali ed esiti delle simulazioni}
 \label{subsec:relazione-parametri-esiti}
-La Figura~\ref{fig:heatmap-bmf-hmr} mostra le mappe di calore della frazione di massa legata finale $\boundMassFraction$ e del raggio di metà massa $R_{1/2}$, in funzione del semiasse maggiore $\semiMajorAxis$ e dell'eccentricità $\orbitEccentricity$. Ogni cella rappresenta la media dei risultati delle $15$ realizzazioni iniziali per una determinata configurazione orbitale.
-\begin{figure}[htbp]
+La Figura~\ref{fig:heatmap-bmf-hmr} mostra le distribuzioni della frazione di massa legata finale $\boundMassFraction$ e del raggio di metà massa relativo $\halfMassRadiusRatio$, in funzione del semiasse maggiore relativo $\tilde{a}$ e dell'eccentricità $\orbitEccentricity$. Ogni cella rappresenta la media dei risultati delle $15$ realizzazioni iniziali per una determinata configurazione orbitale.
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth]{./plots/mappa_calore_bmf_hmr.pdf}
-	\caption{Mappe di calore dei valori medi della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del raggio di metà massa finale $R_{1/2}$ (a destra), in funzione del semiasse maggiore $\semiMajorAxis$ e dell'eccentricità $\orbitEccentricity$.}
+	\includegraphics[width=\textwidth]{./plots/heat_distribution_bmf_hmr.pdf}
+	\caption{Mappe di calore dei valori medi della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del raggio di metà massa relativo $\halfMassRadiusRatio$ (a destra), in funzione del semiasse maggiore relativo $\tilde{a}$ e dell'eccentricità $\orbitEccentricity$.}
 	\label{fig:heatmap-bmf-hmr}
 \end{figure}
-Le mappe mostrano che per valori del semiasse maggiore inferiori a circa $75$ l'ammasso subisce una dissoluzione completa, dovuta alla forte influenza del potenziale galattico. Anche l'eccentricità influisce sull'evoluzione dell'ammasso: all'aumentare di $\orbitEccentricity$, la dissoluzione diventa progressivamente più marcata, poiché l'ammasso si avvicina maggiormente alla galassia al pericentro, subendo effetti mareali più intensi.
-
-
+\noindent Le distribuzioni mostrano che per valori del semiasse maggiore relativo inferiori a circa $3$ l'ammasso subisce una dissoluzione completa, dovuta alla forte influenza del potenziale galattico. Anche l'eccentricità influisce sull'evoluzione dell'ammasso: all'aumentare di $\orbitEccentricity$, la dissoluzione diventa progressivamente più marcata, poiché l'ammasso si avvicina maggiormente alla galassia al pericentro, subendo effetti mareali più intensi.
 \section{Definizione del problema di classificazione}
+\label{sec:definizione-problema-di-classificazione}
 Per applicare i metodi di apprendimento automatico, il dataset viene organizzato in un insieme di variabili di ingresso e un insieme di etichette, definendo i criteri per l'assegnazione delle classi e la successiva suddivisione dei dati per l'addestramento e la valutazione dei modelli.
 \subsection{Classificazione degli ammassi stellari}
 \label{subsec:classificazione-ammassi}
-Al termine della simulazione, gli ammassi stellari possono presentare esiti evolutivi differenti: alcuni conservano una struttura compatta e gravitazionalmente legata, mentre altri subiscono una perdita di massa e una variazione dell'estensione spaziale tali da modificarne significativamente la struttura iniziale. Queste differenze consentono di distinguere due classi di esito evolutivo: gli ammassi sopravvissuti, indicati come vivi, e gli ammassi dissolti, indicati come morti. Nel presente lavoro, tale distinzione viene adottata per formulare un problema di classificazione binaria, nel quale a ciascun ammasso viene assegnata un'etichetta corrispondente all'insieme di appartenenza.
+Al termine della simulazione, gli ammassi stellari possono presentare esiti evolutivi differenti: alcuni conservano una struttura compatta e gravitazionalmente legata, mentre altri subiscono una perdita di massa e una variazione dell'estensione spaziale tali da modificarne significativamente la struttura iniziale. Queste differenze consentono di distinguere due classi di esito evolutivo: gli ammassi sopravvissuti e gli ammassi dissolti. Nel presente lavoro, tale distinzione viene adottata per formulare un problema di classificazione binaria, nel quale a ciascun ammasso viene assegnata un'etichetta corrispondente alla classe di appartenenza.
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[t]{0.48\textwidth}
@@ -104,7 +110,7 @@ Al termine della simulazione, gli ammassi stellari possono presentare esiti evol
 		\includegraphics[width=\textwidth]{./plots/cluster_alive.png}
 		\vspace{0.3em}
 		
-		\small Ammasso stellare vivo \\ ($\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.5$) \\ ($\boundMassFraction = 0.93$, $\halfMassRadiusRatio = 1.002$)
+		\small Ammasso stellare sopravvissuto \\ ($\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.5$) \\ ($\boundMassFraction = 0.93$, $\halfMassRadiusRatio = 1.002$)
 	\end{minipage}
 	\hfill
 	\begin{minipage}[t]{0.48\textwidth}
@@ -112,14 +118,14 @@ Al termine della simulazione, gli ammassi stellari possono presentare esiti evol
 		\includegraphics[width=\textwidth]{./plots/cluster_dead.png}
 		\vspace{0.3em}
 		
-		\small Ammasso stellare morto \\ ($\semiMajorAxis = 140.0$, $\orbitEccentricity = 0.8$) \\ ($\boundMassFraction = 0.065$, $\halfMassRadiusRatio = 0.246$)
+		\small Ammasso stellare dissolto \\ ($\semiMajorAxis = 140.0$, $\orbitEccentricity = 0.8$) \\ ($\boundMassFraction = 0.065$, $\halfMassRadiusRatio = 0.246$)
 	\end{minipage}
-	\caption{Evoluzione di uno stesso ammasso stellare, generato a partire dalla medesima configurazione iniziale e sottoposto a differenti condizioni orbitali. Le immagini mostrano le configurazioni raggiunte al tempo $\simulationEndTime$: in un caso l'ammasso sopravvive, mentre nell'altro si dissolve. Le configurazioni sono visualizzate mediante OVITO: le stelle sono rappresentate in bianco, il centro galattico in rosso e il centro di massa delle stelle legate in arancione.}
+	\caption{Evoluzione di uno stesso ammasso stellare, generato a partire dalla medesima configurazione iniziale e sottoposto a differenti condizioni orbitali. Le immagini mostrano le configurazioni raggiunte al tempo $\simulationEndTime$: in un caso l'ammasso sopravvive, mentre nell'altro si dissolve. Le configurazioni sono visualizzate mediante OVITO \cite{stukowski2010}: le stelle sono rappresentate in bianco, il centro galattico in rosso e il centro di massa delle stelle legate in arancione.}
 	\label{fig:esempi-ammassi}
 \end{figure}
 \subsection{Definizione formale degli insiemi}
 \label{subsec:criterio-vivi-morti}
-Sia $\allClusters$ l'insieme di tutti gli ammassi stellari $i$. Come descritto nella Sezione~\ref{subsec:classificazione-ammassi}, gli ammassi vengono suddivisi in due sottoinsiemi, $\aliveCluster$ e $\deadCluster$. Tale suddivisione si basa su due grandezze associate a ciascun ammasso $i$: la frazione di massa legata $f_{\mathrm{bound}, i}$ e il rapporto tra il raggio di metà massa finale e quello iniziale $\mathcal{R}_{1/2, i}$. I valori soglia, entrambi pari a $0.1$, sono stati individuati attraverso un'analisi delle configurazioni degli ammassi nelle fasi iniziali e finali delle simulazioni, nonché delle distribuzioni delle grandezze finali presentate nelle Sezioni~\ref{subsec:distribuzione-grandezze-finali} e~\ref{subsec:relazione-parametri-esiti}.
+Sia $\allClusters$ l'insieme di tutti gli ammassi stellari $i$. Come descritto nella Sezione~\ref{subsec:classificazione-ammassi}, gli ammassi vengono suddivisi in due sottoinsiemi, $\aliveCluster$ e $\deadCluster$, rispettivamente contenenti gli ammassi sopravvissuti e quelli dissolti. Tale suddivisione si basa su due grandezze associate a ciascun ammasso $i$: la frazione di massa legata $f_{\mathrm{bound}, i}$ e il rapporto tra il raggio di metà massa finale e quello iniziale $\mathcal{R}_{1/2, i}$. I valori soglia, entrambi pari a $0.1$, sono stati individuati attraverso un'analisi delle configurazioni degli ammassi nelle fasi iniziali e finali delle simulazioni, nonché delle distribuzioni delle grandezze finali presentate nelle Sezioni~\ref{subsec:distribuzione-grandezze-finali} e~\ref{subsec:relazione-parametri-esiti}.
 Gli insiemi $\aliveCluster$ e $\deadCluster$ sono definiti come segue:
 \[
 \aliveCluster = \left\{ i \in \allClusters \,\middle|\, f_{\mathrm{bound}, i} > 0.1 \;\land\; \mathcal{R}_{1/2, i} > 0.1 \right\}
@@ -133,7 +139,7 @@ I due insiemi sono disgiunti ed esaustivi rispetto a $\allClusters$, poiché sod
 \qquad
 \aliveCluster \cup \deadCluster = \allClusters.
 \]
-Sul totale di $|\allClusters|=17\,100$  simulazioni analizzate, l'insieme $\aliveCluster$ contiene 11\,695 ammassi, pari al $68.39\%$ del totale, mentre $\deadCluster$ contiene 5\,405 ammassi, pari al $31.61\%$.
+Sul totale di $|\allClusters|=17\,100$ simulazioni analizzate, l'insieme $\aliveCluster$ contiene 11\,695 ammassi, pari al $68.39\%$ del totale, mentre $\deadCluster$ contiene 5\,405 ammassi, pari al $31.61\%$.
 
 \subsection{Variabili di ingresso e di uscita}
 \label{subsec:variabili-ingresso-uscita}
@@ -164,15 +170,15 @@ Utilizzando gli insiemi $\aliveCluster$ e $\deadCluster$, definiti nella Sezione
 \end{equation}
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=0.75\textwidth]{plots/distribution_alive_dead_clusters.pdf}
+	\includegraphics[width=0.75\textwidth]{plots/cluster_classification.pdf}
 	\caption{Esito della classificazione binaria degli ammassi stellari.}
 	\label{fig:distribuzione-ammassi}
 \end{figure}
 
 \subsection{Suddivisione in training set e test set}
 \label{subsec:suddivisione-dataset}
-Per valutare la capacità di generalizzazione dei modelli, il dataset viene suddiviso in un insieme di addestramento (training set), contenente l'80\% delle simulazioni, e un insieme di test (test set), contenente il restante 20\%. Il primo viene utilizzato per apprendere la relazione tra i parametri orbitali e le etichette, mentre il secondo viene impiegato esclusivamente per valutare le prestazioni su simulazioni non utilizzate durante l'addestramento.
-La suddivisione è stratificata rispetto alle etichette, in modo da mantenere nei due insiemi proporzioni comparabili di ammassi vivi e morti.
+Per valutare la capacità di generalizzazione dei modelli, il dataset viene suddiviso casualmente in un insieme di addestramento, contenente l'80\% delle simulazioni, e un insieme di test, contenente il restante 20\%. Sul totale di $17100$ simulazioni, si ottengono quindi $13680$ campioni per l'addestramento e $3420$ per la valutazione. La suddivisione è stratificata rispetto alle etichette, in modo da mantenere proporzioni comparabili di ammassi sopravvissuti e dissolti nei due insiemi. La selezione dei campioni avviene mediante una procedura pseudo-casuale, controllata da un seme prestabilito, mantenuto uguale per entrambi i modelli. In questo modo si garantisce che le due suddivisioni coincidano e che i risultati siano confrontabili e riproducibili.
+Il training set viene utilizzato per apprendere la relazione tra i parametri orbitali e le etichette, mentre il test set viene impiegato esclusivamente per valutare le prestazioni dei modelli su simulazioni non utilizzate durante l'addestramento.
 
 \subsection{Confronto tramite F1-score}
 \label{subsec:confronto-f1-score}
@@ -189,36 +195,40 @@ Il secondo è il richiamo (recall), che misura la capacità del modello di indiv
 In queste espressioni, $TP$ (veri positivi) indica il numero di ammassi sopravvissuti classificati correttamente, $FP$ (falsi positivi) il numero di ammassi dissolti classificati erroneamente come sopravvissuti e $FN$ (falsi negativi) il numero di ammassi sopravvissuti classificati erroneamente come dissolti.
 Per riassumere entrambe le misure in un unico valore si utilizza l'F1-score, definito come la loro media armonica:
 \begin{equation}
-	F_1 = 2 \cdot \frac{\mathrm{Precisione}\cdot\mathrm{Richiamo}}{\mathrm{Precisione}+\mathrm{Richiamo}}.
+	F_1 = 2 \cdot \frac{\mathrm{Precisione}\cdot\mathrm{Richiamo}}{\mathrm{Precisione}+\mathrm{Richiamo}}
 	\label{eq:f1-score}
 \end{equation}
 La media armonica penalizza gli squilibri tra precisione e richiamo: un valore elevato di una misura non è sufficiente a compensare un valore basso dell'altra. L'F1-score assume valori compresi tra $0$ e $1$, dove $1$ rappresenta il caso ideale in cui tutti gli ammassi sopravvissuti vengono riconosciuti correttamente e non si verificano falsi positivi.
 
+
+\section{Applicazione dei modelli}
+\label{sec:applicazione-modelli}
+In questa sezione vengono applicati due modelli di apprendimento automatico per classificare gli ammassi stellari a partire dai parametri orbitali iniziali. Vengono considerati un classificatore SVC e una rete neurale MLP, di cui si descrivono le caratteristiche principali e si analizzano le prestazioni ottenute sul test set, mettendone a confronto i risultati.
 \subsection{Standardizzazione delle variabili}
 \label{subsec:standardizzazione-variabili}
-Prima dell'addestramento, le variabili di ingresso vengono standardizzate per uniformarne la scala ed evitare che differenze nell'ordine di grandezza influenzino il processo di apprendimento. La trasformazione applicata a ciascuna variabile è definita come:
+Prima dell'addestramento, le variabili di ingresso vengono standardizzate per riportarle a una scala comune. La trasformazione applicata a ciascuna variabile è:
 \begin{equation}
 	x' = \frac{x-\mu}{\sigma}
 	\label{eq:standardizzazione}
 \end{equation}
-dove $x$ rappresenta il valore originale, mentre $\mu$ e $\sigma$ indicano rispettivamente la media e la deviazione standard della variabile. Questi parametri vengono calcolati esclusivamente sul training set e successivamente utilizzati, senza modificarli, per standardizzare il test set.
-Questa procedura evita la contaminazione dei dati di addestramento da parte delle informazioni contenute nel test set. Se i parametri di standardizzazione fossero calcolati sull'intero dataset, anche i dati destinati alla valutazione contribuirebbero indirettamente alla fase di addestramento, compromettendo l'indipendenza del test set e rendendo meno attendibile la valutazione delle prestazioni del modello \cite{ kaufman2012leakage}.
+dove $x$ è il valore originale, mentre $\mu$ e $\sigma$ indicano rispettivamente la media e la deviazione standard. Questi parametri vengono calcolati esclusivamente sul training set e successivamente utilizzati per trasformare anche il test set. In questo modo si evita che le informazioni contenute nei dati di test influenzino indirettamente l'addestramento dei modelli \cite{kaufman2012leakage}.
 
 \subsection{Support Vector Classifier}
 \label{subsec:svm}
 \subsubsection{Modello}
-Il primo classificatore utilizzato è il Support Vector Classifier (SVC), basato sulle Support Vector Machine (SVM) \cite{cortes1995support}. Il suo obiettivo è individuare una frontiera decisionale che separi gli ammassi sopravvissuti da quelli dissolti nello spazio definito dal semiasse maggiore e dall'eccentricità orbitale. La posizione della frontiera dipende dai campioni più vicini ad essa, chiamati vettori di supporto, che contribuiscono a determinarne la forma.
+Il primo classificatore utilizzato è il Support Vector Classifier (SVC), basato sulle Support Vector Machine (SVM) \cite{cortes1995support}. Il suo obiettivo è individuare una frontiera decisionale che separi gli ammassi sopravvissuti da quelli dissolti nello spazio definito dai parametri orbitali. La posizione di questa frontiera dipende principalmente dai campioni più vicini ad essa, chiamati vettori di supporto, che ne determinano la forma.
 Per consentire una separazione non lineare viene adottato un kernel polinomiale di secondo grado, definito come:
 \begin{equation}
 	K(\mathbf{x},\mathbf{z})=(\gamma\,\mathbf{x}\cdot\mathbf{z}+r)^2
 	\label{eq:svm-polynomial-kernel}
 \end{equation}
-dove $\mathbf{x}$ e $\mathbf{z}$ rappresentano due vettori contenenti i parametri orbitali standardizzati, mentre $\mathbf{x}\cdot\mathbf{z}$ indica il loro prodotto scalare. Il parametro $\gamma$ determina la scala del prodotto scalare e viene calcolato secondo la relazione:
+Un kernel permette di valutare la relazione tra due campioni attraverso una funzione matematica, rendendo possibile individuare frontiere decisionali anche quando le classi non sono separabili mediante una semplice retta. In questa espressione, $\mathbf{x}$ e $\mathbf{z}$ rappresentano due vettori contenenti i parametri orbitali standardizzati, mentre $\mathbf{x}\cdot\mathbf{z}$ indica il loro prodotto scalare.
+Il parametro $\gamma$ determina la scala del prodotto scalare e viene calcolato secondo la relazione:
 \begin{equation}
 	\gamma = \frac{1}{n_{\mathrm{feature}}\cdot\operatorname{Var}(X)}
 	\label{eq:svm-gamma}
 \end{equation}
-dove $n_{\mathrm{feature}}$ indica il numero di variabili di ingresso e $\operatorname{Var}(X)$ la loro varianza media. Nel nostro caso, le variabili considerate sono il semiasse maggiore e l'eccentricità. Tuttavia, come descritto nella Sezione~\ref{subsec:standardizzazione-variabili}, entrambe vengono standardizzate prima dell'addestramento, assumendo quindi varianza unitaria. Avendo due variabili di ingresso, si ottiene:
+dove $n_{\mathrm{feature}}$ indica il numero di variabili di ingresso e $\operatorname{Var}(X)$ la loro varianza media. Poiché le due variabili sono state standardizzate, la loro varianza è unitaria. Si ottiene quindi:
 \[
 \gamma = \frac{1}{2\cdot 1}=0.5
 \]
@@ -227,16 +237,16 @@ Il parametro $r$, corrispondente al termine costante del kernel, viene impostato
 	K(\mathbf{x},\mathbf{z}) = \gamma^2(\mathbf{x}\cdot\mathbf{z})^2
 	\label{eq:svm-polynomial-kernel-expanded}
 \end{equation}
-In questo modo, il kernel considera esclusivamente termini quadratici, comprese le interazioni tra le variabili di ingresso, senza introdurre contributi lineari o costanti.
+Il kernel considera quindi esclusivamente termini quadratici e le interazioni tra le variabili di ingresso.
+\subsubsection{Risultati}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{plots/svc_decision_boundaries.pdf}
 	\caption{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}
 	\label{fig:svm-decision-boundaries}
 \end{figure}
-\subsubsection{Risultati}
-Sul test set, il classificatore raggiunge un F1-score, definito nella Sezione~\ref{subsec:confronto-f1-score}, pari a $0.6505$. Considerando separatamente le due categorie, l'F1-score è pari a $0.53$ per gli ammassi dissolti e a $0.72$ per quelli sopravvissuti. Il modello mostra quindi prestazioni differenti nel riconoscimento delle due categorie, con risultati migliori per gli ammassi sopravvissuti.
-\\Sebbene le prestazioni ottenute non siano particolarmente elevate, la separazione appresa può essere descritta mediante un'equazione quadratica, coerentemente con il kernel polinomiale introdotto nella Sezione~\ref{subsec:svm}. Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
+Sul test set, il classificatore raggiunge un F1-score pesato pari a $0.6505$. Considerando separatamente le due categorie, il valore è pari a $0.53$ per gli ammassi dissolti e a $0.72$ per quelli sopravvissuti.
+La frontiera decisionale può essere descritta mediante un'equazione quadratica. Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
 \begin{equation}
 	\begin{aligned}
 		f(a, e) = \, & -0.000126024\,a^2
@@ -248,19 +258,23 @@ Sul test set, il classificatore raggiunge un F1-score, definito nella Sezione~\r
 	\end{aligned}
 	\label{eq:svm-decision-boundary}
 \end{equation}
-L'equazione permette di ricondurre la classificazione a una relazione esplicita tra il semiasse maggiore $a$ e l'eccentricità $e$, rendendo direttamente descrivibile la frontiera decisionale appresa dal modello.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.65\textwidth]{plots/svc_analytical_boundary.pdf}
-	\caption{Rappresentazione grafica della frontiera di decisione analitica definita dall'Equazione~\ref{eq:svm-decision-boundary}. La regione verde rappresenta l'isola di stabilità e sopravvivenza degli ammassi ($f(a,e) > 0$), mentre la regione in rosso denota la regione di dissoluzione degli ammassi ($f(a,e) < 0$).}
+	\includegraphics[width=0.55\textwidth]{plots/svc_analytical_boundary.pdf}
+	\caption{Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref{eq:svm-decision-boundary}. La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$).}
 	\label{fig:svm-analytical-boundary}
 \end{figure}
 
 \subsection{Multi-Layer Perceptron}
 \label{subsec:mlp}
 \subsubsection{Modello}
-Il secondo classificatore utilizzato è un Multi-Layer Perceptron (MLP), una rete neurale artificiale costituita da strati di neuroni interconnessi. L'architettura adottata comprende due livelli nascosti, rispettivamente di 16 e 8 neuroni, e un livello di uscita per la classificazione binaria. Come funzione di attivazione dei livelli nascosti viene utilizzata la funzione ReLU, mentre l'ottimizzazione dei pesi della rete è affidata all'algoritmo Adam. L'addestramento prevede un massimo di 500 iterazioni.
-Come descritto nella Sezione~\ref{subsec:standardizzazione-variabili}, prima dell'addestramento le variabili di ingresso vengono standardizzate utilizzando i parametri calcolati sul training set. Il modello viene addestrato mantenendo la distribuzione originale degli ammassi sopravvissuti e dissolti, senza applicare procedure di bilanciamento.
+Il secondo classificatore utilizzato è un Multi-Layer Perceptron (MLP), una rete neurale artificiale composta da neuroni organizzati in diversi strati. Ogni neurone riceve i valori prodotti dallo strato precedente, li combina attraverso pesi numerici e restituisce un risultato che viene trasmesso ai neuroni successivi. Durante l'addestramento, questi pesi vengono modificati per migliorare la capacità del modello di classificare correttamente gli ammassi.
+L'architettura adottata comprende due livelli nascosti, rispettivamente di 16 e 8 neuroni, e un livello di uscita per la classificazione binaria. I livelli nascosti utilizzano la funzione di attivazione ReLU (Rectified Linear Unit), definita come:
+\[
+\operatorname{ReLU}(x)=\max(0,x)
+\]
+Questa funzione restituisce zero per valori negativi e mantiene invariati quelli positivi. La sua introduzione consente alla rete di apprendere relazioni non lineari tra le variabili di ingresso.
+L'aggiornamento dei pesi durante l'addestramento è affidato all'algoritmo Adam, un metodo di ottimizzazione che regola automaticamente l'entità degli aggiornamenti sulla base degli errori commessi dalla rete e dell'andamento dei gradienti durante le iterazioni. L'addestramento prevede un massimo di 500 iterazioni.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{plots/mlp_decision_boundaries.pdf}
@@ -268,5 +282,5 @@ Come descritto nella Sezione~\ref{subsec:standardizzazione-variabili}, prima del
 	\label{fig:mlp-decision-boundaries}
 \end{figure}
 \subsubsection{Risultati}
-Sul test set, il classificatore raggiunge un F1-score pesato pari a $0.9642$, nettamente superiore al valore $0.6505$ ottenuto dall'SVC. Considerando separatamente le due categorie, l'F1-score è pari a $0.95$ per gli ammassi dissolti e a $0.97$ per quelli sopravvissuti. Il modello mostra quindi prestazioni elevate e più uniformi nel riconoscimento delle due categorie rispetto al classificatore precedente.
-La Figura~\ref{fig:mlp-decision-boundaries} mostra le regioni decisionali individuate dal modello nello spazio dei parametri orbitali. A differenza dell'SVC, la frontiera decisionale dell'MLP non può essere ricondotta a una semplice equazione quadratica: la sua forma dipende dalla combinazione dei pesi e delle funzioni di attivazione dei diversi neuroni. La separazione appresa risulta quindi più complessa da descrivere mediante una singola relazione analitica.
+Sul test set, il classificatore raggiunge un F1-score pesato pari a $0.9642$. Considerando separatamente le due categorie, il valore è pari a $0.95$ per gli ammassi dissolti e a $0.97$ per quelli sopravvissuti.
+La Figura~\ref{fig:mlp-decision-boundaries} mostra le regioni decisionali individuate dal modello. A differenza dell'SVC, la frontiera dell'MLP non può essere descritta mediante una semplice equazione quadratica, poiché dipende dai pesi e dalle funzioni di attivazione dei diversi neuroni.
