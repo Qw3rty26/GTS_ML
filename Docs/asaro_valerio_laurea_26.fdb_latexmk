@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex asaro_valerio_laurea_26"] 1793427098.39166 "asaro_valerio_laurea_26.aux" "asaro_valerio_laurea_26.bbl" "asaro_valerio_laurea_26" 1793430517.89507 0
+["bibtex asaro_valerio_laurea_26"] 1793427098.39166 "asaro_valerio_laurea_26.aux" "asaro_valerio_laurea_26.bbl" "asaro_valerio_laurea_26" 1793467619.8017 0
   "./biblio.bib" 1793421310.31633 8850 1b03d891c5288b917628400c44c6fd43 ""
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/bibtex/bst/base/plain.bst" 1 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "asaro_valerio_laurea_26.aux" 1793430517.35404 27329 18275d30db9904f4cc63d69c5575794b "pdflatex"
+  "asaro_valerio_laurea_26.aux" 1793467619.17417 27288 65d682ee357210cdf79c6d77dc700b3f "pdflatex"
   (generated)
   "asaro_valerio_laurea_26.bbl"
   "asaro_valerio_laurea_26.blg"
   (rewritten before read)
-["pdflatex"] 1793430511.41511 "asaro_valerio_laurea_26.tex" "asaro_valerio_laurea_26.pdf" "asaro_valerio_laurea_26" 1793430517.8955 2
+["pdflatex"] 1793467613.0487 "asaro_valerio_laurea_26.tex" "asaro_valerio_laurea_26.pdf" "asaro_valerio_laurea_26" 1793467619.80212 2
   "/nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1 334042 b0bb6c3f818e504ab831c860dc214e0c ""
   "/nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/web2c/pdftex/pdflatex.fmt" 1 8021441 97995a4de8f21274b7ae9151572c4806 ""
   "/nix/store/0bvssfakydya43d6bsf043nd845fwzwj-texlive-2023-env/share/texmf-var/web2c/texmf.cnf" 1 42643 83eec79818b584997cb0682995bfb0fe ""
@@ -163,16 +163,16 @@
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/latex/ucs/utf8x.def" 1 8944 e3433baec74c4b7b278c6b6a547ff9ec ""
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/latex/url/url.sty" 1 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/latex/xcolor/xcolor.sty" 1 55487 80a65caedd3722f4c20a14a69e785d8f ""
-  "asaro_valerio_laurea_26.aux" 1793430517.35404 27329 18275d30db9904f4cc63d69c5575794b "pdflatex"
+  "asaro_valerio_laurea_26.aux" 1793467619.17417 27288 65d682ee357210cdf79c6d77dc700b3f "pdflatex"
   "asaro_valerio_laurea_26.bbl" 1793427098.42397 3411 86bce2fc0f44288af53fe37ddab9bc85 "bibtex asaro_valerio_laurea_26"
-  "asaro_valerio_laurea_26.out" 1793430517.35904 9330 69c24870c5c214896fcc13fabc3f1e21 "pdflatex"
+  "asaro_valerio_laurea_26.out" 1793467619.17817 9330 69c24870c5c214896fcc13fabc3f1e21 "pdflatex"
   "asaro_valerio_laurea_26.tex" 1793427149.23413 7311 02c378c5988b43d7a938704f8fe22ea3 ""
-  "asaro_valerio_laurea_26.toc" 1793430517.35904 4642 5ce2d0eecc5c38bb19eb5fb289204bb1 "pdflatex"
+  "asaro_valerio_laurea_26.toc" 1793467619.17917 4642 3f5e1103d68a9775cb191299dbdb7740 "pdflatex"
   "capitolo1.tex" 1793430510.56106 7181 9dd6680b878095bc08af04c57f325a1b ""
-  "capitolo2.tex" 1793430298.80317 29217 7a367a0bb4cb2188de19f0a5edc53560 ""
-  "capitolo3.tex" 1793429984.7135 24017 1f40fd997924f1ac741b075be8cf4c45 ""
+  "capitolo2.tex" 1793466797.44184 29214 908ced453b88452fcfa826e1e35682ed ""
+  "capitolo3.tex" 1793466777.66584 24717 19a3cb57088f96269aca76c4cc86bdd7 ""
   "capitolo4.tex" 1793427180.99423 220 6d145285d887320aec6e0c3f149826e5 ""
-  "capitolo5.tex" 1793429118.93309 2391 41a49ee6f28832691044784cf60e15e8 ""
+  "capitolo5.tex" 1793467612.61918 2642 cc7db456403a30470e30e682ba4dc8c8 ""
   "images/iadi.jpg" 1793418180.3981 393703 54e750fbe5fa4f01592a13012433eb1b ""
   "images/m62.jpg" 1793418180.4001 266897 9296eb3cd746be3474f127b409b55b9e ""
   "images/m80.jpg" 1793418180.4041 911503 f05cff35e50f967afcbcff34cf8fc4c8 ""
@@ -193,8 +193,8 @@
   "plots/heat_distribution_bmf_hmr.pdf" 1793422575.20327 63338 3009f84fc160339fac836a0eec4bfeb6 ""
   "plots/initial_positions.pdf" 1793418180.4541 170603 92ebbe741d61bfe1c961277239024236 ""
   "plots/mlp_decision_boundaries.pdf" 1793418180.4561 65584 98c5516364a570f496f3dea42b42d720 ""
-  "plots/svc_analytical_boundary.pdf" 1793418180.4581 41197 ca45d2119da4a3e8a5cb20e071a23a36 ""
-  "plots/svc_decision_boundaries.pdf" 1793418180.4591 80578 646a08a6709ee131705ba12c4a4a5856 ""
+  "plots/svc_analytical_boundary.pdf" 1793466049.8109 39293 9afd47f42dfa0601850012b36b9ebfb2 ""
+  "plots/svc_decision_boundaries.pdf" 1793465315.79918 69298 54608a974d3445acbbac81d9ba2f822a ""
   "plots/velocity_distribution_comparison.pdf" 1793418180.4601 19989 5240f7ee1e85d331885a16553f79049d ""
   "plots/velocity_rescaling.pdf" 1793418180.4611 28413 ec5f3ce4b0ef66a964232a887541a445 ""
   "ringraziamenti.tex" 1793418180.4611 120 3ca9542c5e077e71ebb044ca911d09a3 ""

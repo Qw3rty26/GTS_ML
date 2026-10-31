@@ -177,17 +177,17 @@
 \newlabel{fig:esempi-ammassi}{{3.3}{21}{Evoluzione di uno stesso ammasso stellare, generato a partire dalla medesima configurazione iniziale e sottoposto a differenti condizioni orbitali. Le immagini mostrano le configurazioni raggiunte al tempo $\simulationEndTime $: in un caso l'ammasso sopravvive, mentre nell'altro si dissolve. Le configurazioni sono visualizzate mediante OVITO \cite {stukowski2010}: le stelle sono rappresentate in bianco, il centro galattico in rosso e il centro di massa delle stelle legate in arancione}{figure.3.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Variabili di ingresso e di uscita}{21}{subsection.3.3.3}\protected@file@percent }
 \newlabel{subsec:variabili-ingresso-uscita}{{3.3.3}{21}{Variabili di ingresso e di uscita}{subsection.3.3.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{21}{subsection.3.3.4}\protected@file@percent }
-\newlabel{subsec:suddivisione-dataset}{{3.3.4}{21}{Suddivisione in training set e test set}{subsection.3.3.4}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Esito della classificazione binaria degli ammassi stellari.}}{22}{figure.3.4}\protected@file@percent }
 \newlabel{fig:distribuzione-ammassi}{{3.4}{22}{Esito della classificazione binaria degli ammassi stellari}{figure.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{22}{subsection.3.3.4}\protected@file@percent }
+\newlabel{subsec:suddivisione-dataset}{{3.3.4}{22}{Suddivisione in training set e test set}{subsection.3.3.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}Confronto tramite F1-score}{22}{subsection.3.3.5}\protected@file@percent }
 \newlabel{subsec:confronto-f1-score}{{3.3.5}{22}{Confronto tramite F1-score}{subsection.3.3.5}{}}
 \newlabel{eq:precisione}{{3.8}{22}{Confronto tramite F1-score}{equation.3.3.8}{}}
 \newlabel{eq:richiamo}{{3.9}{22}{Confronto tramite F1-score}{equation.3.3.9}{}}
-\newlabel{eq:f1-score}{{3.10}{22}{Confronto tramite F1-score}{equation.3.3.10}{}}
 \citation{kaufman2012leakage}
 \citation{cortes1995support}
+\newlabel{eq:f1-score}{{3.10}{23}{Confronto tramite F1-score}{equation.3.3.10}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3.4}Applicazione dei modelli}{23}{section.3.4}\protected@file@percent }
 \newlabel{sec:applicazione-modelli}{{3.4}{23}{Applicazione dei modelli}{section.3.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Standardizzazione delle variabili}{23}{subsection.3.4.1}\protected@file@percent }
@@ -198,30 +198,30 @@
 \@writefile{toc}{\contentsline {subsubsection}{Modello}{23}{subsubsection*.3}\protected@file@percent }
 \newlabel{eq:svm-polynomial-kernel}{{3.12}{23}{Modello}{equation.3.4.12}{}}
 \newlabel{eq:svm-gamma}{{3.13}{23}{Modello}{equation.3.4.13}{}}
-\newlabel{eq:svm-polynomial-kernel-expanded}{{3.14}{23}{Modello}{equation.3.4.14}{}}
+\newlabel{eq:svm-polynomial-kernel-expanded}{{3.14}{24}{Modello}{equation.3.4.14}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Risultati}{24}{subsubsection*.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}}{24}{figure.3.5}\protected@file@percent }
-\newlabel{fig:svm-decision-boundaries}{{3.5}{24}{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}{figure.3.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate.}}{24}{figure.3.5}\protected@file@percent }
+\newlabel{fig:svm-decision-boundaries}{{3.5}{24}{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate}{figure.3.5}{}}
 \newlabel{eq:svm-decision-boundary}{{3.15}{24}{Risultati}{equation.3.4.15}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref {eq:svm-decision-boundary}. La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$).}}{24}{figure.3.6}\protected@file@percent }
-\newlabel{fig:svm-analytical-boundary}{{3.6}{24}{Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref {eq:svm-decision-boundary}. La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$)}{figure.3.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref {eq:svm-decision-boundary}. La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$).}}{25}{figure.3.6}\protected@file@percent }
+\newlabel{fig:svm-analytical-boundary}{{3.6}{25}{Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref {eq:svm-decision-boundary}. La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$)}{figure.3.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}Multi-Layer Perceptron}{25}{subsection.3.4.3}\protected@file@percent }
 \newlabel{subsec:mlp}{{3.4.3}{25}{Multi-Layer Perceptron}{subsection.3.4.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Modello}{25}{subsubsection*.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}}{25}{figure.3.7}\protected@file@percent }
-\newlabel{fig:mlp-decision-boundaries}{{3.7}{25}{Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}{figure.3.7}{}}
-\@writefile{toc}{\contentsline {subsubsection}{Risultati}{25}{subsubsection*.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Implementazione software}{26}{chapter.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}}{26}{figure.3.7}\protected@file@percent }
+\newlabel{fig:mlp-decision-boundaries}{{3.7}{26}{Regioni decisionali del classificatore MLP nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (F1-score = 0.9642)}{figure.3.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Risultati}{26}{subsubsection*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Implementazione software}{27}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{cha:implementazione-software}{{4}{26}{Implementazione software}{chapter.4}{}}
+\newlabel{cha:implementazione-software}{{4}{27}{Implementazione software}{chapter.4}{}}
 \bibstyle{plain}
 \bibdata{biblio}
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusioni}{27}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusioni}{28}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{cha:conclusioni}{{5}{27}{Conclusioni}{chapter.5}{}}
-\@writefile{toc}{\contentsline {chapter}{Bibliografia}{27}{chapter.5}\protected@file@percent }
+\newlabel{cha:conclusioni}{{5}{28}{Conclusioni}{chapter.5}{}}
+\@writefile{toc}{\contentsline {chapter}{Bibliografia}{28}{chapter.5}\protected@file@percent }
 \bibcite{baumgardt2003}{1}
 \bibcite{binneytremaine2008}{2}
 \bibcite{cai2016evolution}{3}
@@ -237,4 +237,4 @@
 \bibcite{springel2005}{13}
 \bibcite{spurzem2023}{14}
 \bibcite{stukowski2010}{15}
-\gdef \@abspage@last{30}
+\gdef \@abspage@last{31}

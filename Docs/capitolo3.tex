@@ -39,7 +39,7 @@ Il tempo finale delle simulazioni è fissato a $\simulationEndTime=700.0$, per c
 \subsection{Riepilogo dei parametri}
 \label{subsec:riepilogo-parametri}
 La Tabella~\ref{tab:parametri-dataset} riassume i parametri adottati per le simulazioni, distinguendo quelli mantenuti costanti da quelli variati per esplorare le diverse configurazioni orbitali.
-\begin{table}[htbp]
+\begin{table}[H]
 	\centering
 	\caption{Parametri adottati per la generazione del dataset.}
 	\label{tab:parametri-dataset}
@@ -80,7 +80,7 @@ Per analizzare i risultati delle simulazioni, vengono considerati gli istogrammi
 	\halfMassRadiusRatio = \frac{\halfMassRadius}{r_{1/2,0}}
 	\label{eq:half-mass-radius-ratio}
 \end{equation}
-\begin{figure}[htbp]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{./plots/distribuzioni_bmf_hmr.pdf}
 	\caption{Distribuzione della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del raggio di metà massa relativo $\halfMassRadiusRatio$ (a destra).}
@@ -168,7 +168,7 @@ Utilizzando gli insiemi $\aliveCluster$ e $\deadCluster$, definiti nella Sezione
 		0 & \text{se } i \in \deadCluster
 	\end{cases}
 \end{equation}
-\begin{figure}[htbp]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.75\textwidth]{plots/cluster_classification.pdf}
 	\caption{Esito della classificazione binaria degli ammassi stellari.}
@@ -212,7 +212,6 @@ Prima dell'addestramento, le variabili di ingresso vengono standardizzate per ri
 	\label{eq:standardizzazione}
 \end{equation}
 dove $x$ è il valore originale, mentre $\mu$ e $\sigma$ indicano rispettivamente la media e la deviazione standard. Questi parametri vengono calcolati esclusivamente sul training set e successivamente utilizzati per trasformare anche il test set. In questo modo si evita che le informazioni contenute nei dati di test influenzino indirettamente l'addestramento dei modelli \cite{kaufman2012leakage}.
-
 \subsection{Support Vector Classifier}
 \label{subsec:svm}
 \subsubsection{Modello}
@@ -232,32 +231,34 @@ dove $n_{\mathrm{feature}}$ indica il numero di variabili di ingresso e $\operat
 \[
 \gamma = \frac{1}{2\cdot 1}=0.5
 \]
-Il parametro $r$, corrispondente al termine costante del kernel, viene impostato a $0$. Sostituendo questo valore nell'Equazione~\ref{eq:svm-polynomial-kernel}, si ottiene:
+Il parametro $r$, corrispondente al termine costante del kernel, viene impostato a $1.0$. Questa scelta permette di includere, oltre ai contributi quadratici e alle interazioni tra le variabili, anche termini lineari e un termine costante. Sostituendo questo valore nell'Equazione~\ref{eq:svm-polynomial-kernel}, si ottiene:
 \begin{equation}
-	K(\mathbf{x},\mathbf{z}) = \gamma^2(\mathbf{x}\cdot\mathbf{z})^2
+	K(\mathbf{x},\mathbf{z}) =
+	\gamma^2(\mathbf{x}\cdot\mathbf{z})^2
+	+2\gamma(\mathbf{x}\cdot\mathbf{z})+1
 	\label{eq:svm-polynomial-kernel-expanded}
 \end{equation}
-Il kernel considera quindi esclusivamente termini quadratici e le interazioni tra le variabili di ingresso.
 \subsubsection{Risultati}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{plots/svc_decision_boundaries.pdf}
-	\caption{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate. (F1-score = 0.6505)}
+	\caption{Regioni decisionali del classificatore SVC nello spazio dei parametri orbitali originali. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del test set; le croci indicano le classificazioni errate.}
 	\label{fig:svm-decision-boundaries}
 \end{figure}
-Sul test set, il classificatore raggiunge un F1-score pesato pari a $0.6505$. Considerando separatamente le due categorie, il valore è pari a $0.53$ per gli ammassi dissolti e a $0.72$ per quelli sopravvissuti.
-La frontiera decisionale può essere descritta mediante un'equazione quadratica. Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
+Sul test set, il classificatore raggiunge un F1-score pesato pari a $0.9644$. Le prestazioni risultano elevate per entrambe le categorie, con un valore di $0.95$ per gli ammassi dissolti e di $0.97$ per quelli sopravvissuti. La distribuzione delle simulazioni rispetto alle regioni decisionali mostra quindi che il modello riesce a distinguere correttamente la maggior parte degli esiti.
+Grazie alla forma espansa del kernel, descritta nell'Equazione~\ref{eq:svm-polynomial-kernel-expanded}, è possibile esprimere la frontiera decisionale mediante un'equazione quadratica esplicita. Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
 \begin{equation}
 	\begin{aligned}
-		f(a, e) = \, & -0.000126024\,a^2
-		- 3.052125993\,e^2
-		+ 0.009638306\,ae \\
-		& + 0.034576916\,a
-		+ 1.320091691\,e
-		- 1.737562166
+		f(a, e) = \, & -0.000136067916\,a^2
+		- 9.13358876203\,e^2
+		- 0.074722704916\,ae \\
+		& + 0.161416252727\,a
+		+ 6.46340228468\,e
+		- 12.1809014128
 	\end{aligned}
 	\label{eq:svm-decision-boundary}
 \end{equation}
+I coefficienti associati ai termini dipendenti dall'eccentricità hanno modulo maggiore rispetto a quelli associati al semiasse maggiore. Tuttavia, poiché i due parametri assumono intervalli di valori molto diversi, il confronto diretto tra i coefficienti non permette di stabilire quale abbia un'influenza maggiore sulla classificazione.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.55\textwidth]{plots/svc_analytical_boundary.pdf}

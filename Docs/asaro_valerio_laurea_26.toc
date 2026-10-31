@@ -38,7 +38,7 @@
 \contentsline {subsection}{\numberline {3.3.1}Classificazione degli ammassi stellari}{20}{subsection.3.3.1}%
 \contentsline {subsection}{\numberline {3.3.2}Definizione formale degli insiemi}{20}{subsection.3.3.2}%
 \contentsline {subsection}{\numberline {3.3.3}Variabili di ingresso e di uscita}{21}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{21}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{22}{subsection.3.3.4}%
 \contentsline {subsection}{\numberline {3.3.5}Confronto tramite F1-score}{22}{subsection.3.3.5}%
 \contentsline {section}{\numberline {3.4}Applicazione dei modelli}{23}{section.3.4}%
 \contentsline {subsection}{\numberline {3.4.1}Standardizzazione delle variabili}{23}{subsection.3.4.1}%
@@ -47,7 +47,7 @@
 \contentsline {subsubsection}{Risultati}{24}{subsubsection*.4}%
 \contentsline {subsection}{\numberline {3.4.3}Multi-Layer Perceptron}{25}{subsection.3.4.3}%
 \contentsline {subsubsection}{Modello}{25}{subsubsection*.5}%
-\contentsline {subsubsection}{Risultati}{25}{subsubsection*.6}%
-\contentsline {chapter}{\numberline {4}Implementazione software}{26}{chapter.4}%
-\contentsline {chapter}{\numberline {5}Conclusioni}{27}{chapter.5}%
-\contentsline {chapter}{Bibliografia}{27}{chapter.5}%
+\contentsline {subsubsection}{Risultati}{26}{subsubsection*.6}%
+\contentsline {chapter}{\numberline {4}Implementazione software}{27}{chapter.4}%
+\contentsline {chapter}{\numberline {5}Conclusioni}{28}{chapter.5}%
+\contentsline {chapter}{Bibliografia}{28}{chapter.5}%
