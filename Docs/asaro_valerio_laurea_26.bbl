@@ -1,5 +1,12 @@
 \begin{thebibliography}{10}
 
+\bibitem{asaro2026gtsml}
+Valerio Asaro.
+\newblock {GTS\_ML}: Simulating galactic tidal stripped clusters with machine
+  learning.
+\newblock \url{https://github.com/Qw3rty26/GTS_ML/}, 2026.
+\newblock Final public release; GitHub account: Qw3rty26.
+
 \bibitem{baumgardt2003}
 Holger Baumgardt and Junichiro Makino.
 \newblock Dynamical evolution of star clusters in tidal fields.
@@ -49,6 +56,11 @@ Ian Goodfellow, Yoshua Bengio, and Aaron Courville.
 \newblock {\em Deep Learning}.
 \newblock MIT Press, Cambridge, MA, 2016.
 
+\bibitem{googlecolab}
+{Google Research}.
+\newblock {Google Colaboratory}: Frequently asked questions, 2026.
+\newblock Documentazione ufficiale, consultata il 1 novembre 2026.
+
 \bibitem{hairer2006geometric}
 Ernst Hairer, Christian Lubich, and Gerhard Wanner.
 \newblock {\em Geometric Numerical Integration: Structure-Preserving Algorithms
@@ -76,10 +88,27 @@ Diederik~P. Kingma and Jimmy Ba.
 \newblock Adam: A method for stochastic optimization.
 \newblock In {\em International Conference on Learning Representations}, 2015.
 
+\bibitem{kluyver2016jupyter}
+Thomas Kluyver, Benjamin Ragan-Kelley, Fernando P{\'e}rez, Brian~E. Granger,
+  Matthias Bussonnier, Jonathan Frederic, Kyle Kelley, Jessica~B. Hamrick,
+  Jason Grout, Sylvain Corlay, Paul Ivanov, Dami{\'a}n Avila, Safia Abdalla,
+  and Carol Willing.
+\newblock Jupyter notebooks---a publishing format for reproducible
+  computational workflows.
+\newblock In {\em Positioning and Power in Academic Publishing: Players, Agents
+  and Agendas}, pages 87--90. IOS Press, 2016.
+
 \bibitem{krumholz2019}
 Mark~R. Krumholz, Christopher~F. McKee, and Joss Bland-Hawthorn.
 \newblock Star clusters across cosmic time.
 \newblock {\em Annual Review of Astronomy and Astrophysics}, 57:227--303, 2019.
+
+\bibitem{lam2015numba}
+Siu~Kwan Lam, Antoine Pitrou, and Stanley Seibert.
+\newblock Numba: A llvm-based python jit compiler.
+\newblock In {\em Proceedings of the Second Workshop on the LLVM Compiler
+  Infrastructure in HPC}, pages 1--6. Association for Computing Machinery,
+  2015.
 
 \bibitem{mckinney2010data}
 Wes McKinney.
@@ -157,5 +186,16 @@ Alexander Stukowski.
 \newblock {\em Support Vector Machines}.
 \newblock scikit-learn, 2026.
 \newblock Documentazione ufficiale.
+
+\bibitem{vanrossum2009python}
+Guido van Rossum and Fred~L. Drake.
+\newblock {\em Python 3 Reference Manual}.
+\newblock CreateSpace Independent Publishing Platform, 2009.
+
+\bibitem{virtanen2020scipy}
+Pauli Virtanen, Ralf Gommers, Travis~E. Oliphant, et~al.
+\newblock {SciPy} 1.0: Fundamental algorithms for scientific computing in
+  python.
+\newblock {\em Nature Methods}, 17:261--272, 2020.
 
 \end{thebibliography}

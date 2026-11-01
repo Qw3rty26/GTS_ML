@@ -10,7 +10,7 @@ import numpy as np
 
 SCRIPT_PATH = Path(__file__).resolve()
 PROJECT_PATH = SCRIPT_PATH.parents[3]
-OUTPUT_PATH = SCRIPT_PATH.parents[1] / "initial_positions.pdf"
+OUTPUT_PATH = SCRIPT_PATH.parents[1] / "cluster_initial_positions.pdf"
 
 sys.path.insert(0, str(PROJECT_PATH / "py"))
 from plummer import Plummer
@@ -43,10 +43,8 @@ plt.rcParams.update({
 })
 
 
-def calculate_enclosed_mass_fraction(normalized_radius):
-    numerator = normalized_radius**3
-    denominator = (normalized_radius**2 + 1.0)**1.5
-    return numerator / denominator
+def calculate_enclosed_mass_fraction(radius):
+    return radius**3 / (radius**2 + 1.0)**1.5
 
 
 def generate_initial_positions():
@@ -63,29 +61,16 @@ def plot_initial_positions():
     positions = generate_initial_positions()
     normalized_positions = positions / PLUMMER_RADIUS
 
-    projected_radius = np.hypot(
-        normalized_positions[:, 0],
-        normalized_positions[:, 1],
-    )
-    three_dimensional_radius = np.linalg.norm(
-        normalized_positions,
-        axis=1,
-    )
-
+    radius = np.linalg.norm(normalized_positions, axis=1)
     number_of_stars = len(positions)
 
-    sorted_radius = np.sort(three_dimensional_radius)
+    sorted_radius = np.sort(radius)
     empirical_mass_fraction = np.arange(1, number_of_stars + 1) / number_of_stars
 
-    theoretical_radius = np.linspace(
-        0.0,
-        MAX_NORMALIZED_RADIUS,
-        NUMBER_OF_RADIAL_POINTS,
-    )
+    theoretical_radius = np.linspace(0.0, MAX_NORMALIZED_RADIUS, NUMBER_OF_RADIAL_POINTS)
     theoretical_mass_fraction = calculate_enclosed_mass_fraction(theoretical_radius)
 
-    half_mass_radius = 1.0 / np.sqrt(2.0**(2.0/3.0) - 1.0)
-    half_mass_fraction = 0.5
+    half_mass_radius = 1.0 / np.sqrt(2.0**(2.0 / 3.0) - 1.0)
 
     fig = plt.figure(figsize=(11, 5.2))
 
@@ -95,7 +80,7 @@ def plot_initial_positions():
     scatter = positions_ax.scatter(
         normalized_positions[:, 0],
         normalized_positions[:, 1],
-        c=three_dimensional_radius,
+        c=radius,
         cmap="turbo",
         s=6,
         alpha=0.85,
@@ -121,7 +106,6 @@ def plot_initial_positions():
     positions_ax.set_xlabel(r"$x_i/A$")
     positions_ax.set_ylabel(r"$y_i/A$")
     positions_ax.set_title("Posizioni stellari proiettate")
-
     positions_ax.set_aspect("equal", adjustable="box")
     positions_ax.grid(True, linestyle=":", linewidth=0.5, color="0.75", alpha=0.6)
     positions_ax.set_axisbelow(True)
@@ -145,8 +129,8 @@ def plot_initial_positions():
     )
 
     mass_ax.axvline(half_mass_radius, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
-    mass_ax.axhline(half_mass_fraction, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
-    mass_ax.scatter([half_mass_radius], [half_mass_fraction], color="black", s=25, zorder=3)
+    mass_ax.axhline(0.5, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
+    mass_ax.scatter([half_mass_radius], [0.5], color="black", s=25, zorder=3)
 
     half_mass_text = (
         "Raggio di metà massa:\n"
@@ -155,9 +139,12 @@ def plot_initial_positions():
     )
 
     mass_ax.text(
-        0.95, 0.05, half_mass_text,
+        0.95,
+        0.05,
+        half_mass_text,
         transform=mass_ax.transAxes,
-        ha="right", va="bottom",
+        ha="right",
+        va="bottom",
         fontsize=11,
         color="black",
         bbox=dict(
@@ -175,7 +162,6 @@ def plot_initial_positions():
     mass_ax.set_xlabel(r"Raggio tridimensionale, $r_i/A$")
     mass_ax.set_ylabel(r"Frazione di massa racchiusa, $M(<r_i)/M_{\mathrm{tot}}$")
     mass_ax.set_title("Profilo di massa racchiusa")
-
     mass_ax.grid(True, linestyle=":", linewidth=0.5, color="0.75", alpha=0.6)
     mass_ax.set_axisbelow(True)
 
@@ -187,16 +173,13 @@ def plot_initial_positions():
         label=r"Raggio di metà massa ($r_{1/2}$)",
     )
 
-    combined_handles = [line_analytic, line_empirical, legend_circle_proxy]
-    combined_labels = [
-        "Profilo analitico di Plummer",
-        "Stelle generate",
-        r"Raggio di metà massa ($r_{1/2}$)",
-    ]
-
     fig.legend(
-        combined_handles,
-        combined_labels,
+        [line_analytic, line_empirical, legend_circle_proxy],
+        [
+            "Profilo analitico di Plummer",
+            "Stelle generate",
+            r"Raggio di metà massa ($r_{1/2}$)",
+        ],
         loc="lower center",
         ncol=3,
         bbox_to_anchor=(0.5, 0.05),
@@ -214,13 +197,13 @@ def plot_initial_positions():
     fig.savefig(OUTPUT_PATH, format="pdf", bbox_inches="tight")
     plt.close(fig)
 
-    fraction_within_range = np.mean(three_dimensional_radius <= MAX_NORMALIZED_RADIUS)
+    fraction_within_range = np.mean(radius <= MAX_NORMALIZED_RADIUS)
 
-    print(f"Generate {number_of_stars:,} stelle.")
-    print(f"Raggio di Plummer: {PLUMMER_RADIUS}")
-    print(f"Seed casuale: {SEED}")
-    print(f"Frazione di stelle entro r/A <= {MAX_NORMALIZED_RADIUS}: {fraction_within_range:.4f}")
-    print(f"Grafico salvato in: {OUTPUT_PATH}")
+    print(f"Generated stars: {number_of_stars:,}")
+    print(f"Plummer radius: {PLUMMER_RADIUS}")
+    print(f"Random seed: {SEED}")
+    print(f"Fraction of stars within r/A <= {MAX_NORMALIZED_RADIUS}: {fraction_within_range:.4f}")
+    print(f"Plot saved to: {OUTPUT_PATH}")
 
 
 def main():

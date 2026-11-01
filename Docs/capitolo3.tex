@@ -75,7 +75,7 @@ Per analizzare i risultati delle simulazioni, vengono considerati gli istogrammi
 \end{equation}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\textwidth]{./plots/distribuzioni_bmf_hmr.pdf}
+	\includegraphics[width=\textwidth]{./plots/histogram_distribution_bmf_hmr.pdf}
 	\caption{Distribuzione della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del raggio di metà massa relativo $\halfMassRadiusRatio$ (a destra).}
 	\label{fig:distribuzione-grandezze-finali}
 \end{figure}
@@ -230,15 +230,16 @@ Il parametro $r$, corrispondente al termine costante del kernel, viene impostato
 	\label{fig:svc-decision-boundaries}
 \end{figure}
 Sul \emph{test set}, il classificatore raggiunge un \emph{F1-score} pesato pari a $0.9644$. Le prestazioni risultano elevate per entrambe le categorie, con un valore di $0.95$ per gli ammassi dissolti e di $0.97$ per quelli sopravvissuti.
-Grazie alla forma espansa del kernel, descritta nell'Equazione~\ref{eq:svc-polynomial-kernel-expanded}, è possibile esprimere la frontiera decisionale mediante un'equazione quadratica esplicita. Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
+Grazie alla forma espansa del kernel, descritta nell'Equazione~\ref{eq:svc-polynomial-kernel-expanded}, è possibile esprimere la frontiera decisionale mediante un'equazione quadratica esplicita.\\
+Riportando i coefficienti nello spazio dei parametri orbitali originali, si ottiene:
 \begin{equation}
 	\begin{aligned}
-		f(a, e) = \, & -0.000136067916\,a^2
-		- 9.13358876203\,e^2
-		- 0.074722704916\,ae \\
-		& + 0.161416252727\,a
-		+ 6.46340228468\,e
-		- 12.1809014128
+		f(a, e) = \, & -0.0001\,a^2
+		- 9.1336\,e^2
+		- 0.0747\,ae
+		+ 0.1614\,a
+		+ 6.4634\,e
+		- 12.1809
 	\end{aligned}
 	\label{eq:svc-decision-boundary}
 \end{equation}

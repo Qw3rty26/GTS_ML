@@ -21,25 +21,21 @@ GALAXY_RADIUS = 10.0
 
 MIN_NORMALIZED_RADIUS = 0.0
 MAX_NORMALIZED_RADIUS = 5.0
-NUMBER_OF_POINTS = 1_000
+NUMBER_OF_POINTS = 1000
 
 
 def calculate_normalized_acceleration(potential, radius):
     coordinates = np.zeros((len(radius), 3), dtype=np.float64)
     coordinates[:, 0] = radius
 
-    acceleration_x, acceleration_y, acceleration_z = (
-        _compute_plummer_accelerations(
-            coordinates,
-            potential.get_galaxy_mass(),
-            potential.get_galaxy_radius(),
-        )
+    acceleration_x, acceleration_y, acceleration_z = _compute_plummer_accelerations(
+        coordinates,
+        potential.get_galaxy_mass(),
+        potential.get_galaxy_radius(),
     )
 
     acceleration_magnitude = np.sqrt(
-        acceleration_x**2
-        + acceleration_y**2
-        + acceleration_z**2
+        acceleration_x**2 + acceleration_y**2 + acceleration_z**2
     )
 
     acceleration_scale = (
@@ -64,9 +60,7 @@ def plot_galactic_plummer():
     )
     radius = normalized_radius * GALAXY_RADIUS
 
-    potential_scale = (
-        GRAVITATIONAL_CONSTANT * GALAXY_MASS / GALAXY_RADIUS
-    )
+    potential_scale = GRAVITATIONAL_CONSTANT * GALAXY_MASS / GALAXY_RADIUS
 
     normalized_potential = np.array([
         potential.potential_phi(r) / potential_scale
@@ -74,8 +68,7 @@ def plot_galactic_plummer():
     ])
 
     normalized_acceleration = calculate_normalized_acceleration(
-        potential,
-        radius,
+        potential, radius
     )
 
     peak_radius = 1.0 / np.sqrt(2.0)
@@ -99,11 +92,7 @@ def plot_galactic_plummer():
         "mathtext.fontset": "dejavuserif",
     })
 
-    figure, (ax_pot, ax_acc) = plt.subplots(
-        1,
-        2,
-        figsize=(11, 4.5),
-    )
+    figure, (ax_pot, ax_acc) = plt.subplots(1, 2, figsize=(11, 4.5))
 
     ax_pot.plot(
         normalized_radius,
@@ -111,13 +100,7 @@ def plot_galactic_plummer():
         linewidth=2.0,
         color="#1f77b4",
     )
-    ax_pot.axhline(
-        0.0,
-        color="black",
-        linewidth=0.8,
-        alpha=0.6,
-    )
-
+    ax_pot.axhline(0.0, color="black", linewidth=0.8, alpha=0.6)
     ax_pot.axvline(
         peak_radius,
         color="black",
@@ -132,7 +115,6 @@ def plot_galactic_plummer():
         linewidth=0.8,
         alpha=0.7,
     )
-
     ax_pot.scatter(
         [peak_radius],
         [potential_at_peak],
@@ -148,9 +130,12 @@ def plot_galactic_plummer():
     )
 
     ax_pot.text(
-        0.95, 0.05, pot_info_text,
+        0.95,
+        0.05,
+        pot_info_text,
         transform=ax_pot.transAxes,
-        ha="right", va="bottom",
+        ha="right",
+        va="bottom",
         fontsize=11,
         color="black",
         bbox=dict(
@@ -178,7 +163,6 @@ def plot_galactic_plummer():
         linewidth=2.0,
         color="#ff7f0e",
     )
-
     ax_acc.axvline(
         peak_radius,
         color="black",
@@ -193,7 +177,6 @@ def plot_galactic_plummer():
         linewidth=0.8,
         alpha=0.7,
     )
-
     ax_acc.scatter(
         [peak_radius],
         [peak_acceleration],
@@ -209,9 +192,12 @@ def plot_galactic_plummer():
     )
 
     ax_acc.text(
-        0.95, 0.92, info_text,
+        0.95,
+        0.92,
+        info_text,
         transform=ax_acc.transAxes,
-        ha="right", va="top",
+        ha="right",
+        va="top",
         fontsize=11,
         color="black",
         bbox=dict(
@@ -230,17 +216,17 @@ def plot_galactic_plummer():
         r"Accelerazione normalizzata, $|\mathbf{a}_{\mathrm{gal}}| / (G M_{\mathrm{gal}} / A_{\mathrm{gal}}^2)$"
     )
     ax_acc.set_xlim(MIN_NORMALIZED_RADIUS, MAX_NORMALIZED_RADIUS)
-    ax_acc.set_ylim(bottom=0.0, top=0.45)
+    ax_acc.set_ylim(0.0, 0.45)
     ax_acc.grid(True, alpha=0.3)
 
     figure.tight_layout()
     figure.savefig(OUTPUT_PATH, format="pdf", bbox_inches="tight")
     plt.close(figure)
 
-    print(f"Massa della galassia: {GALAXY_MASS}")
-    print(f"Raggio della galassia: {GALAXY_RADIUS}")
-    print(f"Intervallo radiale: 0 - {MAX_NORMALIZED_RADIUS * GALAXY_RADIUS}")
-    print(f"Grafico salvato in: {OUTPUT_PATH}")
+    print(f"Galaxy mass: {GALAXY_MASS}")
+    print(f"Galaxy radius: {GALAXY_RADIUS}")
+    print(f"Radial range: 0 - {MAX_NORMALIZED_RADIUS * GALAXY_RADIUS}")
+    print(f"Plot saved to: {OUTPUT_PATH}")
 
 
 def main():

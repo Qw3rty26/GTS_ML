@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import gaussian_kde
 
+
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PLOTS_DIR = Path(__file__).resolve().parents[1]
-OUTPUT_PATH = PLOTS_DIR / "velocity_rescaling.pdf"
+OUTPUT_PATH = PLOTS_DIR / "cluster_velocity_rescaling.pdf"
 
 sys.path.insert(0, str(PROJECT_ROOT / "py"))
 
@@ -27,11 +28,7 @@ def theoretical_plummer_pdf(normalized_speed):
     valid = (normalized_speed >= 0.0) & (normalized_speed <= 1.0)
     x = normalized_speed[valid]
 
-    density[valid] = (
-        512.0 / (7.0 * np.pi)
-        * x**2
-        * (1.0 - x**2)**3.5
-    )
+    density[valid] = 512.0 / (7.0 * np.pi) * x**2 * (1.0 - x**2)**3.5
 
     return density
 
@@ -53,11 +50,7 @@ def sample_initial_conditions(plummer):
         velocities.append(plummer._sample_velocity(radius))
         radii.append(radius)
 
-    return (
-        np.asarray(positions),
-        np.asarray(velocities),
-        np.asarray(radii),
-    )
+    return np.asarray(positions), np.asarray(velocities), np.asarray(radii)
 
 
 def calculate_virial_ratio(plummer, positions, velocities):
@@ -70,38 +63,31 @@ def calculate_virial_ratio(plummer, positions, velocities):
     for i in range(plummer.number_of_stars):
         for j in range(i + 1, plummer.number_of_stars):
             distance_vector = positions[j] - positions[i]
-            distance = np.sqrt(
-                np.sum(distance_vector**2) + softening_eps**2
-            )
-
-            potential_energy -= (
-                GRAVITATIONAL_CONSTANT * star_mass**2 / distance
-            )
+            distance = np.sqrt(np.sum(distance_vector**2) + softening_eps**2)
+            potential_energy -= GRAVITATIONAL_CONSTANT * star_mass**2 / distance
 
     return 2.0 * kinetic_energy / abs(potential_energy)
 
 
 def estimate_initial_density(samples, evaluation_points):
     estimator = gaussian_kde(samples)
-
-    density = (
-        estimator(evaluation_points)
-        + estimator(-evaluation_points)
-        + estimator(2.0 - evaluation_points)
-    )
-
+    density = estimator(evaluation_points) + estimator(-evaluation_points) + estimator(2.0 - evaluation_points)
     density[evaluation_points > 1.0] = 0.0
-
     return density
 
 
 def estimate_rescaled_density(samples, evaluation_points):
     estimator = gaussian_kde(samples)
-
     return estimator(evaluation_points) + estimator(-evaluation_points)
 
 
-def configure_plot_style():
+def plot_velocity_rescaling(
+    initial_speeds,
+    rescaled_speeds,
+    rescaling_factor,
+    q_before,
+    q_after,
+):
     plt.rcParams.update({
         "font.family": "serif",
         "font.size": 11,
@@ -120,29 +106,12 @@ def configure_plot_style():
         "mathtext.fontset": "dejavuserif",
     })
 
-
-def plot_velocity_rescaling(
-    initial_speeds,
-    rescaled_speeds,
-    rescaling_factor,
-    q_before,
-    q_after,
-):
-    configure_plot_style()
-
     maximum_speed = max(1.05, np.max(rescaled_speeds) * 1.05)
     evaluation_points = np.linspace(0.0, maximum_speed, 800)
 
-    initial_density = estimate_initial_density(
-        initial_speeds,
-        evaluation_points,
-    )
-    rescaled_density = estimate_rescaled_density(
-        rescaled_speeds,
-        evaluation_points,
-    )
+    initial_density = estimate_initial_density(initial_speeds, evaluation_points)
+    rescaled_density = estimate_rescaled_density(rescaled_speeds, evaluation_points)
     theoretical_density = theoretical_plummer_pdf(evaluation_points)
-
     density_difference = rescaled_density - initial_density
 
     fig, (ax_top, ax_bot) = plt.subplots(
@@ -152,7 +121,6 @@ def plot_velocity_rescaling(
         gridspec_kw={"height_ratios": [2.5, 1.0], "hspace": 0.10},
     )
 
-    # --- Pannello Superiore ---
     ax_top.plot(
         evaluation_points,
         initial_density,
@@ -205,7 +173,6 @@ def plot_velocity_rescaling(
         zorder=5,
     )
 
-    # --- Pannello Inferiore ---
     ax_bot.plot(
         evaluation_points,
         density_difference,
@@ -221,10 +188,9 @@ def plot_velocity_rescaling(
     ax_bot.grid(True, alpha=0.3)
     ax_bot.yaxis.set_label_coords(-0.11, 0.5)
 
-    # --- Legenda unica combinata in basso ---
     handles_top, labels_top = ax_top.get_legend_handles_labels()
     handles_bot, labels_bot = ax_bot.get_legend_handles_labels()
-    
+
     fig.legend(
         handles_top + handles_bot,
         labels_top + labels_bot,
@@ -242,18 +208,13 @@ def plot_velocity_rescaling(
         labelspacing=0.5,
     )
 
-    fig.subplots_adjust(
-        left=0.15,
-        right=0.97,
-        top=0.92,
-        bottom=0.22,
-    )
+    fig.subplots_adjust(left=0.15, right=0.97, top=0.92, bottom=0.22)
 
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUTPUT_PATH, format="pdf", bbox_inches="tight")
     plt.close(fig)
 
-    print(f"Grafico salvato in: {OUTPUT_PATH}")
+    print(f"Plot saved to: {OUTPUT_PATH}")
 
 
 def main():
@@ -273,22 +234,14 @@ def main():
 
     normalized_initial_speeds = initial_speeds / escape_speeds
 
-    q_before = calculate_virial_ratio(
-        plummer,
-        positions,
-        initial_velocities,
-    )
+    q_before = calculate_virial_ratio(plummer, positions, initial_velocities)
 
     rescaled_velocities = plummer._apply_virial_correction(
         positions,
         initial_velocities.copy(),
     )
 
-    q_after = calculate_virial_ratio(
-        plummer,
-        positions,
-        rescaled_velocities,
-    )
+    q_after = calculate_virial_ratio(plummer, positions, rescaled_velocities)
 
     rescaled_speeds = np.linalg.norm(rescaled_velocities, axis=1)
     normalized_rescaled_speeds = rescaled_speeds / escape_speeds
