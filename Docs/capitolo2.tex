@@ -1,79 +1,42 @@
-\newcommand{\totalMass}{M_{\mathrm{tot}}}          % Massa totale
-\newcommand{\starMass}{m}                          % Massa singola stella
-\newcommand{\numberOfStars}{N}                     % Numero di stelle
-\newcommand{\radialDistance}{r}                    % Distanza radiale
-\newcommand{\clusterRadius}{A}                     % Parametro di scala di Plummer 
-\newcommand{\densityRho}{\rho}                     % Densità di massa
-\newcommand{\potentialPhi}{\Phi}                   % Potenziale gravitazionale
-\newcommand{\gravitationalConstant}{G}             % Costante gravitazionale
-\newcommand{\escapeVelocity}{v_{\mathrm{esc}}}     % Velocità di fuga
-\newcommand{\velV}{v}                              % Velocità
-\newcommand{\totalCineticEnergy}{K}                % Energia Cinetica Totale
-\newcommand{\totalPotentialEnergy}{U}              % Energia Potenziale Totale
-\newcommand{\virialRatio}{Q}                       % Viriale
-\newcommand{\semiMajorAxis}{a}                     % Semiasse Maggiore
-\newcommand{\orbitEccentricity}{e}                 % Eccentricità
-\newcommand{\galaxyMass}{M_{\mathrm{gal}}}         % Massa galattica
-\newcommand{\galaxyRadius}{A_{\mathrm{gal}}}       % Parametro di scala di Plummer 
-\newcommand{\galaxyParameter}{b_{\mathrm{gal}}}    % Parametro potenziale galattico
-\newcommand{\galaxyDistance}{R}                    % Distanza centro galattico
-\newcommand{\velocityRescalingFactor}{\lambda}     % Fattore di riscalo per velocità
-\newcommand{\deltat}{\Delta t}                     % Passo temporale integrativo
-\newcommand{\boundSet}{S_{\mathrm{bound}}}                 % Insieme delle stelle legate
-\newcommand{\boundMass}{M_{\mathrm{bound}}}                % Massa legata
-\newcommand{\boundMassFraction}{f_{\mathrm{bound}}}        % Frazione di massa legata
-\newcommand{\halfMassRadius}{r_{1/2}}                      % Raggio di metà massa
-\newcommand{\kineticEnergy}{K_i}                           % Energia cinetica specifica della stella i
-\newcommand{\specificPotential}{\Phi_i}                    % Potenziale gravitazionale specifico della stella i
-\newcommand{\specificEnergy}{E_i}                          % Energia meccanica specifica della stella i
-\newcommand{\boundCenterPosition}{\mathbf{x}_{\mathrm{CM,bound}}} % Posizione del centro di massa delle stelle legate
-\newcommand{\boundCenterVelocity}{\mathbf{v}_{\mathrm{CM,bound}}} % Velocità del centro di massa delle stelle legate
-\newcommand{\stellarDistance}{d_i}                         % Distanza della stella i dal centro di massa
-\newcommand{\halfMassRadiusRatio}{\mathcal{R}_{1/2}}       % Rapporto tra raggio di metà massa finale ed iniziale
-\newcommand{\softeningLength}{\epsilon}                    % Softening gravitazionale
-\newcommand{\simulationEndTime}{T_{\mathrm{end}}}          % Tempo finale della simulazione
-\newcommand{\randomSeed}{s}                                % Seme di generazione
-\newcommand{\allClusters}{\mathcal{N}}                           % Insieme di tutti i cluster 
-\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{sopravvissuti}}} % Insieme di cluster vivi
-\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{dissolti}}}       % Insieme di cluster morti
-
 \chapter{Il modello fisico}
 \label{cha:modello-fisico}
 Il modello fisico adottato descrive gli ammassi stellari come sistemi di stelle puntiformi, soggette alla reciproca attrazione gravitazionale e al campo esterno della galassia. Per rappresentare la distribuzione iniziale delle stelle si utilizza il modello di Plummer, da cui vengono generate le posizioni e le velocità iniziali. Si verifica quindi l'equilibrio viriale dell'ammasso e si applica un riscalamento delle velocità per ottenere una configurazione iniziale più vicina all'equilibrio. Anche la galassia viene descritta attraverso un potenziale di Plummer. Si definiscono poi le equazioni del moto, considerando sia le interazioni gravitazionali tra le stelle sia l'azione della galassia, e si stabiliscono le condizioni orbitali iniziali attraverso il semiasse maggiore e l'eccentricità.
 Definite le condizioni iniziali, si procede con l'integrazione numerica delle equazioni del moto mediante il metodo Leapfrog e si controlla la conservazione dell'energia durante l'evoluzione del sistema. Infine, per valutare gli effetti della rimozione mareale, si individuano le stelle che rimangono gravitazionalmente legate all'ammasso e si calcolano il centro di massa, la frazione di massa legata e il raggio di metà massa. Queste grandezze permettono di descrivere l'evoluzione dell'ammasso e quantificare la perdita di massa e la variazione della sua struttura.
 \section{Notazione}
 \label{sec:notazione}
-La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati
-nel documento.
+La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati nel documento.
 \begin{table}[H]
 	\centering
-	\caption{Notazione utilizzata nel documento.}
+	\small
+	\caption{Principali simboli utilizzati nel documento.}
 	\label{tab:notazione}
-	\begin{tabular}{ll}
+	\begin{tabular}{p{0.20\textwidth}p{0.52\textwidth}p{0.16\textwidth}}
 		\hline
-		\textbf{Simbolo} & \textbf{Significato} \\
+		\textbf{Simbolo} & \textbf{Significato} & \textbf{Sezione} \\
 		\hline
-		$\numberOfStars$ & Numero di stelle dell'ammasso \\
-		$\starMass$ & Massa di una singola stella \\
-		$\totalMass$ & Massa totale dell'ammasso \\
-		$\radialDistance$ & Distanza dal centro dell'ammasso \\
-		$\clusterRadius$ & Parametro di scala del modello di Plummer\\
-		$\mathbf{x}_i$ & Vettore posizione della stella $i$ \\
-		$\mathbf{v}_i$ & Vettore velocità della stella $i$ \\
-		$\gravitationalConstant$ & Costante gravitazionale \\
-		$\densityRho(r)$ & Densità volumetrica di massa dell'ammasso \\
-		$\potentialPhi(r)$ & Potenziale gravitazionale dell'ammasso \\
-		$\galaxyMass$ & Massa del modello galattico \\
-		$\galaxyRadius$ & Parametro di scala del modello di Plummer galattico \\
-		$\galaxyParameter$ & Parametro di scala del potenziale galattico \\
-		$\galaxyDistance$ & Distanza dal centro galattico \\
-		$\semiMajorAxis$ & Semiasse maggiore dell'orbita dell'ammasso \\
-		$\orbitEccentricity$ & Eccentricità dell'orbita dell'ammasso \\
-		$\deltat$ & Passo temporale \\
+		$\numberOfStars$ & Numero di stelle dell'ammasso & \ref{subsec:plummer} \\
+		$\starMass$ & Massa di una singola stella & \ref{subsec:plummer} \\
+		$\totalMass$ & Massa totale dell'ammasso & \ref{subsec:plummer} \\
+		$\clusterRadius$ & Parametro di scala del modello di Plummer dell'ammasso & \ref{subsec:plummer} \\
+		$\radialDistance$ & Distanza radiale dal centro dell'ammasso stellare & \ref{subsec:plummer} \\
+		$\densityRho$ & Densità volumetrica di massa dell'ammasso & \ref{subsec:plummer} \\
+		$\potentialPhi$ & Potenziale gravitazionale dell'ammasso & \ref{subsec:plummer} \\
+		$\gravitationalConstant$ & Costante gravitazionale & \ref{subsec:plummer} \\
+		$\mathbf{x}_i$ & Vettore posizione della stella $i$ & \ref{subsec:posizioni-iniziali} \\
+		$\mathbf{v}_i$ & Vettore velocità della stella $i$ & \ref{subsec:velocita-iniziali} \\
+		$\galaxyMass$ & Massa del modello galattico & \ref{subsec:plummer-galattico} \\
+		$\galaxyRadius$ & Parametro di scala del modello galattico di Plummer & \ref{subsec:plummer-galattico} \\
+		$\galaxyDistance$ & Distanza dal centro galattico & \ref{subsec:plummer-galattico} \\
+		$\softeningLength$ & Parametro di ammorbidimento gravitazionale & \ref{subsec:equazioni-moto} \\
+		$\semiMajorAxis$ & Semiasse maggiore dell'orbita & \ref{subsec:parametri-orbitali-iniziali} \\
+		$\orbitEccentricity$ & Eccentricità dell'orbita & \ref{subsec:parametri-orbitali-iniziali} \\
+		$\deltat$ & Passo temporale di integrazione & \ref{subsec:integrazione-numerica} \\
+		$\boundCenterPosition$ & Posizione del centro di massa delle stelle legate & \ref{subsec:centro-massa-legato} \\
+		$\boundMassFraction$ & Frazione di massa legata & \ref{subsec:frazione-massa-legata} \\
+		$\halfMassRadius$ & Raggio di metà massa & \ref{subsec:raggio-meta-massa} \\
 		\hline
 	\end{tabular}
 \end{table}
-
 \section{Generazione dell'ammasso stellare}
 \label{sec:generazione-ammasso}
 Per descrivere la distribuzione iniziale di un ammasso
@@ -229,7 +192,7 @@ Anche per descrivere il potenziale gravitazionale della galassia si adotta il mo
 \begin{equation}
 	\potentialPhi_{\mathrm{gal}}(\galaxyDistance) =
 	-\frac{\gravitationalConstant \galaxyMass}
-	{\sqrt{\galaxyDistance^2+\galaxyParameter^2}}
+	{\sqrt{\galaxyDistance^2+\galaxyRadius^2}}
 	\label{eq:galactic-plummer-potential}
 \end{equation}
 La forma adottata evita la singolarità del potenziale al centro,
@@ -238,7 +201,7 @@ A partire dal potenziale definito nell'equazione~\eqref{eq:galactic-plummer-pote
 \begin{equation}
 	\mathbf{a}_{\mathrm{gal}}(\mathbf{R}) =
 	-\frac{\gravitationalConstant \galaxyMass}
-	{(\galaxyDistance^2+\galaxyParameter^2)^{3/2}}\mathbf{R}
+	{(\galaxyDistance^2+\galaxyRadius^2)^{3/2}}\mathbf{R}
 	\label{eq:galactic-plummer-acceleration}
 \end{equation}
 \begin{figure}[H]
@@ -287,14 +250,14 @@ L'orbita iniziale dell'ammasso stellare viene definita attraverso il semiasse ma
 \begin{equation}
 	R_{\mathrm{apo}} = \semiMajorAxis(1+\orbitEccentricity),
 	\qquad
-	R_{\mathrm{peri}} = \semiMajorAxis(1-\orbitEccentricity).
+	R_{\mathrm{peri}} = \semiMajorAxis(1-\orbitEccentricity)
 	\label{eq:orbital-extrema}
 \end{equation}
 L'ammasso viene inizialmente collocato alla distanza $R_{\mathrm{apo}}$, con velocità perpendicolare alla direzione radiale. Il suo modulo viene determinato mediante la conservazione dell'energia meccanica specifica e del momento angolare specifico \cite{goldstein2002}:
 \begin{equation}
 	E = \frac{\velV^2}{2} + \potentialPhi_{\mathrm{gal}}(R),
 	\qquad
-	L = R v_{\mathrm{t}},
+	L = R v_{\mathrm{t}}
 	\label{eq:orbital-conservation}
 \end{equation}
 dove $R$ è la distanza dal centro galattico, $\velV$ il modulo della velocità e $v_{\mathrm{t}}$ la componente tangenziale. All'apocentro e al pericentro la velocità è interamente tangenziale. Uguagliando l'energia nei due punti e imponendo la conservazione del momento angolare, si ottiene:
@@ -304,12 +267,12 @@ dove $R$ è la distanza dal centro galattico, $\velV$ il modulo della velocità 
 		\potentialPhi_{\mathrm{gal}}(R_{\mathrm{apo}})
 		-\potentialPhi_{\mathrm{gal}}(R_{\mathrm{peri}})
 		\right]}
-	{R_{\mathrm{peri}}^{-2}-R_{\mathrm{apo}}^{-2}}.
+	{R_{\mathrm{peri}}^{-2}-R_{\mathrm{apo}}^{-2}}
 	\label{eq:orbital-angular-momentum}
 \end{equation}
 La velocità iniziale all'apocentro è quindi:
 \begin{equation}
-	v_{\mathrm{apo}} = \frac{L}{R_{\mathrm{apo}}}.
+	v_{\mathrm{apo}} = \frac{L}{R_{\mathrm{apo}}}
 	\label{eq:orbital-apocenter-velocity}
 \end{equation}
 La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sovrapponendosi ai loro moti individuali. La Figura~\ref{fig:confronto-eccentricita} mostra, mediante OVITO \cite{stukowski2010}, l'evoluzione dell'ammasso per due diverse eccentricità orbitali.

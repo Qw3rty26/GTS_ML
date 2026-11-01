@@ -1,3 +1,33 @@
 \chapter{Implementazione software}
 \label{cha:implementazione-software}
-2-3 paragrafi per dire quale linguaggio di programmazione è stato usato, per dire che ho usato REBOUND, per dire che il codice è su GitHub, ecc...
+L'implementazione delle simulazioni è stata sviluppata in Python, utilizzando REBOUND 5.0.0, una libreria open source per l'integrazione numerica di sistemi gravitazionali a N-corpi \cite{rein2012rebound}. REBOUND fornisce gli strumenti per gestire le particelle e integrare le loro equazioni del moto, mentre le caratteristiche specifiche del problema, come la generazione degli ammassi secondo il modello di Plummer, il potenziale galattico e il calcolo delle grandezze diagnostiche, sono implementate attraverso moduli Python dedicati, riassunte nella Tabella~\ref{tab:moduli-software}.
+\begin{table}[H]
+	\centering
+	\small
+	\caption{Principali moduli del programma e relative funzionalità.}
+	\label{tab:moduli-software}
+	\begin{tabular}{p{0.28\textwidth}p{0.66\textwidth}}
+		\hline
+		\textbf{Modulo} & \textbf{Funzionalità} \\
+		\hline
+		\texttt{plummer.py} &
+		Generazione delle posizioni e delle velocità iniziali e costruzione degli ammassi stellari. \\
+		\hline
+		\texttt{galaxy.py} &
+		Definizione del potenziale galattico, calcolo dell'accelerazione gravitazionale esercitata dalla galassia sulle stelle e determinazione delle condizioni orbitali iniziali. \\
+		\hline
+		\texttt{simulation.py} &
+		Interfaccia con REBOUND e gestione delle particelle, dei parametri di integrazione e dell'evoluzione dinamica. \\
+		\hline
+		\texttt{cluster\_generation.py} &
+		Coordinamento della generazione dell'ammasso e della creazione della relativa simulazione, integrando le funzionalità di \texttt{plummer.py} e \texttt{simulation.py}. \\
+		\hline
+		\texttt{galactic\_tidal\_stripping.py} &
+		Coordinamento della configurazione del sistema galattico e delle condizioni orbitali con la creazione e l'esecuzione della simulazione, integrando le funzionalità di \texttt{galaxy.py} e \texttt{simulation.py}. \\
+		\hline
+		\texttt{cluster\_diagnostics.py}, \texttt{galactic\_diagnostics.py} &
+		Calcolo delle energie, del rapporto viriale, delle stelle legate, della frazione di massa legata e del raggio di metà massa. \\
+		\hline
+	\end{tabular}
+\end{table}
+Al termine delle simulazioni, i risultati sono stati raccolti e organizzati in file TSV per costruire il dataset utilizzato nelle successive analisi. Per le operazioni numeriche e la gestione dei dati sono stati utilizzati rispettivamente NumPy \cite{harris2020array} e pandas \cite{mckinney2010data}, mentre la produzione dei grafici riportati nel documento è stata svolta con Matplotlib \cite{hunter2007matplotlib}. L'addestramento e la valutazione dei classificatori SVC e MLP sono stati invece realizzati mediante la libreria scikit-learn \cite{pedregosa2011scikit}.\\ Il codice sorgente, insieme ai file di configurazione e alle istruzioni per l'esecuzione del programma, è stato pubblicato su GitHub, una piattaforma online per la condivisione e la gestione di progetti software attraverso repository che ne conservano la cronologia delle modifiche: \url{https://github.com/Qw3rty26/GTS_ML/}.

@@ -38,6 +38,16 @@ Ernst Hairer, Christian Lubich, and Gerhard Wanner.
   for Ordinary Differential Equations}.
 \newblock Springer, 2 edition, 2006.
 
+\bibitem{harris2020array}
+Charles~R. Harris, K.~Jarrod Millman, St{\'e}fan~J. van~der Walt, et~al.
+\newblock Array programming with {NumPy}.
+\newblock {\em Nature}, 585:357--362, 2020.
+
+\bibitem{hunter2007matplotlib}
+John~D. Hunter.
+\newblock Matplotlib: A 2d graphics environment.
+\newblock {\em Computing in Science \& Engineering}, 9(3):90--95, 2007.
+
 \bibitem{kaufman2012leakage}
 Shachar Kaufman, Saharon Rosset, Claudia Perlich, and Oren Stitelman.
 \newblock Leakage in data mining: Formulation, detection, and avoidance.
@@ -49,6 +59,20 @@ Mark~R. Krumholz, Christopher~F. McKee, and Joss Bland-Hawthorn.
 \newblock Star clusters across cosmic time.
 \newblock {\em Annual Review of Astronomy and Astrophysics}, 57:227--303, 2019.
 
+\bibitem{mckinney2010data}
+Wes McKinney.
+\newblock Data structures for statistical computing in python.
+\newblock In {\em Proceedings of the 9th Python in Science Conference}, pages
+  56--61, 2010.
+
+\bibitem{pedregosa2011scikit}
+Fabian Pedregosa, Ga{\"e}l Varoquaux, Alexandre Gramfort, Vincent Michel,
+  Bertrand Thirion, Olivier Grisel, Mathieu Blondel, Peter Prettenhofer, Ron
+  Weiss, Vincent Dubourg, Jake Vanderplas, Alexandre Passos, David Cournapeau,
+  Matthieu Brucher, Matthieu Perrot, and Edouard Duchesnay.
+\newblock Scikit-learn: Machine learning in python.
+\newblock {\em Journal of Machine Learning Research}, 12:2825--2830, 2011.
+
 \bibitem{plummer1911}
 H.~C. Plummer.
 \newblock On the problem of distribution in globular star clusters.
@@ -59,6 +83,12 @@ H.~C. Plummer.
 Thomas Quinn, Neal Katz, Joachim Stadel, and George Lake.
 \newblock Time stepping n-body simulations.
 \newblock {\em The Astrophysical Journal}, 1997.
+
+\bibitem{rein2012rebound}
+Hanno Rein and Shang-Fei Liu.
+\newblock Rebound: an open-source multi-purpose n-body code for collisional
+  dynamics.
+\newblock {\em Astronomy \& Astrophysics}, 537:A128, 2012.
 
 \bibitem{rodriguez2022}
 Jos{\'e}-V{\'i}ctor Rodr{\'i}guez, Ignacio Rodr{\'i}guez-Rodr{\'i}guez, and

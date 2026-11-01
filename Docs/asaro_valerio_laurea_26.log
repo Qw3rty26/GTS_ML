@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/nixos.org) (preloaded format=pdflatex 1980.1.1)  31 OCT 2026 18:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/nixos.org) (preloaded format=pdflatex 1980.1.1)  1 NOV 2026 01:57
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -950,24 +950,24 @@ LaTeX Warning: Unused global option(s):
 (./asaro_valerio_laurea_26.aux)
 \openout1 = `asaro_valerio_laurea_26.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 84.
-LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 127.
+LaTeX Font Info:    ... okay on input line 127.
 
 (/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/con
 text/base/mkii/supp-pdf.mkii
@@ -1029,9 +1029,9 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \it@ocap on input line 84.
-LaTeX Info: Redefining \it@ccap on input line 84.
-Package hyperref Info: Link coloring OFF on input line 84.
+LaTeX Info: Redefining \it@ocap on input line 127.
+LaTeX Info: Redefining \it@ccap on input line 127.
+Package hyperref Info: Link coloring OFF on input line 127.
 (./asaro_valerio_laurea_26.out) (./asaro_valerio_laurea_26.out)
 \@outlinefile=\write3
 \openout3 = `asaro_valerio_laurea_26.out'.
@@ -1082,7 +1082,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.100   \clearpage
+l.143   \clearpage
                    [2
 
 ] (./asaro_valerio_laurea_26.toc [1
@@ -1093,32 +1093,51 @@ l.100   \clearpage
 \tf@toc=\write4
 \openout4 = `asaro_valerio_laurea_26.toc'.
 
- [2] (./sommario.tex) (./capitolo1.tex [3
+ [2] (./sommario.tex
+Underfull \hbox (badness 10000) in paragraph at lines 13--14
 
-{/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/e
-nc/dvips/cm-super/cm-super-ts1.enc}]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15--16
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 17--18
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 19--20
+
+ []
+
+) (./capitolo1.tex [3
+
+]
 Capitolo 1.
-<./images/volto-stellato.jpg, id=278, 963.6pt x 542.025pt>
+<./images/volto-stellato.jpg, id=277, 963.6pt x 542.025pt>
 File: ./images/volto-stellato.jpg Graphic file (type jpg)
 <use ./images/volto-stellato.jpg>
 Package pdftex.def Info: ./images/volto-stellato.jpg  used on input line 6.
 (pdftex.def)             Requested size: 266.03474pt x 149.64041pt.
-<./images/nebulosa-orione.jpg, id=279, 4015.0pt x 3117.6475pt>
+<./images/nebulosa-orione.jpg, id=278, 4015.0pt x 3117.6475pt>
 File: ./images/nebulosa-orione.jpg Graphic file (type jpg)
 <use ./images/nebulosa-orione.jpg>
 Package pdftex.def Info: ./images/nebulosa-orione.jpg  used on input line 17.
 (pdftex.def)             Requested size: 145.11053pt x 112.6491pt.
-<./images/nebulosa-carena.jpg, id=280, 2055.68pt x 1541.76pt>
+<./images/nebulosa-carena.jpg, id=279, 2055.68pt x 1541.76pt>
 File: ./images/nebulosa-carena.jpg Graphic file (type jpg)
 <use ./images/nebulosa-carena.jpg>
 Package pdftex.def Info: ./images/nebulosa-carena.jpg  used on input line 17.
 (pdftex.def)             Requested size: 149.94484pt x 112.45108pt.
-<./images/m62.jpg, id=282, 702.625pt x 720.6925pt>
+<./images/m62.jpg, id=281, 702.625pt x 720.6925pt>
 File: ./images/m62.jpg Graphic file (type jpg)
 <use ./images/m62.jpg>
 Package pdftex.def Info: ./images/m62.jpg  used on input line 30.
 (pdftex.def)             Requested size: 140.26883pt x 143.87202pt.
-<./images/m80.jpg, id=283, 1783.66376pt x 1870.99pt>
+<./images/m80.jpg, id=282, 1783.66376pt x 1870.99pt>
 File: ./images/m80.jpg Graphic file (type jpg)
 <use ./images/m80.jpg>
 Package pdftex.def Info: ./images/m80.jpg  used on input line 30.
@@ -1142,12 +1161,12 @@ has been already used, duplicate ignored
 l.33 \end{figure}
                   <./images/volto-stellato.jpg> <./images/nebulosa-orione.jpg> 
 <./images/nebulosa-carena.jpg>]
-<./images/palomar5.jpg, id=292, 582.175pt x 346.29375pt>
+<./images/palomar5.jpg, id=291, 582.175pt x 346.29375pt>
 File: ./images/palomar5.jpg Graphic file (type jpg)
 <use ./images/palomar5.jpg>
 Package pdftex.def Info: ./images/palomar5.jpg  used on input line 45.
 (pdftex.def)             Requested size: 193.47578pt x 115.08044pt.
-<./images/iadi.jpg, id=293, 1927.2pt x 1084.05pt>
+<./images/iadi.jpg, id=292, 1927.2pt x 1084.05pt>
 File: ./images/iadi.jpg Graphic file (type jpg)
 <use ./images/iadi.jpg>
 Package pdftex.def Info: ./images/iadi.jpg  used on input line 45.
@@ -1174,24 +1193,23 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.2.1}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.84 \subsection{Il modello di Plummer}
+l.47 \subsection{Il modello di Plummer}
                                        ]
-<./plots/initial_positions.pdf, id=330, 711.86185pt x 349.38127pt>
+<./plots/initial_positions.pdf, id=352, 711.86185pt x 349.38127pt>
 File: ./plots/initial_positions.pdf Graphic file (type pdf)
 <use ./plots/initial_positions.pdf>
-Package pdftex.def Info: ./plots/initial_positions.pdf  used on input line 135.
-
+Package pdftex.def Info: ./plots/initial_positions.pdf  used on input line 98.
 (pdftex.def)             Requested size: 435.32422pt x 213.66069pt.
 
 Underfull \vbox (badness 1681) has occurred while \output is active []
 
  [8]
-<./plots/velocity_distribution_comparison.pdf, id=348, 614.76042pt x 434.3703pt
+<./plots/velocity_distribution_comparison.pdf, id=371, 614.76042pt x 434.3703pt
 >
 File: ./plots/velocity_distribution_comparison.pdf Graphic file (type pdf)
 <use ./plots/velocity_distribution_comparison.pdf>
 Package pdftex.def Info: ./plots/velocity_distribution_comparison.pdf  used on 
-input line 171.
+input line 134.
 (pdftex.def)             Requested size: 411.14528pt x 290.50298pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1201,19 +1219,19 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.2.1})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.175 ...section{Condizione di equilibrio viriale}
+l.138 ...section{Condizione di equilibrio viriale}
                                                    <./plots/initial_positions.p
 df>] [10
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2.2}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.203 \begin{equation}
+l.166 \begin{equation}
                        <./plots/velocity_distribution_comparison.pdf>]
-<./plots/velocity_rescaling.pdf, id=492, 619.52412pt x 558.73807pt>
+<./plots/velocity_rescaling.pdf, id=515, 619.52412pt x 558.73807pt>
 File: ./plots/velocity_rescaling.pdf Graphic file (type pdf)
 <use ./plots/velocity_rescaling.pdf>
-Package pdftex.def Info: ./plots/velocity_rescaling.pdf  used on input line 219
+Package pdftex.def Info: ./plots/velocity_rescaling.pdf  used on input line 182
 .
 (pdftex.def)             Requested size: 411.14528pt x 370.81442pt.
  [11
@@ -1221,13 +1239,13 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.2.3})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.234 \end{equation}
+l.197 \end{equation}
                      <./plots/velocity_rescaling.pdf>]
-<plots/galactic_plummer_potential.pdf, id=570, 782.26126pt x 323.29784pt>
+<plots/galactic_plummer_potential.pdf, id=594, 782.26126pt x 323.29784pt>
 File: plots/galactic_plummer_potential.pdf Graphic file (type pdf)
 <use plots/galactic_plummer_potential.pdf>
 Package pdftex.def Info: plots/galactic_plummer_potential.pdf  used on input li
-ne 246.
+ne 209.
 (pdftex.def)             Requested size: 435.32422pt x 179.91093pt.
 
 Underfull \vbox (badness 1303) has occurred while \output is active []
@@ -1237,53 +1255,38 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.2.4})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.284 \subsection{Parametri orbitali iniziali}
+l.247 \subsection{Parametri orbitali iniziali}
                                                <./plots/galactic_plummer_potent
 ial.pdf>]
-<./images/ovito_e03.png, id=665, 2890.8pt x 1626.075pt>
+<./images/ovito_e03.png, id=688, 2890.8pt x 1626.075pt>
 File: ./images/ovito_e03.png Graphic file (type png)
 <use ./images/ovito_e03.png>
-Package pdftex.def Info: ./images/ovito_e03.png  used on input line 318.
+Package pdftex.def Info: ./images/ovito_e03.png  used on input line 281.
 (pdftex.def)             Requested size: 232.17242pt x 130.58488pt.
-<./images/ovito_e06.png, id=667, 2890.8pt x 1626.075pt>
+<./images/ovito_e06.png, id=690, 2890.8pt x 1626.075pt>
 File: ./images/ovito_e06.png Graphic file (type png)
 <use ./images/ovito_e06.png>
-Package pdftex.def Info: ./images/ovito_e06.png  used on input line 320.
+Package pdftex.def Info: ./images/ovito_e06.png  used on input line 283.
 (pdftex.def)             Requested size: 232.17242pt x 130.58488pt.
  [13
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2.5}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.340 \end{align}
+l.303 \end{align}
                   <./images/ovito_e03.png> <./images/ovito_e06.png>]
-<./plots/energy_drift.pdf, id=683, 603.0718pt x 405.08466pt>
+<./plots/energy_drift.pdf, id=706, 603.0718pt x 405.08466pt>
 File: ./plots/energy_drift.pdf Graphic file (type pdf)
 <use ./plots/energy_drift.pdf>
-Package pdftex.def Info: ./plots/energy_drift.pdf  used on input line 350.
+Package pdftex.def Info: ./plots/energy_drift.pdf  used on input line 313.
 (pdftex.def)             Requested size: 338.58632pt x 227.42688pt.
  [14
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2.6}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.375 \end{equation}
+l.338 \end{equation}
                      <./plots/energy_drift.pdf>] [15]) (./capitolo3.tex
-
-./capitolo3.tex:1: LaTeX Error: Command \deadCluster already defined.
-               Or name \end... illegal, see p.192 of the manual.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1 ...adCluster}{\mathcal{N}_{\mathrm{dissolti}}}
-                                                         % Insieme di cluste...
-
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
 [16]
 Capitolo 3.
 [17
@@ -1296,19 +1299,19 @@ pdfTeX warning (ext4): destination with the same identifier (name{table.3.1}) h
 as been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.82 \end{equation}
+l.80 \end{equation}
                    ]
-<./plots/distribuzioni_bmf_hmr.pdf, id=785, 999.90936pt x 437.93431pt>
+<./plots/distribuzioni_bmf_hmr.pdf, id=808, 999.90936pt x 437.93431pt>
 File: ./plots/distribuzioni_bmf_hmr.pdf Graphic file (type pdf)
 <use ./plots/distribuzioni_bmf_hmr.pdf>
 Package pdftex.def Info: ./plots/distribuzioni_bmf_hmr.pdf  used on input line 
-85.
+83.
 (pdftex.def)             Requested size: 483.69687pt x 211.84325pt.
-<./plots/heat_distribution_bmf_hmr.pdf, id=788, 1123.03452pt x 485.74023pt>
+<./plots/heat_distribution_bmf_hmr.pdf, id=811, 1123.03452pt x 485.74023pt>
 File: ./plots/heat_distribution_bmf_hmr.pdf Graphic file (type pdf)
 <use ./plots/heat_distribution_bmf_hmr.pdf>
 Package pdftex.def Info: ./plots/heat_distribution_bmf_hmr.pdf  used on input l
-ine 95.
+ine 93.
 (pdftex.def)             Requested size: 483.69687pt x 209.20517pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1318,31 +1321,31 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.3.1})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.99 \noindent
+l.97 \noindent
                Le distribuzioni mostrano che per valori del semiasse maggior...
  <./plots/distribuzioni_bmf_hmr.pdf>]
-<./plots/cluster_alive.png, id=849, 2890.8pt x 1626.075pt>
+<./plots/cluster_alive.png, id=872, 2890.8pt x 1626.075pt>
 File: ./plots/cluster_alive.png Graphic file (type png)
 <use ./plots/cluster_alive.png>
-Package pdftex.def Info: ./plots/cluster_alive.png  used on input line 110.
+Package pdftex.def Info: ./plots/cluster_alive.png  used on input line 108.
 (pdftex.def)             Requested size: 232.17242pt x 130.58488pt.
-<./plots/cluster_dead.png, id=850, 2890.8pt x 1626.075pt>
+<./plots/cluster_dead.png, id=873, 2890.8pt x 1626.075pt>
 File: ./plots/cluster_dead.png Graphic file (type png)
 <use ./plots/cluster_dead.png>
-Package pdftex.def Info: ./plots/cluster_dead.png  used on input line 118.
+Package pdftex.def Info: ./plots/cluster_dead.png  used on input line 116.
 (pdftex.def)             Requested size: 232.17242pt x 130.58488pt.
  [20
 pdfTeX warning (ext4): destination with the same identifier (name{figure.3.2}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.135 \]
+l.133 \]
          <./plots/heat_distribution_bmf_hmr.pdf>]
-<plots/cluster_classification.pdf, id=919, 565.47823pt x 459.35764pt>
+<plots/cluster_classification.pdf, id=942, 565.47823pt x 459.35764pt>
 File: plots/cluster_classification.pdf Graphic file (type pdf)
 <use plots/cluster_classification.pdf>
 Package pdftex.def Info: plots/cluster_classification.pdf  used on input line 1
-73.
+71.
 (pdftex.def)             Requested size: 362.77264pt x 294.6958pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1352,25 +1355,25 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.3.3})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.177 
+l.175 
        <./plots/cluster_alive.png> <./plots/cluster_dead.png>] [22
 pdfTeX warning (ext4): destination with the same identifier (name{figure.3.4}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.197 \begin{equation}
+l.195 \begin{equation}
                        <./plots/cluster_classification.pdf>] [23]
-<plots/svc_decision_boundaries.pdf, id=1010, 691.32657pt x 417.56076pt>
+<plots/svc_decision_boundaries.pdf, id=1031, 691.32657pt x 417.56076pt>
 File: plots/svc_decision_boundaries.pdf Graphic file (type pdf)
 <use plots/svc_decision_boundaries.pdf>
 Package pdftex.def Info: plots/svc_decision_boundaries.pdf  used on input line 
-244.
+242.
 (pdftex.def)             Requested size: 386.95897pt x 233.7241pt.
-<plots/svc_analytical_boundary.pdf, id=1012, 633.89325pt x 440.68515pt>
+<plots/svc_analytical_boundary.pdf, id=1033, 633.89325pt x 440.68515pt>
 File: plots/svc_analytical_boundary.pdf Graphic file (type pdf)
 <use plots/svc_analytical_boundary.pdf>
 Package pdftex.def Info: plots/svc_analytical_boundary.pdf  used on input line 
-264.
+262.
 (pdftex.def)             Requested size: 266.03474pt x 184.95201pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1380,13 +1383,13 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.3.5})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.268 
+l.266 
        <./plots/svc_decision_boundaries.pdf>]
-<plots/mlp_decision_boundaries.pdf, id=1075, 691.32657pt x 417.56076pt>
+<plots/mlp_decision_boundaries.pdf, id=1095, 691.32657pt x 417.56076pt>
 File: plots/mlp_decision_boundaries.pdf Graphic file (type pdf)
 <use plots/mlp_decision_boundaries.pdf>
 Package pdftex.def Info: plots/mlp_decision_boundaries.pdf  used on input line 
-281.
+279.
 (pdftex.def)             Requested size: 386.95897pt x 233.7241pt.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1396,7 +1399,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{figure.3.6})
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.285 \subsubsection{Risultati}
+l.283 \subsubsection{Risultati}
                                 <./plots/svc_analytical_boundary.pdf>])
 (./capitolo4.tex [26
 pdfTeX warning (ext4): destination with the same identifier (name{figure.3.7}) 
@@ -1406,31 +1409,53 @@ has been already used, duplicate ignored
 l.1 \chapter
             {Implementazione software} <./plots/mlp_decision_boundaries.pdf>]
 Capitolo 4.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 1
+3.
+
+(/nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/tex/lat
+ex/base/t1cmtt.fd
+File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+Overfull \hbox (6.28087pt too wide) in paragraph at lines 25--25
+[]|\T1/cmtt/m/n/10 galactic_tidal_stripping.py| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 28--28
+[]|\T1/cmtt/m/n/10 cluster_diagnostics.py\T1/cmr/m/n/10 ,
+ []
+
 ) (./capitolo5.tex [27
 
-]
+
+pdfTeX warning (ext4): destination with the same identifier (name{table.4.1}) h
+as been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Conclusioni}]
 Capitolo 5.
 ) (./asaro_valerio_laurea_26.bbl [28
 
-]) [29
+] [29
 
-] (./asaro_valerio_laurea_26.aux)
+]) [30] (./asaro_valerio_laurea_26.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
  ***********
 Package rerunfilecheck Info: File `asaro_valerio_laurea_26.out' has not changed
 .
-(rerunfilecheck)             Checksum: 69C24870C5C214896FCC13FABC3F1E21;9330.
+(rerunfilecheck)             Checksum: 6D93DD423E705D78FFED060E4844E5DD;9330.
  ) 
 Here is how much of TeX's memory you used:
- 14599 strings out of 475230
- 235031 string characters out of 5749612
- 1942187 words of memory out of 5000000
- 36361 multiletter control sequences out of 15000+600000
- 581679 words of font info for 93 fonts, out of 8000000 for 9000
+ 14632 strings out of 475230
+ 235942 string characters out of 5749612
+ 1946187 words of memory out of 5000000
+ 36383 multiletter control sequences out of 15000+600000
+ 582741 words of font info for 95 fonts, out of 8000000 for 9000
  430 hyphenation exceptions out of 8191
- 75i,12n,79p,1236b,904s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,14n,79p,1236b,864s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts
 /type1/public/amsfonts/cm/cmbx10.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh
 9d-texlive-2023-env-texmfdist/fonts/type1/public/amsfonts/cm/cmex10.pfb></nix/s
@@ -1451,28 +1476,32 @@ blic/amsfonts/cm/cmr8.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-
 ts/cm/cmsy8.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-t
 exmfdist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></nix/store/k3rb4g58ind
 xh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sf
-bx1095.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfd
-ist/fonts/type1/public/cm-super/sfbx1200.pfb></nix/store/k3rb4g58indxh1mn4zn118
-82yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfbx1440.pfb>
+bx1000.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfd
+ist/fonts/type1/public/cm-super/sfbx1095.pfb></nix/store/k3rb4g58indxh1mn4zn118
+82yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfbx1200.pfb>
 </nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/t
-ype1/public/cm-super/sfbx2074.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-
-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfbx2488.pfb></nix/store
+ype1/public/cm-super/sfbx1440.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-
+texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfbx2074.pfb></nix/store
 /k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public
-/cm-super/sfcc1440.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-202
-3-env-texmfdist/fonts/type1/public/cm-super/sfcc2488.pfb></nix/store/k3rb4g58in
+/cm-super/sfbx2488.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-202
+3-env-texmfdist/fonts/type1/public/cm-super/sfcc1440.pfb></nix/store/k3rb4g58in
 dxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/s
-frm1000.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmf
-dist/fonts/type1/public/cm-super/sfrm1095.pfb></nix/store/k3rb4g58indxh1mn4zn11
-882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfrm1440.pfb
+fcc2488.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmf
+dist/fonts/type1/public/cm-super/sfrm1000.pfb></nix/store/k3rb4g58indxh1mn4zn11
+882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfrm1095.pfb
 ></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/
-type1/public/cm-super/sfrm1728.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d
--texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfti1095.pfb></nix/stor
+type1/public/cm-super/sfrm1440.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d
+-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/sfrm1728.pfb></nix/stor
 e/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/publi
-c/cm-super/sfti1440.pfb>
-Output written on asaro_valerio_laurea_26.pdf (31 pages, 11989624 bytes).
+c/cm-super/sfti1095.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-20
+23-env-texmfdist/fonts/type1/public/cm-super/sfti1440.pfb></nix/store/k3rb4g58i
+ndxh1mn4zn11882yidbsh9d-texlive-2023-env-texmfdist/fonts/type1/public/cm-super/
+sftt1000.pfb></nix/store/k3rb4g58indxh1mn4zn11882yidbsh9d-texlive-2023-env-texm
+fdist/fonts/type1/public/cm-super/sftt1095.pfb>
+Output written on asaro_valerio_laurea_26.pdf (32 pages, 12080357 bytes).
 PDF statistics:
- 1352 PDF objects out of 1440 (max. 8388607)
- 749 compressed objects within 8 object streams
- 176 named destinations out of 1000 (max. 500000)
+ 1403 PDF objects out of 1440 (max. 8388607)
+ 794 compressed objects within 8 object streams
+ 183 named destinations out of 1000 (max. 500000)
  492 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -33,6 +33,8 @@
 
 \usepackage[italian]{babel}
 
+
+
 % aggiunti da Valerio Asaro
 \usepackage[hidelinks]{hyperref}
 
@@ -57,6 +59,47 @@
 % per snippets di codice
 \usepackage{xcolor}
 \usepackage{listings}
+
+\newcommand{\totalMass}{M_{\mathrm{tot}}}          % Massa totale
+\newcommand{\starMass}{m}                          % Massa singola stella
+\newcommand{\numberOfStars}{N}                     % Numero di stelle
+\newcommand{\radialDistance}{r}                    % Distanza radiale
+\newcommand{\clusterRadius}{A}                     % Parametro di scala di Plummer 
+\newcommand{\densityRho}{\rho}                     % Densità di massa
+\newcommand{\potentialPhi}{\Phi}                   % Potenziale gravitazionale
+\newcommand{\gravitationalConstant}{G}             % Costante gravitazionale
+\newcommand{\escapeVelocity}{v_{\mathrm{esc}}}     % Velocità di fuga
+\newcommand{\velV}{v}                              % Velocità
+\newcommand{\totalCineticEnergy}{K}                % Energia Cinetica Totale
+\newcommand{\totalPotentialEnergy}{U}              % Energia Potenziale Totale
+\newcommand{\virialRatio}{Q}                       % Viriale
+\newcommand{\semiMajorAxis}{a}                     % Semiasse Maggiore
+\newcommand{\orbitEccentricity}{e}                 % Eccentricità
+\newcommand{\galaxyMass}{M_{\mathrm{gal}}}         % Massa galattica
+\newcommand{\galaxyRadius}{A_{\mathrm{gal}}}       % Parametro di scala di Plummer 
+\newcommand{\galaxyParameter}{b_{\mathrm{gal}}}    % Parametro potenziale galattico
+\newcommand{\galaxyDistance}{R}                    % Distanza centro galattico
+\newcommand{\velocityRescalingFactor}{\lambda}     % Fattore di riscalo per velocità
+\newcommand{\deltat}{\Delta t}                     % Passo temporale integrativo
+\newcommand{\boundSet}{S_{\mathrm{bound}}}                 % Insieme delle stelle legate
+\newcommand{\boundMass}{M_{\mathrm{bound}}}                % Massa legata
+\newcommand{\boundMassFraction}{f_{\mathrm{bound}}}        % Frazione di massa legata
+\newcommand{\halfMassRadius}{r_{1/2}}                      % Raggio di metà massa
+\newcommand{\kineticEnergy}{K_i}                           % Energia cinetica specifica della stella i
+\newcommand{\specificPotential}{\Phi_i}                    % Potenziale gravitazionale specifico della stella i
+\newcommand{\specificEnergy}{E_i}                          % Energia meccanica specifica della stella i
+\newcommand{\boundCenterPosition}{\mathbf{x}_{\mathrm{CM,bound}}} % Posizione del centro di massa delle stelle legate
+\newcommand{\boundCenterVelocity}{\mathbf{v}_{\mathrm{CM,bound}}} % Velocità del centro di massa delle stelle legate
+\newcommand{\stellarDistance}{d_i}                         % Distanza della stella i dal centro di massa
+\newcommand{\halfMassRadiusRatio}{\mathcal{R}_{1/2}}       % Rapporto tra raggio di metà massa finale ed iniziale
+\newcommand{\softeningLength}{\epsilon}                    % Softening gravitazionale
+\newcommand{\simulationEndTime}{T_{\mathrm{end}}}          % Tempo finale della simulazione
+\newcommand{\randomSeed}{s}                                % Seme di generazione
+\newcommand{\allClusters}{\mathcal{N}}                           % Insieme di tutti i cluster 
+\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{sopravvissuti}}} % Insieme di cluster vivi
+\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{dissolti}}}       % Insieme di cluster morti
+
+
 
 \definecolor{codegreen}{rgb}{0.0,0.45,0.2}
 \definecolor{codegray}{rgb}{0.45,0.45,0.45}
