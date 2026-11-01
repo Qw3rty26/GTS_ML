@@ -1,5 +1,5 @@
 \chapter{Dataset e apprendimento automatico}
-Il capitolo descrive la costruzione del \emph{dataset} a partire dalle simulazioni, definendo i parametri dell'ammasso stellare, del potenziale galattico e delle orbite, oltre alle condizioni di integrazione numerica. I risultati vengono poi analizzati attraverso la distribuzione delle grandezze finali, per studiare la relazione tra i parametri orbitali e l'evoluzione degli ammassi.
+La costruzione del \emph{dataset} parte dalla definizione dei parametri dell'ammasso stellare, del potenziale galattico e delle orbite, oltre che delle condizioni di integrazione numerica. I risultati vengono poi analizzati attraverso la distribuzione delle grandezze finali, per studiare la relazione tra i parametri orbitali e l'evoluzione degli ammassi.
 A partire da questa analisi, si definisce un problema di classificazione binaria, stabilendo i criteri per distinguere gli ammassi sopravvissuti da quelli dissolti, le variabili di ingresso e la suddivisione del \emph{dataset} per l'addestramento e la valutazione. Viene inoltre introdotto l'\emph{F1-score}, utilizzato per misurare le prestazioni dei classificatori. Infine, vengono presentati i classificatori \emph{Support Vector Classifier} (SVC) e \emph{Multi-Layer Perceptron} (MLP), descrivendone il funzionamento e confrontandone i risultati.
 \section{Generazione del dataset}
 \label{sec:costruzione-dataset}
@@ -9,7 +9,7 @@ Le simulazioni vengono eseguite variando i parametri orbitali dell'ammasso, ossi
 L'ammasso stellare viene inizializzato secondo il modello di Plummer, descritto nella Sezione~\ref{subsec:plummer}. In tutte le simulazioni sono stati fissati il numero di stelle, $\numberOfStars=200$, il parametro di scala $\clusterRadius=1.0$ e la massa totale $\totalMass=1.0$.
 Le stelle hanno tutte la stessa massa, calcolata come:
 \begin{equation}
-	\starMass=\frac{\totalMass}{\numberOfStars}=0.005.
+	\starMass=\frac{\totalMass}{\numberOfStars}=0.005
 	\label{eq:massa-singola-stella}
 \end{equation}
 Per ottenere diverse realizzazioni iniziali dell'ammasso sono stati utilizzati 15 semi di generazione distinti, che determinano differenti distribuzioni iniziali delle posizioni e delle velocità stellari. In questo modo è possibile valutare l'influenza delle condizioni iniziali sui risultati, evitando di basare l'analisi su una singola realizzazione dell'ammasso.
@@ -27,7 +27,7 @@ L'eccentricità assume invece 38 valori compresi tra $0.0$ e $0.925$, con increm
 Considerando tutte le combinazioni dei due parametri, si ottengono $30\times38=1140$ configurazioni orbitali. Ciascuna viene simulata utilizzando le 15 realizzazioni iniziali dell'ammasso descritte nella Sezione~\ref{subsec:condizioni-iniziali}. Il \emph{dataset} comprende quindi un totale di $15\times1140=17100$ simulazioni.
 \subsection{Parametri di integrazione}
 \label{subsec:parametri-integrazione}
-Le simulazioni adottano una costante gravitazionale $\gravitationalConstant=1.0$, scelta che consente di esprimere tutte le grandezze in un sistema di unità coerente, evitando conversioni tra diverse unità di misura. L'integrazione numerica viene eseguita con il metodo \emph{leapfrog} \cite{hairer2006geometric}, utilizzando un passo temporale $\deltat=0.005$. Il parametro di ammorbidimento $\softeningLength$, introdotto nella Sezione~\ref{subsec:equazioni-moto}, viene fissato a $0.01$.
+Le simulazioni adottano una costante gravitazionale $\gravitationalConstant=1.0$, scelta che consente di esprimere tutte le grandezze in un sistema di unità coerente, evitando conversioni tra diverse unità di misura. L'integrazione numerica viene eseguita con il metodo \emph{leapfrog} \cite{hairer2006geometric}, utilizzando un passo temporale $\deltat=0.005$. Il parametro di ammorbidimento $\softeningLength$, introdotto nella Sezione~\ref{subsec:equazioni-moto}, viene fissato a $0.01$.\\
 Il tempo finale delle simulazioni è fissato a $\simulationEndTime=700.0$, per contenere l'influenza della dissoluzione dell'ammasso dovuta alla sua evoluzione dinamica interna e concentrarsi sugli effetti della rimozione mareale galattica \cite{cai2016evolution}.
 \subsection{Riepilogo dei parametri}
 \label{subsec:riepilogo-parametri}
@@ -89,13 +89,13 @@ La Figura~\ref{fig:heatmap-bmf-hmr} mostra le distribuzioni della frazione di ma
 	\caption{Distribuzione dei valori medi della frazione di massa legata finale $\boundMassFraction$ (a sinistra) e del raggio di metà massa relativo $\halfMassRadiusRatio$ (a destra), in funzione del semiasse maggiore relativo $\tilde{a}$ e dell'eccentricità $\orbitEccentricity$.}
 	\label{fig:heatmap-bmf-hmr}
 \end{figure}
-\noindent Dalle distribuzioni emerge una linea di transizione ben riconoscibile tra le configurazioni orbitali per le quali la frazione di massa legata e il raggio di metà massa relativo assumono valori nulli o prossimi allo zero e quelle in cui entrambe le grandezze mantengono valori positivi. Tale separazione costituisce un'ulteriore evidenza del legame tra i parametri orbitali iniziali e l'evoluzione degli ammassi.\\ In particolare, per valori del semiasse maggiore relativo inferiori a circa $3$, entrambe le grandezze tendono ad annullarsi, indicando una dissoluzione completa dell'ammasso, dovuta alla maggiore intensità degli effetti mareali a distanze ridotte dal centro galattico. Anche l'eccentricità influisce sull'evoluzione dell'ammasso: a parità di semiasse maggiore, valori più elevati determinano una minore distanza dal centro galattico al pericentro, esponendo l'ammasso a effetti mareali più intensi e favorendone la dissoluzione.
+\noindent Dalle distribuzioni emerge una linea di transizione ben riconoscibile tra le configurazioni orbitali per le quali la frazione di massa legata e il raggio di metà massa relativo assumono valori nulli o prossimi allo zero e quelle in cui entrambe le grandezze mantengono valori positivi. Tale separazione costituisce un'ulteriore evidenza del legame tra i valori delle grandezze che descrivono lo stato dell'ammasso e la sua evoluzione.\\ In particolare, per valori del semiasse maggiore relativo inferiori a circa $3.0$, entrambe le grandezze tendono ad annullarsi, indicando una dissoluzione completa dell'ammasso, dovuta alla maggiore intensità degli effetti mareali a distanze ridotte dal centro galattico.\\ Anche l'eccentricità influisce sull'evoluzione dell'ammasso: a parità di semiasse maggiore, valori più elevati determinano una minore distanza dal centro galattico al pericentro, esponendo l'ammasso a effetti mareali più intensi e favorendone la dissoluzione.
 \section{Definizione del problema di classificazione}
 \label{sec:definizione-problema-di-classificazione}
 Per applicare i metodi di apprendimento automatico, il \emph{dataset} viene organizzato in un insieme di variabili di ingresso e un insieme di etichette, definendo i criteri per l'assegnazione delle classi e la successiva suddivisione dei dati per l'addestramento e la valutazione dei modelli.
 \subsection{Classificazione degli ammassi stellari}
 \label{subsec:classificazione-ammassi}
-Al termine della simulazione, gli ammassi stellari possono presentare esiti evolutivi differenti: alcuni conservano una struttura compatta e gravitazionalmente legata, mentre altri subiscono una perdita di massa e una variazione dell'estensione spaziale tali da modificarne significativamente la struttura iniziale. Queste differenze consentono di distinguere due classi di esito evolutivo: gli ammassi sopravvissuti e gli ammassi dissolti. Nel presente lavoro, tale distinzione viene adottata per formulare un problema di classificazione binaria, nel quale a ciascun ammasso viene assegnata un'etichetta corrispondente alla classe di appartenenza.
+Come mostrato nella Sezione~\ref{subsec:distribuzione-grandezze-finali}, al termine della simulazione gli ammassi stellari possono presentare esiti evolutivi differenti: alcuni conservano una struttura compatta e gravitazionalmente legata, mentre altri subiscono una perdita di massa e una variazione dell'estensione spaziale tali da modificarne significativamente la struttura iniziale. Queste differenze consentono di distinguere due classi di esito evolutivo: gli ammassi sopravvissuti e gli ammassi dissolti. Nel presente lavoro, tale distinzione viene adottata per formulare un problema di classificazione binaria, nel quale a ciascun ammasso viene assegnata un'etichetta corrispondente alla classe di appartenenza.
 \begin{figure}[H]
 	\centering
 	\begin{minipage}[t]{0.48\textwidth}
@@ -111,7 +111,7 @@ Al termine della simulazione, gli ammassi stellari possono presentare esiti evol
 		\vspace{0.3em}
 		\small Ammasso stellare dissolto \\ ($\semiMajorAxis = 140.0$, $\orbitEccentricity = 0.8$) \\ ($\boundMassFraction = 0.065$, $\halfMassRadiusRatio = 0.246$)
 	\end{minipage}
-	\caption{Evoluzione di uno stesso ammasso stellare, generato a partire dalla medesima configurazione iniziale e sottoposto a differenti condizioni orbitali. Le immagini mostrano le configurazioni raggiunte al tempo $\simulationEndTime$: in un caso l'ammasso sopravvive, mentre nell'altro si dissolve. Le configurazioni sono visualizzate mediante OVITO \cite{stukowski2010}: le stelle sono rappresentate in bianco, il centro galattico in rosso e il centro di massa delle stelle legate in arancione.}
+	\caption{Evoluzione di uno stesso ammasso stellare, generato a partire dalla medesima configurazione iniziale e sottoposto a differenti condizioni orbitali. Le immagini mostrano le configurazioni raggiunte al tempo $\simulationEndTime$: in un caso l'ammasso sopravvive, mentre nell'altro si dissolve. Le configurazioni sono visualizzate mediante OVITO \cite{stukowski2010}: le stelle sono rappresentate in bianco, il centro galattico in rosso e il centro di massa delle stelle legate in arancione.\\ ($\numberOfStars = 200$, $\clusterRadius = 1.0$, $\galaxyMass = 3000.0$, $\galaxyRadius = 20.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\deltat = 0.005$, $\simulationEndTime = 700.0$, \emph{leapfrog})}
 	\label{fig:esempi-ammassi}
 \end{figure}
 \subsection{Definizione formale degli insiemi}
@@ -166,11 +166,11 @@ Utilizzando gli insiemi $\aliveCluster$ e $\deadCluster$, definiti nella Sezione
 \end{figure}
 \subsection{Suddivisione in training set e test set}
 \label{subsec:suddivisione-dataset}
-Per valutare la capacità di generalizzazione dei modelli, il \emph{dataset} viene suddiviso casualmente in un insieme di addestramento, contenente l'80\% delle simulazioni, e un insieme di test, contenente il restante 20\%. Sul totale di $17100$ simulazioni, si ottengono quindi $13680$ campioni per l'addestramento e $3420$ per la valutazione. La suddivisione è stratificata rispetto alle etichette, in modo da mantenere proporzioni comparabili di ammassi sopravvissuti e dissolti nei due insiemi. La selezione dei campioni avviene mediante una procedura pseudo-casuale, controllata da un seme prestabilito, mantenuto uguale per entrambi i modelli. In questo modo si garantisce che le due suddivisioni coincidano e che i risultati siano confrontabili e riproducibili.
+Per valutare la capacità di generalizzazione dei modelli, il \emph{dataset} viene suddiviso casualmente in un insieme di addestramento, contenente l'80\% delle simulazioni, e un insieme di test, contenente il restante 20\%. Sul totale di $17100$ simulazioni, si ottengono quindi $13680$ campioni per l'addestramento e $3420$ per la valutazione. La suddivisione è stratificata rispetto alle etichette, in modo da mantenere proporzioni comparabili di ammassi sopravvissuti e dissolti nei due insiemi. La selezione dei campioni avviene mediante una procedura pseudo-casuale, controllata da un seme prestabilito, mantenuto identico per entrambi i modelli. In questo modo si garantisce che le due suddivisioni coincidano e che i risultati siano confrontabili e riproducibili.
 Il \emph{training set} viene utilizzato per apprendere la relazione tra i parametri orbitali e le etichette, mentre il \emph{test set} viene impiegato esclusivamente per valutare le prestazioni dei modelli su simulazioni non utilizzate durante l'addestramento.
 \subsection{Confronto tramite F1-score}
 \label{subsec:confronto-f1-score}
-Per valutare le prestazioni dei modelli si considerano la precisione e il richiamo, due misure complementari che descrivono rispettivamente l'affidabilità delle previsioni e la capacità di riconoscere correttamente gli elementi appartenenti a una determinata classe. Entrambe vengono calcolate separatamente per gli ammassi sopravvissuti e per quelli dissolti. Indicando con $TP$ il numero di elementi appartenenti alla classe considerata e classificati correttamente, con $FP$ il numero di elementi appartenenti all'altra classe ma assegnati erroneamente a quella considerata e con $FN$ il numero di elementi della classe considerata assegnati erroneamente all'altra, si ottengono:
+Per valutare le prestazioni dei modelli si considerano la precisione e il richiamo, due misure complementari che descrivono rispettivamente l'affidabilità delle previsioni e la capacità di riconoscere correttamente gli elementi appartenenti a una determinata classe. Entrambe vengono calcolate separatamente per gli ammassi sopravvissuti e per quelli dissolti.\\ Indicando con $TP$ il numero di elementi appartenenti alla classe considerata e classificati correttamente, con $FP$ il numero di elementi appartenenti all'altra classe ma assegnati erroneamente a quella considerata e con $FN$ il numero di elementi della classe considerata assegnati erroneamente all'altra, si ottengono:
 \begin{equation}
 	\mathrm{Precisione} = \frac{TP}{TP+FP}
 	\label{eq:precisione}
@@ -179,9 +179,9 @@ Per valutare le prestazioni dei modelli si considerano la precisione e il richia
 	\mathrm{Richiamo} = \frac{TP}{TP+FN}
 	\label{eq:richiamo}
 \end{equation}
-Per riassumere entrambe le misure in un unico valore si utilizza l'\emph{F1-score}, definito come la loro media armonica:
+Per riassumere entrambe le misure in un unico valore si utilizza l'\emph{F1-score}, definito come la loro media armonica \cite{sokolova2009systematic}:
 \begin{equation}
-	F_1 = 2 \cdot \frac{\mathrm{Precisione}\cdot\mathrm{Richiamo}}{\mathrm{Precisione}+\mathrm{Richiamo}}
+	\mathrm{F1\text{-}score} = 2 \cdot \frac{\mathrm{Precisione}\cdot\mathrm{Richiamo}}{\mathrm{Precisione}+\mathrm{Richiamo}}
 	\label{eq:f1-score}
 \end{equation}
 L'\emph{F1-score} viene quindi calcolato separatamente per ciascuna classe e assume valori compresi tra $0$ e $1$: valori più vicini a $1$ indicano una classificazione più accurata. Per ottenere una misura complessiva delle prestazioni si utilizza infine la media pesata degli \emph{F1-score} delle due classi, in cui ciascun contributo è proporzionale al numero di simulazioni appartenenti alla rispettiva classe.
@@ -190,7 +190,7 @@ L'\emph{F1-score} viene quindi calcolato separatamente per ciascuna classe e ass
 In questa sezione vengono applicati due modelli di apprendimento automatico per classificare gli ammassi stellari a partire dai parametri orbitali iniziali. Vengono considerati un classificatore \emph{Support Vector Classifier} e una rete neurale \emph{Multi-Layer Perceptron}, di cui si descrivono le caratteristiche principali. Entrambi vengono addestrati utilizzando i dati del \emph{training set} e successivamente valutati sul \emph{test set}, confrontando le prestazioni ottenute.
 \subsection{Standardizzazione delle variabili}
 \label{subsec:standardizzazione-variabili}
-Prima dell'addestramento, le variabili di ingresso vengono standardizzate per renderle confrontabili, evitando che le differenze nei rispettivi intervalli numerici influenzino il processo di apprendimento. La trasformazione applicata a ciascuna variabile è:
+Prima dell'addestramento, le variabili di ingresso vengono standardizzate per renderle confrontabili, evitando che le differenze nei rispettivi intervalli numerici influenzino il processo di apprendimento.\\ La trasformazione applicata a ciascuna variabile è:
 \begin{equation}
 	x' = \frac{x-\mu}{\sigma}
 	\label{eq:standardizzazione}
@@ -205,7 +205,7 @@ Per consentire una separazione non lineare viene adottato un kernel polinomiale 
 	K(\mathbf{x},\mathbf{z})=(\gamma\,\mathbf{x}\cdot\mathbf{z}+r)^2
 	\label{eq:svc-polynomial-kernel}
 \end{equation}
-Un kernel permette di valutare la relazione tra due campioni attraverso una funzione matematica, rendendo possibile individuare frontiere decisionali anche quando le classi non sono separabili mediante una semplice retta \cite{scholkopf2002learning}. In questa espressione, $\mathbf{x}$ e $\mathbf{z}$ rappresentano due vettori contenenti i parametri orbitali standardizzati, mentre $\mathbf{x}\cdot\mathbf{z}$ indica il loro prodotto scalare.
+Un kernel permette di valutare la relazione tra due campioni attraverso una funzione matematica, rendendo possibile individuare frontiere decisionali anche quando le classi non sono separabili mediante una semplice retta \cite{scholkopf2002learning}. In questa espressione, $\mathbf{x}$ e $\mathbf{z}$ rappresentano due vettori contenenti i parametri orbitali standardizzati, mentre $\mathbf{x}\cdot\mathbf{z}$ indica il loro prodotto scalare.\\
 Il parametro $\gamma$ determina la scala del prodotto scalare e viene calcolato secondo la relazione \cite{scikitlearnsvmdoc}:
 \begin{equation}
 	\gamma = \frac{1}{n_{\mathrm{feature}}\cdot\operatorname{Var}(X)}
@@ -247,24 +247,24 @@ Dalla sola osservazione dei coefficienti, questi sembrerebbero indicare un'influ
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth]{plots/svc_analytical_boundary.pdf}
-	\caption{Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref{eq:svc-decision-boundary}. La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$).}
+	\caption{Rappresentazione grafica della frontiera decisionale definita dall'Equazione~\ref{eq:svc-decision-boundary}.\\ La regione verde rappresenta la zona di sopravvivenza degli ammassi ($f(a,e)>0$), mentre quella rossa rappresenta la zona di dissoluzione ($f(a,e)<0$).}
 	\label{fig:svc-analytical-boundary}
 \end{figure}
 \subsection{Multi-Layer Perceptron}
 \label{subsec:mlp}
 \subsubsection{Modello}
 Il secondo classificatore utilizzato è un \emph{Multi-Layer Perceptron} (MLP), una rete neurale artificiale composta da neuroni organizzati in diversi strati \cite{goodfellow2016deeplearning}. Ogni neurone riceve i valori prodotti dallo strato precedente, li combina attraverso pesi numerici e restituisce un risultato che viene trasmesso ai neuroni successivi. Durante l'addestramento, questi pesi vengono modificati per migliorare la capacità del modello di classificare correttamente gli ammassi \cite{rumelhart1986learning}.
-L'architettura adottata comprende due livelli nascosti, rispettivamente di 16 e 8 neuroni, e un livello di uscita per la classificazione binaria. I livelli nascosti utilizzano la funzione di attivazione ReLU (Rectified Linear Unit), definita come:
+L'architettura adottata comprende due livelli nascosti, rispettivamente di 16 e 8 neuroni, e un livello di uscita per la classificazione binaria. I livelli nascosti utilizzano la funzione di attivazione ReLU (\emph{Rectified Linear Unit}), definita come:
 \[
 \operatorname{ReLU}(x)=\max(0,x)
 \]
-Questa funzione restituisce zero per valori negativi e mantiene invariati quelli positivi. La sua introduzione consente alla rete di apprendere relazioni non lineari tra le variabili di ingresso \cite{glorot2011rectifier}.
-L'aggiornamento dei pesi durante l'addestramento è affidato all'algoritmo Adam, un metodo di ottimizzazione che regola automaticamente l'entità degli aggiornamenti sulla base degli errori commessi dalla rete e dell'andamento dei gradienti durante le iterazioni \cite{kingma2015adam}. L'addestramento prevede un massimo di 500 iterazioni.
+Questa funzione restituisce zero per valori negativi e mantiene invariati quelli positivi. La sua introduzione consente alla rete di apprendere relazioni non lineari tra le variabili di ingresso \cite{glorot2011rectifier}.\\
+L'aggiornamento dei pesi durante l'addestramento è affidato all'algoritmo Adam, un metodo di ottimizzazione che regola automaticamente l'entità degli aggiornamenti sulla base degli errori commessi dalla rete e dell'andamento dei gradienti durante le iterazioni \cite{kingma2015adam}.\\ L'addestramento prevede un massimo di 500 iterazioni.
 \subsubsection{Risultati}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{plots/mlp_decision_boundaries.pdf}
-	\caption{Regioni decisionali del classificatore MLP in funzione del semiasse maggiore relativo $\tilde{a}$ e dell'eccentricità $\orbitEccentricity$. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del \emph{test set}: il colore identifica l'esito effettivo e le croci indicano le classificazioni errate. (\emph{F1-score} = 0.9642)}
+	\caption{Regioni decisionali del classificatore MLP in funzione del semiasse maggiore relativo $\tilde{a}$ e dell'eccentricità $\orbitEccentricity$. Lo sfondo rappresenta le previsioni del modello, mentre i punti mostrano le simulazioni del \emph{test set}; le croci indicano le classificazioni errate. (\emph{F1-score} = 0.9642)}
 	\label{fig:mlp-decision-boundaries}
 \end{figure}
 Sul \emph{test set}, il classificatore raggiunge un \emph{F1-score} pesato pari a $0.9642$. Considerando separatamente le due categorie, il valore è pari a $0.95$ per gli ammassi dissolti e a $0.97$ per quelli sopravvissuti.

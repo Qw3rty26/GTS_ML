@@ -40,9 +40,9 @@ La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati nel docu
 \section{Generazione dell'ammasso stellare}
 \label{sec:generazione-ammasso}
 Per descrivere la distribuzione iniziale di un ammasso
-stellare, si adotta il modello di Plummer,
+stellare, si adotta il modello di Plummer \cite{plummer1911},
 che permette di definire la distribuzione delle posizioni
-e delle velocità delle stelle nel contesto galattico\cite{plummer1911}.
+e delle velocità delle stelle nel contesto galattico.
 
 \subsection{Il modello di Plummer}
 \label{subsec:plummer}
@@ -110,7 +110,7 @@ Una volta determinate le posizioni iniziali, le velocità delle singole stelle v
 Il modulo della velocità viene campionato secondo la distribuzione teorica prevista dal modello isotropo di Plummer:
 \begin{equation}
 	p(\velV_i\mid r_i)\propto \velV_i^2
-	\left(1-\frac{\velV_i^2}{\escapeVelocity^2(r_i)}\right)^{7/2},
+	\left(1-\frac{\velV_i^2}{\escapeVelocity^2(r_i)}\right)^{7/2}
 	\qquad 0\leq \velV_i\leq \escapeVelocity(r_i)
 	\label{eq:plummer-speed-distribution}
 \end{equation}
@@ -153,7 +153,7 @@ Il rapporto viriale permette di quantificare lo scostamento da questa condizione
 Il valore $Q=1$ corrisponde all'equilibrio viriale.
 \subsection{Riscalamento delle velocità}
 \label{subsec:riscalamento-velocita}
-Nel modello continuo di Plummer, la distribuzione teorica delle velocità è compatibile con la condizione di equilibrio viriale descritta nella Sezione~\ref{subsec:equilibrio-viriale}, che viene soddisfatta nel limite di un numero di stelle tendente all'infinito ($N\rightarrow\infty$). Nelle simulazioni, tuttavia, il numero di stelle è finito e il campionamento casuale può determinare un'energia cinetica che non soddisfa esattamente tale condizione. Per correggere questo scostamento, le velocità vengono moltiplicate per un fattore comune $\velocityRescalingFactor$, mantenendo invariate le posizioni delle stelle. Questo procedimento non altera l'energia potenziale gravitazionale, che dipende esclusivamente dalle posizioni delle particelle.
+Nel modello continuo di Plummer, la distribuzione teorica delle velocità è compatibile con la condizione di equilibrio viriale descritta nella Sezione~\ref{subsec:equilibrio-viriale}, che viene soddisfatta nel limite di un numero di stelle tendente all'infinito ($N\rightarrow\infty$). Nelle simulazioni, tuttavia, il numero di stelle è finito e il campionamento casuale può determinare un'energia cinetica che non soddisfa esattamente tale condizione.\\ Per correggere questo scostamento, le velocità vengono moltiplicate per un fattore comune $\velocityRescalingFactor$, mantenendo invariate le posizioni delle stelle. Questo procedimento non altera l'energia potenziale gravitazionale, che dipende esclusivamente dalle posizioni delle particelle.
 Poiché l'energia cinetica è proporzionale al quadrato delle velocità, dopo il riscalamento si ottiene:
 \begin{equation}
 	\totalCineticEnergy' =
@@ -238,14 +238,14 @@ Questa formulazione permette di descrivere simultaneamente la dinamica interna d
 \label{subsec:parametri-orbitali-iniziali}
 L'orbita iniziale dell'ammasso stellare viene definita attraverso il semiasse maggiore $\semiMajorAxis$ e l'eccentricità $\orbitEccentricity$. Questi parametri determinano la distanza massima $R_{\mathrm{apo}}$ e quella minima $R_{\mathrm{peri}}$ dal centro galattico:
 \begin{equation}
-	R_{\mathrm{apo}} = \semiMajorAxis(1+\orbitEccentricity),
+	R_{\mathrm{apo}} = \semiMajorAxis(1+\orbitEccentricity)
 	\qquad
 	R_{\mathrm{peri}} = \semiMajorAxis(1-\orbitEccentricity)
 	\label{eq:orbital-extrema}
 \end{equation}
 L'ammasso viene inizialmente collocato alla distanza $R_{\mathrm{apo}}$, con velocità perpendicolare alla direzione radiale. Il suo modulo viene determinato mediante la conservazione dell'energia meccanica specifica e del momento angolare specifico \cite{goldstein2002}:
 \begin{equation}
-	E = \frac{\velV^2}{2} + \potentialPhi_{\mathrm{gal}}(R),
+	E = \frac{\velV^2}{2} + \potentialPhi_{\mathrm{gal}}(R)
 	\qquad
 	L = R v_{\mathrm{t}}
 	\label{eq:orbital-conservation}
@@ -298,7 +298,7 @@ Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simula
 	\label{eq:energy-drift}
 \end{equation}
 Questa quantità è adimensionale e permette di valutare lo scostamento relativo dell'energia rispetto al valore iniziale. 
-Come riferimento indicativo, uno scostamento massimo $\max_t|\delta_E(t)|\lesssim10^{-3}$ può essere considerato contenuto; nel caso mostrato in Figura~\ref{fig:energy-drift}, lo scostamento assume valori compresi tra circa $-5\times10^{-3}$ e $1.25\times10^{-2}$.
+Come riferimento indicativo, uno scostamento massimo $\max_t|\delta_E(t)|\lesssim10^{-3}$ può essere considerato contenuto; nel caso mostrato in Figura~\ref{fig:energy-drift}, lo scostamento assume valori compresi tra circa $-5\times10^{-3}$ e $1.25\times10^{-2}$, considerati accettabili.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./plots/energy_drift.pdf}
@@ -328,7 +328,7 @@ Il potenziale gravitazionale specifico della stella $i$ è calcolato sommando i 
 	\label{eq:stellar-potential}
 \end{equation}
 dove $\gravitationalConstant$ è la costante di gravitazione universale, $m_j$ è la massa della stella $j$ e $\mathbf{x}_i$ e $\mathbf{x}_j$ sono le posizioni delle stelle.
-Il calcolo dell'energia specifica dipende quindi dall'insieme $\boundSet$: quest'ultimo determina sia la velocità del centro di massa utilizzata per calcolare l'energia cinetica, sia il potenziale gravitazionale utilizzato per calcolare l'energia potenziale. Per risolvere questa dipendenza reciproca, la selezione viene eseguita iterativamente, aggiornando $\boundSet$ e la velocità del relativo centro di massa a ogni passaggio:
+Il calcolo dell'energia specifica dipende quindi dall'insieme $\boundSet$, che determina sia la velocità del centro di massa utilizzata come riferimento per il calcolo dell'energia cinetica, sia le stelle che contribuiscono al potenziale gravitazionale. Per risolvere questa dipendenza reciproca, la selezione viene eseguita iterativamente, aggiornando $\boundSet$ e la velocità del relativo centro di massa a ogni passaggio:
 \begin{enumerate}
 	\item Si individua la stella con il potenziale gravitazionale più basso e si selezionano le undici stelle più vicine. La loro velocità media pesata sulle masse fornisce una stima iniziale della velocità del centro di massa.
 	\item Si inizializza $\boundSet$ con tutte le stelle dell'ammasso e si calcolano le energie specifiche. Le stelle con energia negativa formano il nuovo insieme $\boundSet$.
@@ -365,12 +365,13 @@ La frazione di massa legata si ottiene dividendo questa quantità per la massa t
 	\label{eq:bound-mass-fraction}
 \end{equation}
 Il valore $\boundMassFraction=1.0$ corrisponde al 100\% della massa iniziale ancora gravitazionalmente legata all'ammasso, mentre un valore pari a zero indica che non rimane alcuna massa legata.
+La frazione di massa legata $\boundMassFraction$ risulta quindi una grandezza adeguata a descrivere l'evoluzione della massa gravitazionalmente legata dell'ammasso stellare nel tempo.
 \subsection{Raggio di metà massa}
 \label{subsec:raggio-meta-massa}
-Il raggio di metà massa indica la distanza dal centro di massa entro la quale è contenuta almeno metà della massa legata. Per ogni stella appartenente a $\boundSet$, si calcola la distanza dal centro di massa:
+Il raggio di metà massa indica la distanza dal centro di massa entro la quale è contenuta metà della massa legata. Per ogni stella appartenente a $\boundSet$, si calcola la distanza dal centro di massa:
 \begin{equation}
 	\stellarDistance =
-	\left\|\mathbf{x}_i-\boundCenterPosition\right\|,
+	\left\|\mathbf{x}_i-\boundCenterPosition\right\|
 	\qquad \forall i\in\boundSet
 	\label{eq:stellar-distance}
 \end{equation}
@@ -385,3 +386,4 @@ Il raggio di metà massa è la minima distanza per cui la massa cumulativa raggi
 	\label{eq:half-mass-radius}
 \end{equation}
 Se non viene identificata una componente gravitazionalmente legata, il raggio di metà massa viene posto uguale a zero.
+Il raggio di metà massa $\halfMassRadius$ è dunque una grandezza adeguata a descrivere l'evoluzione della distribuzione spaziale della massa legata nel tempo.

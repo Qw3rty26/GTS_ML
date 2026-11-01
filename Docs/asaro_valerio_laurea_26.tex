@@ -60,45 +60,45 @@
 \usepackage{xcolor}
 \usepackage{listings}
 
-\newcommand{\totalMass}{M_{\mathrm{tot}}}          % Massa totale
-\newcommand{\starMass}{m}                          % Massa singola stella
-\newcommand{\numberOfStars}{N}                     % Numero di stelle
-\newcommand{\radialDistance}{r}                    % Distanza radiale
-\newcommand{\clusterRadius}{A}                     % Parametro di scala di Plummer 
-\newcommand{\densityRho}{\rho}                     % Densità di massa
-\newcommand{\potentialPhi}{\Phi}                   % Potenziale gravitazionale
-\newcommand{\gravitationalConstant}{G}             % Costante gravitazionale
-\newcommand{\escapeVelocity}{v_{\mathrm{esc}}}     % Velocità di fuga
-\newcommand{\velV}{v}                              % Velocità
-\newcommand{\totalCineticEnergy}{K}                % Energia Cinetica Totale
-\newcommand{\totalPotentialEnergy}{U}              % Energia Potenziale Totale
-\newcommand{\virialRatio}{Q}                       % Viriale
-\newcommand{\semiMajorAxis}{a}                     % Semiasse Maggiore
-\newcommand{\orbitEccentricity}{e}                 % Eccentricità
-\newcommand{\galaxyMass}{M_{\mathrm{gal}}}         % Massa galattica
-\newcommand{\galaxyRadius}{A_{\mathrm{gal}}}       % Parametro di scala di Plummer 
-\newcommand{\galaxyParameter}{b_{\mathrm{gal}}}    % Parametro potenziale galattico
-\newcommand{\galaxyDistance}{R}                    % Distanza centro galattico
-\newcommand{\velocityRescalingFactor}{\lambda}     % Fattore di riscalo per velocità
-\newcommand{\deltat}{\Delta t}                     % Passo temporale integrativo
-\newcommand{\boundSet}{S_{\mathrm{bound}}}                 % Insieme delle stelle legate
-\newcommand{\boundMass}{M_{\mathrm{bound}}}                % Massa legata
-\newcommand{\boundMassFraction}{f_{\mathrm{bound}}}        % Frazione di massa legata
-\newcommand{\halfMassRadius}{r_{1/2}}                      % Raggio di metà massa
-\newcommand{\kineticEnergy}{K_i}                           % Energia cinetica specifica della stella i
-\newcommand{\specificPotential}{\Phi_i}                    % Potenziale gravitazionale specifico della stella i
-\newcommand{\specificEnergy}{E_i}                          % Energia meccanica specifica della stella i
-\newcommand{\boundCenterPosition}{\mathbf{x}_{\mathrm{CM,bound}}} % Posizione del centro di massa delle stelle legate
-\newcommand{\boundCenterVelocity}{\mathbf{v}_{\mathrm{CM,bound}}} % Velocità del centro di massa delle stelle legate
-\newcommand{\stellarDistance}{d_i}                         % Distanza della stella i dal centro di massa
-\newcommand{\halfMassRadiusRatio}{\mathcal{R}_{1/2}}       % Rapporto tra raggio di metà massa finale ed iniziale
-\newcommand{\softeningLength}{\epsilon}                    % Softening gravitazionale
-\newcommand{\simulationEndTime}{T_{\mathrm{end}}}          % Tempo finale della simulazione
-\newcommand{\randomSeed}{s}                                % Seme di generazione
-\newcommand{\allClusters}{\mathcal{N}}                           % Insieme di tutti i cluster 
-\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{sopravvissuti}}} % Insieme di cluster vivi
-\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{dissolti}}}       % Insieme di cluster morti
-
+% macro per i simboli usati nel documento
+\newcommand{\totalMass}{M_{\mathrm{tot}}}             				% Massa totale
+\newcommand{\starMass}{m}                          					% Massa singola stella
+\newcommand{\numberOfStars}{N}                     					% Numero di stelle
+\newcommand{\radialDistance}{r}                    					% Distanza radiale
+\newcommand{\clusterRadius}{A}                     					% Parametro di scala di Plummer 
+\newcommand{\densityRho}{\rho}                     					% Densità di massa
+\newcommand{\potentialPhi}{\Phi}                   					% Potenziale gravitazionale
+\newcommand{\gravitationalConstant}{G}             					% Costante gravitazionale
+\newcommand{\escapeVelocity}{v_{\mathrm{esc}}}     					% Velocità di fuga
+\newcommand{\velV}{v}                              					% Velocità
+\newcommand{\totalCineticEnergy}{K}                					% Energia Cinetica Totale
+\newcommand{\totalPotentialEnergy}{U}              					% Energia Potenziale Totale
+\newcommand{\virialRatio}{Q}                       					% Viriale
+\newcommand{\semiMajorAxis}{a}                     					% Semiasse Maggiore
+\newcommand{\orbitEccentricity}{e}                 					% Eccentricità
+\newcommand{\galaxyMass}{M_{\mathrm{gal}}}         					% Massa galattica
+\newcommand{\galaxyRadius}{A_{\mathrm{gal}}}       					% Parametro di scala di Plummer 
+\newcommand{\galaxyParameter}{b_{\mathrm{gal}}}    					% Parametro potenziale galattico
+\newcommand{\galaxyDistance}{R}                    					% Distanza centro galattico
+\newcommand{\velocityRescalingFactor}{\lambda}     					% Fattore di riscalo per velocità
+\newcommand{\deltat}{\Delta t}                     					% Passo temporale integrativo
+\newcommand{\boundSet}{S_{\mathrm{bound}}}                 			% Insieme delle stelle legate
+\newcommand{\boundMass}{M_{\mathrm{bound}}}                			% Massa legata
+\newcommand{\boundMassFraction}{f_{\mathrm{bound}}}        			% Frazione di massa legata
+\newcommand{\halfMassRadius}{r_{1/2}}                      			% Raggio di metà massa
+\newcommand{\kineticEnergy}{K_i}                           			% Energia cinetica specifica della stella i
+\newcommand{\specificPotential}{\Phi_i}                    			% Potenziale gravitazionale specifico della stella i
+\newcommand{\specificEnergy}{E_i}                          			% Energia meccanica specifica della stella i
+\newcommand{\boundCenterPosition}{\mathbf{x}_{\mathrm{CM,bound}}} 	% Posizione del centro di massa delle stelle legate
+\newcommand{\boundCenterVelocity}{\mathbf{v}_{\mathrm{CM,bound}}} 	% Velocità del centro di massa delle stelle legate
+\newcommand{\stellarDistance}{d_i}                         			% Distanza della stella i dal centro di massa
+\newcommand{\halfMassRadiusRatio}{\mathcal{R}_{1/2}}       			% Rapporto tra raggio di metà massa finale ed iniziale
+\newcommand{\softeningLength}{\epsilon}                    			% Softening gravitazionale
+\newcommand{\simulationEndTime}{T_{\mathrm{end}}}          			% Tempo finale della simulazione
+\newcommand{\randomSeed}{s}                                			% Seme di generazione
+\newcommand{\allClusters}{\mathcal{N}}                           	% Insieme di tutti i cluster 
+\newcommand{\aliveCluster}{\mathcal{N}_{\mathrm{sopravvissuti}}} 	% Insieme di cluster vivi
+\newcommand{\deadCluster}{\mathcal{N}_{\mathrm{dissolti}}}       	% Insieme di cluster morti
 
 
 \definecolor{codegreen}{rgb}{0.0,0.45,0.2}
@@ -128,48 +128,50 @@
 
   % nessuna numerazione
   \pagenumbering{gobble} 
-  \input{pagina_iniziale}
+  \input{frontespizio}
 
   \clearpage
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Nota
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Sezione Ringraziamenti opzionale
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
   \input{ringraziamenti}
   \clearpage
   \pagestyle{plain} % nessuna intestazione e pie pagina con numero al centro
 
   
-  % inizio numerazione pagine in numeri arabi
-  \mainmatter
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Nota
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Si ricorda che il numero massimo di facciate e' 30.
-%% Nel conteggio delle facciate sono incluse 
-%%   indice
-%%   sommario
-%%   capitoli
-%% Dal conteggio delle facciate sono escluse
-%%   frontespizio
-%%   ringraziamenti
-%%   allegati    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    % indice
-    \tableofcontents
-    \clearpage
-    
-    
+	% inizio numerazione pagine in numeri arabi
+	\mainmatter
+	% indice
+	\clearpage
+	\phantomsection
+	\pdfbookmark{Indice}{toc}
+	\begingroup
+	\fontsize{10.5pt}{12pt}\selectfont
+	\linespread{0.984}\selectfont
+	
+	\makeatletter
+	\renewcommand*\l@chapter[2]{%
+		\ifnum \c@tocdepth >\m@ne
+		\addpenalty{-\@highpenalty}%
+		\vskip 0.6em \@plus\p@
+		\setlength\@tempdima{1.5em}%
+		\begingroup
+		\parindent\z@
+		\rightskip\@pnumwidth
+		\parfillskip-\@pnumwidth
+		\leavevmode\bfseries
+		\advance\leftskip\@tempdima
+		\hskip-\leftskip
+		#1\nobreak\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+		\penalty\@highpenalty
+		\endgroup
+		\fi
+	}
+	\makeatother
+	\tableofcontents
+	\endgroup
+	\clearpage
+	
           
-    % gruppo per definizone di successione capitoli senza interruzione di pagina
+    % gruppo per definizione di successione capitoli senza interruzione di pagina
     \begingroup
       % nessuna interruzione di pagina tra capitoli
       % ridefinizione dei comandi di clear page
@@ -191,22 +193,8 @@
       
       % sommario
       \input{sommario}
-      \endgroup
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Nota
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Sommario e' un breve riassunto del lavoro svolto dove si descrive 
-%% l’obiettivo, l’oggetto della tesi, le metodologie e 
-%% le tecniche usate, i dati elaborati e la spiegazione delle conclusioni 
-%% alle quali siete arrivati.
-%% Il sommario dell’elaborato consiste al massimo di 3 pagine e deve contenere le seguenti informazioni: 
-%%   contesto e motivazioni
-%%   breve riassunto del problema affrontato
-%%   tecniche utilizzate e/o sviluppate
-%%   risultati raggiunti, sottolineando il contributo personale del laureando/a
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
+      
+      \endgroup%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
       
 	\begingroup
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -227,43 +215,10 @@
     % bibliografia in formato bibtex
     %
     % aggiunta del capitolo nell'indice
+    \clearpage
+    \phantomsection
     \addcontentsline{toc}{chapter}{Bibliografia}
     % stile con ordinamento alfabetico in funzione degli autori
     \bibliographystyle{plain}
     \bibliography{biblio}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Nota
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Nella bibliografia devono essere riportati tutte le fonti consultate 
-%% per lo svolgimento della tesi. La bibliografia deve essere redatta 
-%% in ordine alfabetico sul cognome del primo autore. 
-%% 
-%% La forma della citazione bibliografica va inserita secondo la fonte utilizzata:
-%% 
-%% LIBRI
-%% Cognome e iniziale del nome autore/autori, la data di edizione, titolo, casa editrice, eventuale numero dell’edizione. 
-%% 
-%% ARTICOLI DI RIVISTA
-%% Cognome e iniziale del nome autore/autori, titolo articolo, titolo rivista, volume, numero, numero di pagine.
-%% 
-%% ARTICOLI DI CONFERENZA
-%% Cognome e iniziale del nome autore/autori (anno), titolo articolo, titolo conferenza, luogo della conferenza (città e paese), date della conferenza, numero di pagine. 
-%% 
-%% SITOGRAFIA
-%% La sitografia contiene un elenco di indirizzi Web consultati e disposti in ordine alfabetico. 
-%% E’ necessario:
-%%   Copiare la URL (l’indirizzo web) specifica della pagina consultata
-%%   Se disponibile, indicare il cognome e nome dell’autore, il titolo ed eventuale sottotitolo del testo
-%%   Se disponibile, inserire la data di ultima consultazione della risorsa (gg/mm/aaaa).    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-
-%    \titleformat{\chapter}
-%        {\normalfont\Huge\bfseries}{Allegato \thechapter}{1em}{}
-%    % sezione Allegati - opzionale
-%    \appendix
-%    \input{allegati}
-
 \end{document}
