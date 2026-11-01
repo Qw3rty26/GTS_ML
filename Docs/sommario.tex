@@ -1,19 +1,24 @@
+\begin{flushright}
+	\textit{«La Galassia infatti non è altro che un ammasso
+		di innumerabili stelle disseminate a mucchi.»}
+	\vspace{0.2cm}
+	Galileo Galilei, \textit{Sidereus Nuncius}, 1610
+\end{flushright}
+
+\vspace{0.5cm}
+\phantomsection
+\addcontentsline{toc}{chapter}{Sommario}
+
 \chapter*{Sommario} % senza numerazione
 \label{sommario}
+Gli ammassi stellari sono sistemi gravitazionalmente legati la cui evoluzione può essere profondamente influenzata dall'ambiente galattico in cui si trovano. In particolare, l'interazione con il campo gravitazionale della galassia può provocare una progressiva perdita di stelle, fenomeno noto come rimozione mareale galattica, che nei casi più estremi può portare alla completa dissoluzione dell'ammasso.\\
+Lo studio di questi processi richiede simulazioni numeriche di sistemi a molti corpi, il cui costo computazionale può diventare significativo quando si vogliono analizzare numerose configurazioni iniziali.
+Da questa esigenza nasce l'interesse verso l'utilizzo di tecniche di apprendimento automatico, capaci di ricavare dai risultati delle simulazioni relazioni utili per effettuare nuove previsioni.\\
 
-\addcontentsline{toc}{chapter}{Sommario} % da aggiungere comunque all'indice
+\noindent L'obiettivo del lavoro è studiare come i parametri orbitali iniziali influenzino la sopravvivenza degli ammassi stellari e utilizzare i risultati delle simulazioni per addestrare modelli in grado di prevederne l'esito evolutivo. In particolare, i parametri orbitali considerati sono il semiasse maggiore e l'eccentricità dell'orbita dell'ammasso. Per descrivere il sistema è stato adottato il modello di Plummer, utilizzato sia per generare la distribuzione delle posizioni e delle velocità iniziali delle stelle sia per rappresentare il potenziale gravitazionale galattico. Successivamente, le velocità sono state riscalate per ottenere configurazioni prossime all'equilibrio viriale. Le equazioni del moto definite includono le interazioni gravitazionali tra le stelle e l'azione del campo galattico. Sono state inoltre sviluppate procedure dedicate al calcolo delle grandezze diagnostiche, tra cui la frazione di massa legata e il raggio di metà massa, necessarie per descrivere lo stato degli ammassi al termine delle simulazioni.\\
 
-%Sommario è un breve riassunto del lavoro svolto dove si descrive l'obiettivo, l'oggetto della tesi, le 
-%metodologie e le tecniche usate, i dati elaborati e la spiegazione delle conclusioni alle quali siete arrivati.  
-%
-%Il sommario dell’elaborato consiste al massimo di 3 pagine e deve contenere le seguenti informazioni:
-%\begin{itemize}
-%  \item contesto e motivazioni 
-%  \item breve riassunto del problema affrontato
-%  \item tecniche utilizzate e/o sviluppate
-%  \item risultati raggiunti, sottolineando il contributo personale del laureando/a
-%\end{itemize}
-%
+\noindent Per costruire il \emph{dataset} sono state considerate 1140 configurazioni orbitali, ottenute combinando 30 valori del semiasse maggiore e 38 valori dell'eccentricità. Ogni configurazione è stata simulata utilizzando 15 diverse realizzazioni iniziali dell'ammasso, per un totale di 17100 simulazioni. L'analisi dei risultati ha permesso di osservare la relazione tra i parametri orbitali e la perdita di massa degli ammassi, evidenziando come la sopravvivenza dipenda sia dal semiasse maggiore sia dall'eccentricità.\\ I dati raccolti sono stati successivamente utilizzati per formulare un problema di classificazione binaria, distinguendo gli ammassi sopravvissuti da quelli dissolti sulla base delle grandezze diagnostiche finali. Come variabili di ingresso dei modelli di apprendimento sono stati scelti il semiasse maggiore e l'eccentricità, mentre la valutazione dei modelli è stata effettuata mediante l'\emph{F1-score}, utilizzando una suddivisione del \emph{dataset} in un insieme di addestramento e uno di test.\\
 
+\noindent Sono stati implementati e confrontati due classificatori: un \emph{Support Vector Classifier} e una rete neurale \emph{Multi-Layer Perceptron}. Entrambi hanno ottenuto prestazioni elevate e molto simili. Le frontiere decisionali individuate dai due modelli seguono da vicino la separazione tra sopravvivenza e dissoluzione osservata nella distribuzione dei risultati delle simulazioni. Le principali difficoltà di classificazione si concentrano nella regione di transizione tra le due regioni, dove ammassi con gli stessi parametri orbitali possono raggiungere esiti differenti a seconda della loro realizzazione iniziale.\\
 
-
+\noindent I risultati ottenuti mostrano che le tecniche di apprendimento automatico possono descrivere efficacemente la relazione tra le condizioni orbitali iniziali e lo stato finale degli ammassi, offrendo una possibile alternativa alle simulazioni numeriche per effettuare previsioni su nuove configurazioni. Il lavoro evidenzia inoltre alcune possibilità di sviluppo futuro, tra cui l'estensione dell'intervallo dei parametri orbitali studiati, l'aumento del numero di stelle e di realizzazioni iniziali e la verifica della capacità dei modelli di prevedere esiti per configurazioni non presenti nell'insieme di addestramento.

@@ -1,0 +1,35 @@
+\chapter{Implementazione software}
+\label{cha:implementazione-software}
+L'implementazione delle simulazioni è stata sviluppata utilizzando il linguaggio di programmazione Python \cite{vanrossum2009python} e la libreria REBOUND \cite{rein2012rebound}, nella versione 5.0.0, per l'integrazione numerica di sistemi gravitazionali a $N$-corpi. REBOUND fornisce gli strumenti necessari per la gestione delle particelle e l'integrazione delle rispettive equazioni del moto. Per le operazioni numeriche sono state utilizzate NumPy (2.0.2) \cite{harris2020array} e SciPy (1.18.0) \cite{virtanen2020scipy}, mentre Numba (0.60.0) \cite{lam2015numba} è stata impiegata per accelerare il calcolo delle accelerazioni galattiche mediante compilazione \emph{just-in-time}.\\
+Le funzionalità specifiche del progetto, tra cui la generazione degli ammassi secondo il modello di Plummer, la definizione del potenziale galattico e il calcolo delle grandezze diagnostiche, sono state implementate mediante moduli dedicati, le cui principali funzionalità sono riassunte nella Tabella~\ref{tab:moduli-software}.
+\begin{table}[H]
+	\centering
+	\small
+	\caption{Moduli software sviluppati e relative funzionalità.}
+	\label{tab:moduli-software}
+	\begin{tabular}{p{0.28\textwidth}p{0.66\textwidth}}
+		\hline
+		\textbf{Modulo} & \textbf{Funzionalità} \\
+		\hline
+		\texttt{plummer.py} &
+		Generazione delle posizioni e delle velocità iniziali e costruzione degli ammassi stellari. \\
+		\hline
+		\texttt{galaxy.py} &
+		Definizione del potenziale galattico, calcolo dell'accelerazione gravitazionale esercitata dalla galassia sulle stelle e determinazione delle condizioni orbitali iniziali. \\
+		\hline
+		\texttt{simulation.py} &
+		Interfaccia con REBOUND e gestione delle stelle, dei parametri di integrazione e dell'evoluzione dinamica. \\
+		\hline
+		\texttt{cluster\_generation.py} &
+		Coordinamento della generazione dell'ammasso e della creazione della relativa simulazione REBOUND, integrando le funzionalità di \texttt{plummer.py} e \texttt{simulation.py}. \\
+		\hline
+		\texttt{galactic\_tidal\_stripping.py} &
+		Coordinamento della configurazione del sistema galattico e delle condizioni orbitali con la creazione e l'esecuzione della simulazione, integrando le funzionalità di \texttt{galaxy.py} e \texttt{cluster\_generation.py}. \\
+		\hline
+		\texttt{cluster\_diagnostics.py}, \texttt{galactic\_diagnostics.py} &
+		Calcolo delle energie, del rapporto viriale, delle stelle legate, della frazione di massa legata e del raggio di metà massa. \\
+		\hline
+	\end{tabular}
+\end{table}
+\noindent Al termine delle simulazioni, il dataset utilizzato per le analisi è stato generato in formato CSV (\emph{Comma-Separated Values}) \cite{shafranovich2005rfc4180}. Le analisi sono state svolte separatamente dal codice del simulatore, utilizzando \emph{notebook} Jupyter \cite{kluyver2016jupyter} eseguiti nell'ambiente \emph{cloud} Google Colab \cite{googlecolab}. Nel runtime utilizzato erano disponibili NumPy (2.1.3), pandas (2.2.3) \cite{mckinney2010data} e Matplotlib (3.10.0) \cite{hunter2007matplotlib} per le operazioni numeriche, la manipolazione dei dati e la produzione dei grafici. L'addestramento e la valutazione dei classificatori SVC e MLP sono stati realizzati mediante scikit-learn (1.6.1) \cite{pedregosa2011scikit}.
+\newline Il codice sorgente, i file di configurazione, i \emph{notebook} e le istruzioni per l'esecuzione sono disponibili nel \emph{repository} pubblico del progetto su GitHub, nella \emph{release} ``Final public release'' \cite{asaro2026gtsml}, accessibile all'indirizzo: \url{https://github.com/Qw3rty26/GTS_ML/}.
