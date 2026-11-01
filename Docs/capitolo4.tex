@@ -1,10 +1,10 @@
 \chapter{Implementazione software}
 \label{cha:implementazione-software}
-L'implementazione delle simulazioni è stata sviluppata in Python, utilizzando REBOUND 5.0.0, una libreria open source per l'integrazione numerica di sistemi gravitazionali a N-corpi \cite{rein2012rebound}. REBOUND fornisce gli strumenti per gestire le particelle e integrare le loro equazioni del moto, mentre le caratteristiche specifiche del problema, come la generazione degli ammassi secondo il modello di Plummer, il potenziale galattico e il calcolo delle grandezze diagnostiche, sono implementate attraverso moduli Python dedicati, riassunte nella Tabella~\ref{tab:moduli-software}.
+L'implementazione delle simulazioni è stata sviluppata utilizzando il linguaggio di programmazione Python e la libreria REBOUND, nella versione 5.0.0, per l'integrazione numerica di sistemi gravitazionali a $N$-corpi \cite{rein2012rebound}. REBOUND fornisce gli strumenti necessari per la gestione delle particelle e l'integrazione delle rispettive equazioni del moto. Le funzionalità specifiche del progetto, tra cui la generazione degli ammassi secondo il modello di Plummer, la definizione del potenziale galattico e il calcolo delle grandezze diagnostiche, sono state implementate mediante moduli dedicati, le cui principali funzionalità sono riassunte nella Tabella~\ref{tab:moduli-software}.
 \begin{table}[H]
 	\centering
 	\small
-	\caption{Principali moduli del programma e relative funzionalità.}
+	\caption{Moduli software sviluppati e relative funzionalità.}
 	\label{tab:moduli-software}
 	\begin{tabular}{p{0.28\textwidth}p{0.66\textwidth}}
 		\hline
@@ -17,7 +17,7 @@ L'implementazione delle simulazioni è stata sviluppata in Python, utilizzando R
 		Definizione del potenziale galattico, calcolo dell'accelerazione gravitazionale esercitata dalla galassia sulle stelle e determinazione delle condizioni orbitali iniziali. \\
 		\hline
 		\texttt{simulation.py} &
-		Interfaccia con REBOUND e gestione delle particelle, dei parametri di integrazione e dell'evoluzione dinamica. \\
+		Interfaccia con REBOUND e gestione delle stelle, dei parametri di integrazione e dell'evoluzione dinamica. \\
 		\hline
 		\texttt{cluster\_generation.py} &
 		Coordinamento della generazione dell'ammasso e della creazione della relativa simulazione, integrando le funzionalità di \texttt{plummer.py} e \texttt{simulation.py}. \\
@@ -30,4 +30,5 @@ L'implementazione delle simulazioni è stata sviluppata in Python, utilizzando R
 		\hline
 	\end{tabular}
 \end{table}
-Al termine delle simulazioni, i risultati sono stati raccolti e organizzati in file TSV per costruire il dataset utilizzato nelle successive analisi. Per le operazioni numeriche e la gestione dei dati sono stati utilizzati rispettivamente NumPy \cite{harris2020array} e pandas \cite{mckinney2010data}, mentre la produzione dei grafici riportati nel documento è stata svolta con Matplotlib \cite{hunter2007matplotlib}. L'addestramento e la valutazione dei classificatori SVC e MLP sono stati invece realizzati mediante la libreria scikit-learn \cite{pedregosa2011scikit}.\\ Il codice sorgente, insieme ai file di configurazione e alle istruzioni per l'esecuzione del programma, è stato pubblicato su GitHub, una piattaforma online per la condivisione e la gestione di progetti software attraverso repository che ne conservano la cronologia delle modifiche: \url{https://github.com/Qw3rty26/GTS_ML/}.
+\noindent Al termine delle simulazioni, i risultati sono stati raccolti e organizzati per la costruzione del dataset e per le successive analisi. Per le operazioni numeriche è stata utilizzata NumPy \cite{harris2020array}, per la manipolazione e l'organizzazione dei dati in strutture tabellari pandas \cite{mckinney2010data}, per la produzione dei grafici Matplotlib \cite{hunter2007matplotlib}, mentre l'addestramento e la valutazione dei classificatori SVC e MLP sono stati realizzati mediante scikit-learn \cite{pedregosa2011scikit}.\\
+Il codice sorgente, i file di configurazione e le istruzioni per l'esecuzione sono disponibili nel repository pubblico del progetto su GitHub: \url{https://github.com/Qw3rty26/GTS_ML/}

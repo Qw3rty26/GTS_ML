@@ -36,12 +36,12 @@
 \contentsline {subsection}{\numberline {3.2.2}Relazione tra parametri orbitali ed esiti delle simulazioni}{19}{subsection.3.2.2}%
 \contentsline {section}{\numberline {3.3}Definizione del problema di classificazione}{20}{section.3.3}%
 \contentsline {subsection}{\numberline {3.3.1}Classificazione degli ammassi stellari}{20}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Definizione formale degli insiemi}{20}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.2}Definizione formale degli insiemi}{21}{subsection.3.3.2}%
 \contentsline {subsection}{\numberline {3.3.3}Variabili di ingresso e di uscita}{21}{subsection.3.3.3}%
 \contentsline {subsection}{\numberline {3.3.4}Suddivisione in training set e test set}{22}{subsection.3.3.4}%
 \contentsline {subsection}{\numberline {3.3.5}Confronto tramite F1-score}{22}{subsection.3.3.5}%
-\contentsline {section}{\numberline {3.4}Applicazione dei modelli}{22}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Standardizzazione delle variabili}{22}{subsection.3.4.1}%
+\contentsline {section}{\numberline {3.4}Applicazione dei modelli}{23}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Standardizzazione delle variabili}{23}{subsection.3.4.1}%
 \contentsline {subsection}{\numberline {3.4.2}Support Vector Classifier}{23}{subsection.3.4.2}%
 \contentsline {subsubsection}{Modello}{23}{subsubsection*.3}%
 \contentsline {subsubsection}{Risultati}{24}{subsubsection*.4}%
