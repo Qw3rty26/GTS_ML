@@ -3,7 +3,7 @@
 Alzando lo sguardo verso un limpido cielo notturno, ci troviamo di fronte a uno degli spettacoli più maestosi che la natura possa offrire: la volta celeste.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.55\textwidth]{./images/volto-stellato.jpg}
+	\includegraphics[width=0.60\textwidth]{./images/volto-stellato.jpg}
 	\caption{La volta celeste sopra l'Osservatorio di Paranal, in Cile (Crediti: R. Wesson/ESO).}
 	\label{fig:volta-celeste}
 \end{figure}
@@ -11,11 +11,11 @@ Alzando lo sguardo verso un limpido cielo notturno, ci troviamo di fronte a uno 
 \begin{figure}[H]
 	\centering
 	\makebox[\textwidth][c]{
-		\includegraphics[width=0.3\textwidth]{./images/nebulosa-orione.jpg}
+		\includegraphics[width=0.40\textwidth]{./images/nebulosa-orione.jpg}
 		\hspace{0.03\textwidth}
-		\includegraphics[width=0.31\textwidth]{./images/nebulosa-carena.jpg}
+		\includegraphics[width=0.41\textwidth]{./images/nebulosa-carena.jpg}
 	}
-	\caption{La nebulosa di Orione (a sinistra, crediti: ESO/G. Beccari) e la nebulosa della Carena (a destra, crediti: ESO. Riconoscimenti: VPHAS+ Consortium/Cambridge Astronomical Survey Unit).}
+	\caption{La nebulosa di Orione (a sinistra, crediti: ESO/G. Beccari) e la nebulosa della Carena\\(a destra, crediti: ESO. Riconoscimenti: VPHAS+ Consortium/Cambridge Astronomical Survey Unit).}
 	\label{fig:nebulose}
 \end{figure}
 \section{Gli ammassi stellari}
@@ -28,7 +28,7 @@ Quando numerose stelle nascono nella stessa regione dello spazio, possono rimane
 		\hspace{0.03\textwidth}
 		\includegraphics[width=0.285\textwidth]{./images/m80.jpg}
 	}
-	\caption{Gli ammassi globulari Messier 62 (a sinistra) e Messier 80 (a destra) (Crediti: ESA/Hubble \& NASA).}
+	\caption{Gli ammassi globulari Messier 62 (a sinistra, crediti: ESA/Hubble) e Messier 80\\(a destra, crediti: NASA).}
 	\label{fig:confronto-ammassi}
 \end{figure}
 \noindent Queste magnifiche ed imponenti strutture sono particolarmente sensibili alle interazioni gravitazionali con l'ambiente circostante. L'influenza esercitata dalla galassia che li ospita può infatti alterare profondamente la loro struttura e comprometterne il delicato equilibrio gravitazionale.
@@ -41,7 +41,7 @@ La perdita progressiva di stelle causata da questo fenomeno prende il nome di ri
 	\makebox[\textwidth][c]{
 		\includegraphics[width=0.40\textwidth]{./images/palomar5.jpg}
 		\hspace{0.03\textwidth}
-		\includegraphics[width=0.40\textwidth]{./images/iadi.jpg}
+		\includegraphics[width=0.42\textwidth]{./images/iadi.jpg}
 	}
 	\caption{Code mareali dell'ammasso globulare Palomar 5 (a sinistra, crediti: SDSS) e rappresentazione delle code mareali dell'ammasso aperto delle Iadi, evidenziate in rosa (a destra, crediti: ESA/Gaia/DPAC; riconoscimenti: S. Jordan/T. Sagrista).}
 	\label{fig:code-mareali}
@@ -49,14 +49,14 @@ La perdita progressiva di stelle causata da questo fenomeno prende il nome di ri
 \noindent Comprendere la natura e l'intensità di questo fenomeno è fondamentale per studiare l'evoluzione e la sopravvivenza degli ammassi stellari. Tuttavia, questi processi si sviluppano su scale temporali estremamente lunghe, che possono raggiungere decine di milioni di anni.
 \section{L'astrofisica computazionale}
 \label{sec:astrofisica-computazionale}
-Molti fenomeni astronomici si sviluppano su scale temporali che non possono essere seguite direttamente attraverso le osservazioni. Per studiarli, l'astrofisica moderna si affida sempre più a modelli matematici e strumenti computazionali. Questo approccio, noto come astrofisica computazionale, permette di ricostruire numericamente sistemi complessi e analizzarne l'evoluzione. Un esempio significativo è la Millennium Simulation, che ha permesso di studiare la formazione delle strutture cosmiche attraverso il tracciamento di miliardi di particelle di materia oscura \cite{springel2005}.
+Molti fenomeni astronomici si sviluppano su scale temporali che non possono essere seguite direttamente attraverso le osservazioni. Per studiarli, l'astrofisica moderna si affida sempre più a modelli matematici e strumenti computazionali. Questo approccio, noto come astrofisica computazionale, permette di ricostruire numericamente sistemi complessi e analizzarne l'evoluzione. Un esempio significativo è la \emph{Millennium Simulation}, che ha permesso di studiare la formazione delle strutture cosmiche attraverso il tracciamento di miliardi di particelle di materia oscura \cite{springel2005}.
 \section{Le simulazioni numeriche}
 \label{sec:simulazioni-numeriche}
 Per descrivere l'evoluzione di un ammasso stellare è possibile rappresentare ogni stella come una particella dotata di massa, posizione e velocità, calcolandone il moto attraverso le leggi della gravitazione. Questo approccio prende il nome di simulazione $N$-corpi e consente di seguire numericamente le interazioni tra tutte le componenti del sistema, includendo anche l'influenza di una forza gravitazionale galattica esterna.
 La difficoltà principale risiede nel costo computazionale: nel metodo di somma diretta, il numero di interazioni gravitazionali da calcolare cresce proporzionalmente al quadrato del numero di stelle presenti, rendendo rapidamente onerosa la simulazione di sistemi numerosi. Simulare numerose configurazioni iniziali può quindi richiedere risorse e tempi considerevoli \cite{spurzem2023}. Da questa esigenza nasce l'interesse verso strumenti capaci di sfruttare i risultati delle simulazioni per formulare nuove previsioni in tempi molto più brevi.
 \section{L'apprendimento automatico}
 \label{sec:apprendimento-automatico}
-L'apprendimento automatico, è un insieme di tecniche informatiche che permette agli algoritmi di $imparare$ relazioni e schemi ricorrenti a partire dai dati. In astrofisica viene utilizzato, tra le altre applicazioni, per classificare oggetti celesti, analizzare osservazioni e costruire modelli predittivi \cite{rodriguez2022}.
+L'apprendimento automatico, è un insieme di tecniche informatiche che permette agli algoritmi di apprendere relazioni e schemi ricorrenti a partire dai dati. In astrofisica viene utilizzato, tra le altre applicazioni, per classificare oggetti celesti, analizzare osservazioni e costruire modelli predittivi \cite{rodriguez2022}.
 Applicato ai risultati delle simulazioni numeriche, permette di apprendere la relazione tra le condizioni iniziali di un sistema e il suo comportamento finale. In questo modo, un modello addestrato può fornire stime per nuove configurazioni senza dover necessariamente ripetere ogni volta l'intera simulazione, offrendo uno strumento complementare ai tradizionali metodi numerici.
 \section{Obiettivo}
 \label{sec:obiettivo}

@@ -1,7 +1,7 @@
 \chapter{Il modello fisico}
 \label{cha:modello-fisico}
 Il modello fisico adottato descrive gli ammassi stellari come sistemi di stelle puntiformi, soggette alla reciproca attrazione gravitazionale e al campo esterno della galassia. Per rappresentare la distribuzione iniziale delle stelle si utilizza il modello di Plummer, da cui vengono generate le posizioni e le velocità iniziali. Si verifica quindi l'equilibrio viriale dell'ammasso e si applica un riscalamento delle velocità per ottenere una configurazione iniziale più vicina all'equilibrio. Anche la galassia viene descritta attraverso un potenziale di Plummer. Si definiscono poi le equazioni del moto, considerando sia le interazioni gravitazionali tra le stelle sia l'azione della galassia, e si stabiliscono le condizioni orbitali iniziali attraverso il semiasse maggiore e l'eccentricità.
-Definite le condizioni iniziali, si procede con l'integrazione numerica delle equazioni del moto mediante il metodo Leapfrog e si controlla la conservazione dell'energia durante l'evoluzione del sistema. Infine, per valutare gli effetti della rimozione mareale, si individuano le stelle che rimangono gravitazionalmente legate all'ammasso e si calcolano il centro di massa, la frazione di massa legata e il raggio di metà massa. Queste grandezze permettono di descrivere l'evoluzione dell'ammasso e quantificare la perdita di massa e la variazione della sua struttura.
+Definite le condizioni iniziali, si procede con l'integrazione numerica delle equazioni del moto e si controlla la conservazione dell'energia durante l'evoluzione del sistema. Infine, per valutare gli effetti della rimozione mareale, si individuano le stelle che rimangono gravitazionalmente legate all'ammasso e si calcolano il centro di massa, la frazione di massa legata e il raggio di metà massa. Queste grandezze permettono di descrivere l'evoluzione dell'ammasso e quantificare la perdita di massa e la variazione della sua struttura.
 \section{Notazione}
 \label{sec:notazione}
 La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati nel documento.
@@ -25,7 +25,7 @@ La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati nel docu
 		$\mathbf{x}_i$ & Vettore posizione della stella $i$ & \ref{subsec:posizioni-iniziali} \\
 		$\mathbf{v}_i$ & Vettore velocità della stella $i$ & \ref{subsec:velocita-iniziali} \\
 		$\galaxyMass$ & Massa del modello galattico & \ref{subsec:plummer-galattico} \\
-		$\galaxyRadius$ & Parametro di scala del modello galattico di Plummer & \ref{subsec:plummer-galattico} \\
+		$\galaxyRadius$ & Parametro di scala del modello di Plummer galattico & \ref{subsec:plummer-galattico} \\
 		$\galaxyDistance$ & Distanza dal centro galattico & \ref{subsec:plummer-galattico} \\
 		$\softeningLength$ & Parametro di ammorbidimento gravitazionale & \ref{subsec:equazioni-moto} \\
 		$\semiMajorAxis$ & Semiasse maggiore dell'orbita & \ref{subsec:parametri-orbitali-iniziali} \\
@@ -42,7 +42,7 @@ La Tabella~\ref{tab:notazione} riassume i principali simboli utilizzati nel docu
 Per descrivere la distribuzione iniziale di un ammasso
 stellare, si adotta il modello di Plummer,
 che permette di definire la distribuzione delle posizioni
-e delle velocità delle stelle nel contesto galattico.\cite{plummer1911}
+e delle velocità delle stelle nel contesto galattico\cite{plummer1911}.
 
 \subsection{Il modello di Plummer}
 \label{subsec:plummer}
@@ -95,8 +95,8 @@ dove $\phi_i$ è estratto uniformemente in $[0,2\pi)$ e $\cos\theta_i$ in $[-1,1
 Ripetendo il procedimento per tutte le $\numberOfStars$ stelle, si ottiene una distribuzione tridimensionale coerente con il profilo di Plummer.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./plots/initial_positions.pdf}
-	\caption[Distribuzione spaziale iniziale del cluster]{Distribuzione tridimensionale delle posizioni iniziali delle stelle generate secondo il modello di Plummer. ($N = 2000$, $\clusterRadius = 1.0$)}
+	\includegraphics[width=\textwidth]{./plots/initial_positions.pdf}
+	\caption[Distribuzione spaziale iniziale dell'ammasso stellare]{Distribuzione tridimensionale delle posizioni iniziali delle stelle generate secondo il modello di Plummer. ($N = 2000$, $\clusterRadius = 1.0$)}
 	\label{fig:initial-positions}
 \end{figure}
 \subsection{Distribuzione delle velocità}
@@ -114,16 +114,8 @@ Il modulo della velocità viene campionato secondo la distribuzione teorica prev
 	\qquad 0\leq \velV_i\leq \escapeVelocity(r_i)
 	\label{eq:plummer-speed-distribution}
 \end{equation}
-Questa distribuzione garantisce che le velocità iniziali siano inferiori alla velocità di fuga locale, evitando di generare stelle inizialmente non legate all'ammasso. Per estrarre i campioni da questa distribuzione si utilizza una variabile casuale $X_i$ generata secondo una distribuzione Beta:
-\begin{equation}
-	X_i\sim\mathrm{Beta}\left(\frac{3}{2},\frac{9}{2}\right)
-	\label{eq:beta-velocity-sampling}
-\end{equation}
-Il modulo della velocità della stella $i$ si ottiene quindi attraverso la relazione:
-\begin{equation}
-	\velV_i=\escapeVelocity(r_i)\sqrt{X_i}
-	\label{eq:initial-speed}
-\end{equation}
+Questa distribuzione garantisce che le velocità iniziali siano inferiori alla velocità di fuga locale, evitando di generare stelle inizialmente non legate all'ammasso. Per estrarre i campioni da questa distribuzione si utilizza il metodo dell'accettazione e del rifiuto \cite{devroye1986nonuniform}: viene generato un valore candidato del modulo della velocità nell'intervallo $[0,\escapeVelocity(r_i)]$, che viene accettato con probabilità proporzionale alla distribuzione teorica. In caso contrario, il campione viene rifiutato e generato nuovamente.
+Il modulo della velocità della stella $i$ coincide quindi con il valore candidato accettato.
 Una volta determinato il modulo, la direzione della velocità viene estratta isotropicamente nello spazio tridimensionale. Il vettore velocità della stella $i$ si ottiene moltiplicando il modulo per un versore di direzione casuale $\hat{\mathbf{n}}_i$:
 \begin{equation}
 	\mathbf{v}_i=\velV_i\hat{\mathbf{n}}_i
@@ -195,8 +187,8 @@ Anche per descrivere il potenziale gravitazionale della galassia si adotta il mo
 	{\sqrt{\galaxyDistance^2+\galaxyRadius^2}}
 	\label{eq:galactic-plummer-potential}
 \end{equation}
-La forma adottata evita la singolarità del potenziale al centro,
-presente nel caso di una massa puntiforme.\\
+Il parametro $\galaxyRadius$ rappresenta la lunghezza di scala del modello galattico e ne caratterizza l'estensione.
+La forma adottata evita la singolarità del potenziale al centro, presente nel caso di una massa puntiforme.\\
 A partire dal potenziale definito nell'equazione~\eqref{eq:galactic-plummer-potential}, l'accelerazione gravitazionale esercitata dalla galassia si ottiene calcolando il gradiente del potenziale con segno opposto:
 \begin{equation}
 	\mathbf{a}_{\mathrm{gal}}(\mathbf{R}) =
@@ -206,15 +198,13 @@ A partire dal potenziale definito nell'equazione~\eqref{eq:galactic-plummer-pote
 \end{equation}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{plots/galactic_plummer_potential.pdf}
-	\caption[Potenziale e accelerazione del modello galattico di Plummer]{Potenziale gravitazionale e intensità dell'accelerazione del modello galattico di Plummer ($G = 1.0$, $M_{\mathrm{gal}} = 2000.0$, $A_{\mathrm{gal}} = 10.0$).}
+	\includegraphics[width=\textwidth]{plots/galactic_plummer_potential.pdf}
+	\caption[Potenziale e accelerazione del modello galattico di Plummer]{Potenziale gravitazionale e intensità dell'accelerazione del modello galattico di Plummer.\\($G = 1.0$, $M_{\mathrm{gal}} = 2000.0$, $A_{\mathrm{gal}} = 10.0$)}
 	\label{fig:galactic-plummer}
 \end{figure}
-
-
 \subsection{Equazioni del moto}
 \label{subsec:equazioni-moto}
-L'evoluzione dell'ammasso stellare è descritta dalle equazioni di Newton per un sistema di particelle gravitazionalmente interagenti. Indicando con $\mathbf{x}_i$ la posizione della stella $i$ e con $m_i$ la sua massa, le equazioni del moto sono:
+L'evoluzione dell'ammasso stellare è descritta dalle equazioni di Newton per un sistema di particelle gravitazionalmente interagenti \cite{goldstein2002}. Indicando con $\mathbf{x}_i$ la posizione della stella $i$ e con $m_i$ la sua massa, le equazioni del moto sono:
 \begin{equation}
 	\frac{d\mathbf{x}_i}{dt} = \mathbf{v}_i
 	\qquad
@@ -281,37 +271,37 @@ La velocità così calcolata viene assegnata a tutte le stelle dell'ammasso, sov
 	\includegraphics[width=0.48\textwidth]{./images/ovito_e03.png}
 	\hfill
 	\includegraphics[width=0.48\textwidth]{./images/ovito_e06.png}
-	\caption{Evoluzione dello stesso ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Le traiettorie bianche vengono tracciate dal movimento delle stelle ed il pallino rosso indica il centro galattico. ($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\semiMajorAxis = 300.0$, $\deltat = 0.005$, Leapfrog)}
+	\caption{Evoluzione dello stesso ammasso stellare dopo due orbite, con eccentricità $e = 0.3$ (sinistra) ed $e = 0.6$ (destra). Le traiettorie bianche vengono tracciate dal movimento delle stelle ed il pallino rosso indica il centro galattico. ($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\semiMajorAxis = 300.0$, $\deltat = 0.005$, \emph{leapfrog})}
 	\label{fig:confronto-eccentricita}
 \end{figure}
 \subsection{Integrazione numerica}
 \label{subsec:integrazione-numerica}
 L'evoluzione del sistema viene calcolata mediante l'integratore numerico \emph{leapfrog}, un metodo simplettico del secondo ordine comunemente utilizzato nelle simulazioni dinamiche a lungo termine \cite{quinn1997timestepping}.
-Indicando con $\deltat$ il passo temporale, il metodo aggiorna le velocità e le posizioni delle stelle alternando due operazioni: una prima metà dell'aggiornamento delle velocità, lo spostamento delle stelle e la seconda metà dell'aggiornamento delle velocità.
+Indicando con $\deltat$ il passo temporale, il metodo aggiorna le posizioni e le velocità in tre passaggi: prima sposta le stelle di mezzo passo utilizzando le velocità correnti, poi aggiorna le velocità di un passo completo utilizzando le accelerazioni calcolate nelle posizioni intermedie e infine completa lo spostamento delle stelle con un ulteriore semipasso.
 Le equazioni di aggiornamento sono:
 \begin{align}
-	\mathbf{v}_{i}^{n+1/2}
-	&= \mathbf{v}_{i}^{n}
-	+ \frac{\deltat}{2}\mathbf{a}_{i}^{n}\\
-	\mathbf{x}_{i}^{n+1}
+	\mathbf{x}_{i}^{n+1/2}
 	&= \mathbf{x}_{i}^{n}
-	+ \deltat\,\mathbf{v}_{i}^{n+1/2}\\
+	+ \frac{\deltat}{2}\mathbf{v}_{i}^{n}\\
 	\mathbf{v}_{i}^{n+1}
-	&= \mathbf{v}_{i}^{n+1/2}
-	+ \frac{\deltat}{2}\mathbf{a}_{i}^{n+1}
+	&= \mathbf{v}_{i}^{n}
+	+ \deltat\,\mathbf{a}_{i}^{n+1/2}\\
+	\mathbf{x}_{i}^{n+1}
+	&= \mathbf{x}_{i}^{n+1/2}
+	+ \frac{\deltat}{2}\mathbf{v}_{i}^{n+1}
 	\label{eq:leapfrog-update}
 \end{align}
-Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simulazioni.\\ Per verificare il comportamento dell'integrazione numerica, viene monitorata la variazione relativa dell'energia totale rispetto al valore iniziale. Indicando con $E(t)$ l'energia totale del sistema all'istante $t$ e con $E_0=E(0)$ il suo valore iniziale, tale variazione è definita come:
+Nel lavoro viene adottato un passo temporale $\deltat=0.005$ per tutte le simulazioni, che vengono eseguite fino al tempo finale $\simulationEndTime=700.0$.\\ Per verificare il comportamento dell'integrazione numerica, viene monitorata la variazione relativa dell'energia totale rispetto al valore iniziale. Indicando con $E(t)$ l'energia totale del sistema all'istante $t$ e con $E_0=E(0)$ il suo valore iniziale, tale variazione è definita come:
 \begin{equation}
 	\delta_E(t)=\frac{\Delta E(t)}{E_0}
 	=\frac{E(t)-E(0)}{E(0)}
 	\label{eq:energy-drift}
 \end{equation}
-Questa quantità è adimensionale e permette di valutare lo scostamento relativo dell'energia rispetto al valore iniziale.
+Questa quantità è adimensionale e permette di valutare lo scostamento relativo dell'energia rispetto al valore iniziale. Come riferimento indicativo, uno scostamento massimo $\max_t|\delta_E(t)|\lesssim10^{-3}$ può essere considerato contenuto, mentre valori prossimi a $10^{-4}$ indicano una conservazione energetica più stringente \cite{sazulibarrena2026relats}.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.7\textwidth]{./plots/energy_drift.pdf}
-	\caption{Andamento della deriva energetica relativa $\delta_E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, Leapfrog)}
+	\includegraphics[width=0.8\textwidth]{./plots/energy_drift.pdf}
+	\caption{Andamento della deriva energetica relativa $\delta_E(t)$ in funzione del tempo di simulazione.\\($\numberOfStars = 400$, $\clusterRadius = 1.0$, $\galaxyMass = 2000.0$, $\galaxyRadius = 10.0$, $\gravitationalConstant = 1.0$, $\softeningLength = 0.01$, $\semiMajorAxis = 300.0$, $\orbitEccentricity = 0.6$, $\deltat = 0.005$, $\simulationEndTime = 700.0$, \emph{leapfrog})}
 	\label{fig:energy-drift}
 \end{figure}
 \subsection{Individuazione delle stelle legate all'ammasso}
@@ -380,7 +370,7 @@ Il raggio di metà massa indica la distanza dal centro di massa entro la quale �
 \begin{equation}
 	\stellarDistance =
 	\left\|\mathbf{x}_i-\boundCenterPosition\right\|,
-	\qquad i\in\boundSet
+	\qquad \forall i\in\boundSet
 	\label{eq:stellar-distance}
 \end{equation}
 Si ordinano quindi le stelle per distanza crescente e si calcola la massa cumulativa della componente legata. La massa contenuta entro una distanza $r$, indicata con $M_{\mathrm{bound}}(<r)$, è:

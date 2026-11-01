@@ -27,6 +27,11 @@ Corinna Cortes and Vladimir Vapnik.
 \newblock Support-vector networks.
 \newblock {\em Machine Learning}, 20:273--297, 1995.
 
+\bibitem{devroye1986nonuniform}
+Luc Devroye.
+\newblock {\em Non-Uniform Random Variate Generation}.
+\newblock Springer, New York, 1986.
+
 \bibitem{goldstein2002}
 Herbert Goldstein, Charles Poole, and John Safko.
 \newblock {\em Classical Mechanics}.
@@ -96,6 +101,13 @@ Jos{\'e}-V{\'i}ctor Rodr{\'i}guez, Ignacio Rodr{\'i}guez-Rodr{\'i}guez, and
 \newblock On the application of machine learning in astronomy and astrophysics:
   A text-mining-based scientometric analysis.
 \newblock {\em WIREs Data Mining and Knowledge Discovery}, 12(5):e1476, 2022.
+
+\bibitem{sazulibarrena2026relats}
+Veronica Saz~Ulibarrena and Simon Portegies~Zwart.
+\newblock Relats: a reinforcement learning-based method for dynamically
+  determining the coupling time-step in multiscale simulations of
+  self-gravitating systems.
+\newblock {\em RAS Techniques and Instruments}, 5:rzag043, 2026.
 
 \bibitem{springel2005}
 Volker Springel, Simon D.~M. White, Adrian Jenkins, Carlos~S. Frenk, Naoki

@@ -143,7 +143,7 @@ def plot_galactic_plummer():
 
     pot_info_text = (
         "Potenziale all'accelerazione di picco:\n"
-        f"$R / a_{{\\mathrm{{gal}}}} = 1/\\sqrt{{2}} \\approx {peak_radius:.3f}$\n"
+        f"$R / A_{{\\mathrm{{gal}}}} = 1/\\sqrt{{2}} \\approx {peak_radius:.3f}$\n"
         f"$\\tilde{{\\Phi}}_{{\\mathrm{{gal}}}} \\approx {potential_at_peak:.3f}$"
     )
 
@@ -164,9 +164,9 @@ def plot_galactic_plummer():
     )
 
     ax_pot.set_title("Potenziale galattico di Plummer")
-    ax_pot.set_xlabel(r"Raggio normalizzato, $R / a_{\mathrm{gal}}$")
+    ax_pot.set_xlabel(r"Raggio normalizzato, $R / A_{\mathrm{gal}}$")
     ax_pot.set_ylabel(
-        r"Potenziale normalizzato, $\Phi_{\mathrm{gal}} / (G M_{\mathrm{gal}} / a_{\mathrm{gal}})$"
+        r"Potenziale normalizzato, $\Phi_{\mathrm{gal}} / (G M_{\mathrm{gal}} / A_{\mathrm{gal}})$"
     )
     ax_pot.set_xlim(MIN_NORMALIZED_RADIUS, MAX_NORMALIZED_RADIUS)
     ax_pot.set_ylim(-1.05, 0.05)
@@ -204,7 +204,7 @@ def plot_galactic_plummer():
 
     info_text = (
         "Accelerazione di picco:\n"
-        f"$R / a_{{\\mathrm{{gal}}}} = 1/\\sqrt{{2}} \\approx {peak_radius:.3f}$\n"
+        f"$R / A_{{\\mathrm{{gal}}}} = 1/\\sqrt{{2}} \\approx {peak_radius:.3f}$\n"
         f"$|\\tilde{{a}}|_{{\\max}} \\approx {peak_acceleration:.3f}$"
     )
 
@@ -225,9 +225,9 @@ def plot_galactic_plummer():
     )
 
     ax_acc.set_title("Intensità dell'accelerazione galattica")
-    ax_acc.set_xlabel(r"Raggio normalizzato, $R / a_{\mathrm{gal}}$")
+    ax_acc.set_xlabel(r"Raggio normalizzato, $R / A_{\mathrm{gal}}$")
     ax_acc.set_ylabel(
-        r"Accelerazione normalizzata, $|\mathbf{a}_{\mathrm{gal}}| / (G M_{\mathrm{gal}} / a_{\mathrm{gal}}^2)$"
+        r"Accelerazione normalizzata, $|\mathbf{a}_{\mathrm{gal}}| / (G M_{\mathrm{gal}} / A_{\mathrm{gal}}^2)$"
     )
     ax_acc.set_xlim(MIN_NORMALIZED_RADIUS, MAX_NORMALIZED_RADIUS)
     ax_acc.set_ylim(bottom=0.0, top=0.45)
