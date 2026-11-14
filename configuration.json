@@ -1,7 +1,7 @@
 {
     "simulation_config": {
         "dt": 0.005,
-        "t": 0,
+        "t": 0.0,
         "G": 1.0,
         "softening": 0.01,
         "time_warp": 1,
@@ -29,7 +29,8 @@
         ],
         "number_of_orbits": -1,
         "end_time": 700.0,
-        "snapshot_interval": 7.0
+        "snapshot_interval": 1.0,
+        "simulate_isolated_cluster": false
     },
     "cores_used": 4,
     "output_directory": "./clusters"

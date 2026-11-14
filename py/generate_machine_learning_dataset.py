@@ -1,4 +1,3 @@
-
 import os
 import csv
 import argparse
@@ -65,16 +64,16 @@ class Generate_Machine_Learning_Dataset:
                 continue
 
             for filename in files:
-                if filename.endswith(".tsv") and not filename.endswith("_isolated.tsv"):
+                if filename.endswith(".csv") and not filename.endswith("_isolated.csv"):
                     simulations_file_paths.append(os.path.join(root, filename))
 
         return simulations_file_paths
 
     def _save_dataset(self, machine_learning_dataset):
-        dataset_file_path = os.path.join(self.working_directory, "machine_learning_dataset.tsv")
+        dataset_file_path = os.path.join(self.working_directory, "machine_learning_dataset.csv")
 
         with open(dataset_file_path, "w", newline="", encoding="utf-8") as dataset_file:
-            writer = csv.DictWriter(dataset_file, fieldnames=SELECTED_COLUMNS, delimiter="\t")
+            writer = csv.DictWriter(dataset_file, fieldnames=SELECTED_COLUMNS)
             writer.writeheader()
             writer.writerows(machine_learning_dataset)
 
@@ -82,9 +81,9 @@ class Generate_Machine_Learning_Dataset:
         simulations_file_paths = self._get_simulations_file_paths()
         dataset = []
 
-        for tsv_file_path in simulations_file_paths:
-            initial_snapshot = File_Handle.load_tsv_snapshot(tsv_file_path, 0)
-            final_snapshot = File_Handle.load_tsv_snapshot(tsv_file_path, -1)
+        for csv_file_path in simulations_file_paths:
+            initial_snapshot = File_Handle.load_csv_snapshot(csv_file_path, 0)
+            final_snapshot = File_Handle.load_csv_snapshot(csv_file_path, -1)
 
             row = {
                 "cluster_seed": final_snapshot["cluster_seed"],

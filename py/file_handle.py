@@ -46,13 +46,11 @@ class File_Handle:
                     f"{velocity[0]:.16e} {velocity[1]:.16e} {velocity[2]:.16e}\n"
                 )
 
-
     @staticmethod
     def open_json_snapshot(json_file_path):
         json_file_descriptor = open(json_file_path, "w", encoding="utf-8")
         json_file_descriptor.write('{"snapshots": [\n')
         return json_file_descriptor
-
 
     @staticmethod
     def save_json_snapshot(json_file_descriptor, particle_positions, particle_velocities, particle_masses):
@@ -77,7 +75,7 @@ class File_Handle:
         json_file_descriptor.close()
 
     @staticmethod
-    def load_json_cluster(json_file_path, snapshot_index = -1):
+    def load_json_cluster(json_file_path, snapshot_index=-1):
         json_file = File_Handle.load_json_file(json_file_path)
         snapshot = json_file["snapshots"][snapshot_index]
 
@@ -87,31 +85,30 @@ class File_Handle:
 
         return particle_positions, particle_velocities, particle_masses
 
-
     @staticmethod
-    def save_tsv_snapshot(tsv_file_path, cluster_diagnostics: Cluster_Diagnostics = None):
+    def save_csv_snapshot(csv_file_path, cluster_diagnostics: Cluster_Diagnostics = None):
 
         fieldnames = [field.name for field in fields(Cluster_Diagnostics)]
-        file_exists = os.path.exists(tsv_file_path)
+        file_exists = os.path.exists(csv_file_path)
 
-        with open(tsv_file_path, "a", newline="") as tsv_file:
-            writer = csv.DictWriter(tsv_file, fieldnames=fieldnames, delimiter="\t")
+        with open(csv_file_path, "a", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
-            if not file_exists or os.path.getsize(tsv_file_path) == 0:
+            if not file_exists or os.path.getsize(csv_file_path) == 0:
                 writer.writeheader()
 
             writer.writerow(asdict(cluster_diagnostics))
 
     @staticmethod
-    def save_tsv_snapshot_gts(tsv_file_path, galactic_tidal_stripping_configuration, galactic_diagnostics: Galactic_Diagnostics = None):
+    def save_csv_snapshot_gts(csv_file_path, galactic_tidal_stripping_configuration, galactic_diagnostics: Galactic_Diagnostics = None):
         fieldnames = ["cluster_seed", "orbit_semi_major_axis", "orbit_eccentricity"]
         fieldnames.extend(field.name for field in fields(Galactic_Diagnostics))
-        file_exists = os.path.exists(tsv_file_path)
+        file_exists = os.path.exists(csv_file_path)
 
-        with open(tsv_file_path, "a", newline="") as tsv_file:
-            writer = csv.DictWriter(tsv_file, fieldnames=fieldnames, delimiter="\t")
+        with open(csv_file_path, "a", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
-            if not file_exists or os.path.getsize(tsv_file_path) == 0:
+            if not file_exists or os.path.getsize(csv_file_path) == 0:
                 writer.writeheader()
 
             snapshot = asdict(galactic_diagnostics)
@@ -122,9 +119,9 @@ class File_Handle:
             writer.writerow(snapshot)
 
     @staticmethod
-    def load_tsv_snapshot(tsv_file_path, snapshot_index=-1):
-        with open(tsv_file_path, "r", newline="", encoding="utf-8") as tsv_file:
-            reader = csv.DictReader(tsv_file, delimiter="\t")
+    def load_csv_snapshot(csv_file_path, snapshot_index=-1):
+        with open(csv_file_path, "r", newline="", encoding="utf-8") as csv_file:
+            reader = csv.DictReader(csv_file)
             snapshots = list(reader)
 
         return snapshots[snapshot_index]
