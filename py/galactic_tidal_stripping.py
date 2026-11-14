@@ -1,279 +1,161 @@
-import logging
+
+import os
+import time
 import numpy as np
-import io_manager
-from simulation import Simulation
-from galactic_potential import GalacticPotential
-from io_manager import Metadata
+import rebound
+from dataclasses import dataclass
+from simulation import Simulation, Simulation_Configuration
+from galaxy import Galaxy, Galaxy_Configuration
+from file_handle import File_Handle
+from galactic_diagnostics import Galactic_Diagnostics
 
-
-logger = logging.getLogger(__name__)
-
+@dataclass
+class Galactic_Tidal_Stripping_Configuration:
+    simulation_configuration: Simulation_Configuration = None
+    galaxy_configuration: Galaxy_Configuration = None
+    number_of_orbits: int = None
+    end_time: float = None
+    cluster_seed: int = None
+    snapshot_interval: float = None
+    snapshot_file_path: str = None
 
 class Galactic_Tidal_Stripping:
 
-    def __init__(
-        self,
-        cluster_json_file,
-        metadata: Metadata,
-        json_and_xyzv_snapshots_dt = 1
-    ):
-        self.metadata = metadata
-        self.json_and_xyzv_snapshots_dt = json_and_xyzv_snapshots_dt
-        self._create_cluster(cluster_json_file)
+    def __init__(self, galactic_tidal_stripping_configuration: Galactic_Tidal_Stripping_Configuration = None, cluster_file_path=None):
+        self.galactic_tidal_stripping_configuration = galactic_tidal_stripping_configuration
+        # this is what being obsessed with OOP does to a mf
+        self.simulation_name = f"{self.galactic_tidal_stripping_configuration.cluster_seed}_a{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_semi_major_axis}_e{self.galactic_tidal_stripping_configuration.galaxy_configuration.orbit_eccentricity}"
 
-    def _save_to_file(self):
+        json_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}.json")
+        self.json_file_descriptor = File_Handle.open_json_snapshot(json_file_path)
 
-        self.metadata.simulation_config.t = (
-            self.simulation.get_time()
+        isolated_json_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}_isolated.json")
+        self.isolated_json_file_descriptor = File_Handle.open_json_snapshot(isolated_json_file_path)
+
+        self.xyzv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}.xyzv")
+        self.tsv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}.tsv")
+
+        self.isolated_xyzv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}_isolated.xyzv")
+        self.isolated_tsv_file_path = os.path.join(self.galactic_tidal_stripping_configuration.snapshot_file_path, f"{self.simulation_name}_isolated.tsv")
+
+        self._create_simulation(cluster_file_path)
+
+    def _save_snapshot(self):
+        particle_positions = self.simulation.get_particle_positions()
+        particle_velocities = self.simulation.get_particle_velocities()
+        particle_masses = self.simulation.get_particle_masses()
+        bound_center_of_mass_position, bound_center_of_mass_velocity = self.simulation.diagnostics.get_bound_center_of_mass()
+        galactic_diagnostics = self.simulation.diagnostics.get_galactic_diagnostics()
+
+        File_Handle.save_json_snapshot(
+            self.json_file_descriptor,
+            particle_positions,
+            particle_velocities,
+            particle_masses
+        )
+        File_Handle.save_xyzv_snapshot_gts(
+            self.xyzv_file_path,
+            particle_positions,
+            particle_velocities,
+            bound_center_of_mass_position,
+            bound_center_of_mass_velocity
+        )
+        File_Handle.save_tsv_snapshot_gts(
+            self.tsv_file_path,
+            self.galactic_tidal_stripping_configuration,
+            galactic_diagnostics
         )
 
-        entities = self.simulation.get_entities()
+    def _save_isolated_snapshot(self):
+        particle_positions = self.isolated_simulation.get_particle_positions()
+        particle_velocities = self.isolated_simulation.get_particle_velocities()
+        particle_masses = self.isolated_simulation.get_particle_masses()
+        cluster_diagnostics = self.isolated_simulation.diagnostics.get_cluster_diagnostics()
 
-        percentile_center_of_mass = (
-            self.simulation.get_percentile_center_of_mass()
+        File_Handle.save_json_snapshot(
+            self.isolated_json_file_descriptor,
+            particle_positions,
+            particle_velocities,
+            particle_masses
+        )
+        File_Handle.save_xyzv_snapshot(
+            self.isolated_xyzv_file_path,
+            particle_positions,
+            particle_velocities
+        )
+        File_Handle.save_tsv_snapshot(
+            self.isolated_tsv_file_path,
+            cluster_diagnostics
         )
 
-        io_manager.save_xyzv_snapshot_gts(
-            self.metadata,
-            entities,
-            percentile_center_of_mass
-        )
+    def _create_simulation(self, cluster_file_path):
 
-        io_manager.save_json_snapshot_gts(
-            self.metadata,
-            entities,
-            percentile_center_of_mass
-        )
+        print(f"Simulation {self.simulation_name}: Creating galaxy_handle")
+        self.galaxy_handle = Galaxy(self.galactic_tidal_stripping_configuration.galaxy_configuration)
 
-    def _create_cluster(self, cluster_json_file):
+        particle_positions, particle_velocities, particle_masses = File_Handle.load_json_cluster(cluster_file_path, -1)
 
-        file_metadata, entities, center_of_mass = (
-            io_manager.load_json_snapshot(cluster_json_file)
-        )
+        print(f"Simulation {self.simulation_name}: Adding the particles to rebound")
+        self.simulation = Simulation(self.galactic_tidal_stripping_configuration.simulation_configuration)
+        self.isolated_simulation = Simulation(self.galactic_tidal_stripping_configuration.simulation_configuration)
 
-        for key, value in vars(file_metadata).items():
-            if value is not None:
-                setattr(self.metadata, key, value)
+        for particle_name, (particle_position, particle_velocity, particle_mass) in enumerate(zip(particle_positions, particle_velocities, particle_masses)):
+            particle = rebound.Particle(
+                name = str(particle_name),
+                x = particle_position[0],
+                y = particle_position[1],
+                z = particle_position[2],
+                vx = particle_velocity[0],
+                vy = particle_velocity[1],
+                vz = particle_velocity[2],
+                m = particle_mass
+            )
+            isolated_particle = rebound.Particle(
+                name = str(particle_name),
+                x = particle_position[0],
+                y = particle_position[1],
+                z = particle_position[2],
+                vx = particle_velocity[0],
+                vy = particle_velocity[1],
+                vz = particle_velocity[2],
+                m = particle_mass
+            )
+            self.simulation.add_particle(particle)
+            self.isolated_simulation.add_particle(isolated_particle)
 
-        logger.info(
-            f"Cluster "
-            f"{self.metadata.cluster_seed}_a"
-            f"{self.metadata.orbit_semi_major_axis}_e"
-            f"{self.metadata.orbit_eccentricity}: "
-            f"Creating..."
-        )
+        self.simulation.rebound_handle.move_to_com()
+        self.isolated_simulation.rebound_handle.move_to_com()
 
-        self.simulation = Simulation(
-            self.metadata.simulation_config
-        )
+        bound_center_of_mass_position, _ = self.simulation.diagnostics.get_bound_center_of_mass()
+        self.simulation.move_cluster(*(self.galaxy_handle.get_initial_orbital_position() - bound_center_of_mass_position))
+        self.simulation.speed_cluster(*self.galaxy_handle.get_initial_orbital_velocity())
 
-        for entity in entities:
-            self.simulation.add_entity(entity)
+        self.isolated_simulation.move_cluster(*(self.galaxy_handle.get_initial_orbital_position() - bound_center_of_mass_position))
+        self.isolated_simulation.speed_cluster(*self.galaxy_handle.get_initial_orbital_velocity())
 
-        galactic_potential = GalacticPotential(
-            self.metadata.galaxy_radius,
-            self.metadata.galaxy_mass
-        )
-
-        self.simulation.add_galactic_potential(
-            galactic_potential
-        )
-
-        r_apo = (
-            self.metadata.orbit_semi_major_axis
-            * (1.0 + self.metadata.orbit_eccentricity)
-        )
-
-        v_apo = galactic_potential.get_elliptical_apocenter_velocity(
-            self.metadata.orbit_semi_major_axis,
-            self.metadata.orbit_eccentricity
-        )
-
-        percentile_center_of_mass = (
-            self.simulation.get_percentile_center_of_mass()
-        )
-
-        self.simulation.move_cluster(
-            -percentile_center_of_mass.position.x,
-            -percentile_center_of_mass.position.y,
-            -percentile_center_of_mass.position.z
-        )
-
-        self.simulation.speed_cluster(
-            -percentile_center_of_mass.velocity.vx,
-            -percentile_center_of_mass.velocity.vy,
-            -percentile_center_of_mass.velocity.vz
-        )
-
-        self.simulation.move_cluster(
-            r_apo,
-            0,
-            0
-        )
-
-        self.simulation.speed_cluster(
-            0,
-            v_apo,
-            0
-        )
+        self.simulation.add_galaxy(self.galaxy_handle)
+        #self.simulation.diagnostics.print_diagnostics()
 
     def run(self):
+        try:
+            print(f"Simulation {self.simulation_name}: Running Galactic Tidal Stripping Simulation")
+            _computing_time = time.perf_counter()
+            _next_snapshot_time = self.simulation.rebound_handle.t + self.galactic_tidal_stripping_configuration.snapshot_interval
+            self._save_snapshot()
+            self._save_isolated_snapshot()
+            while self.simulation.rebound_handle.t < self.galactic_tidal_stripping_configuration.end_time:
+            #while self.simulation.diagnostics.number_of_orbits_done < self.galactic_tidal_stripping_configuration.number_of_orbits:
+                self.simulation.integrate()
+                self.isolated_simulation.integrate()
 
-        logger.info(
-            f"Cluster "
-            f"{self.metadata.cluster_seed}_a"
-            f"{self.metadata.orbit_semi_major_axis}_e"
-            f"{self.metadata.orbit_eccentricity}: "
-            f"Running..."
-        )
-
-        theoretical_orbit_period = (
-            2.0 * np.pi
-            * np.sqrt(
-                self.metadata.orbit_semi_major_axis**3
-                / (
-                    self.metadata.simulation_config.G
-                    * self.metadata.galaxy_mass
-                )
-            )
-        )
-
-        logger.debug(
-            f"Cluster "
-            f"{self.metadata.cluster_seed}_a"
-            f"{self.metadata.orbit_semi_major_axis}_e"
-            f"{self.metadata.orbit_eccentricity}: "
-            f"Theoretical orbital period: "
-            f"{theoretical_orbit_period:.4f}"
-        )
-
-        next_snapshot = (
-            self.simulation.get_time()
-            + self.json_and_xyzv_snapshots_dt
-        )
-
-        io_manager.init_json_gts(self.metadata)
-
-        self._save_to_file()
-
-        last_logged_orbits = 0
-
-        ORBIT_TRACKING_START = 0.8
-        ORBIT_TIMEOUT_FACTOR = 2.0
-
-        current_time = self.simulation.get_time()
-        orbit_timeout = (
-            current_time
-            + ORBIT_TIMEOUT_FACTOR * theoretical_orbit_period
-        )
-
-        next_orbit_completion_time = (
-            current_time
-            + theoretical_orbit_period
-        )
-
-        next_orbit_tracking_start = (
-            current_time
-            + (
-                ORBIT_TRACKING_START
-                * theoretical_orbit_period
-            )
-        )
-
-        tracking_orbit = False
-
-        while True:
-            self.simulation.integrate()
-
-            current_time = self.simulation.get_time()
-
-            if current_time >= next_snapshot:
-                next_snapshot += self.json_and_xyzv_snapshots_dt
-                self._save_to_file()
-
-            if (
-                not tracking_orbit
-                and current_time >= next_orbit_tracking_start
-            ):
-                tracking_orbit = True
-
-            if tracking_orbit:
-                current_orbits = (
-                    self.simulation.get_number_of_orbits()
-                )
-
-                if current_orbits > last_logged_orbits:
-                    last_logged_orbits = current_orbits
-                    tracking_orbit = False
-
-                    orbit_timeout = (
-                        current_time
-                        + ORBIT_TIMEOUT_FACTOR
-                        * theoretical_orbit_period
-                    )
-
-                    next_orbit_completion_time = (
-                        current_time
-                        + theoretical_orbit_period
-                    )
-
-                    logger.info(
-                        f"Cluster "
-                        f"{self.metadata.cluster_seed}_a"
-                        f"{self.metadata.orbit_semi_major_axis}_e"
-                        f"{self.metadata.orbit_eccentricity}: "
-                        f"Orbit {current_orbits}/"
-                        f"{self.metadata.number_of_orbits} completed "
-                    )
-
-                    if current_orbits >= self.metadata.number_of_orbits:
-                        logger.debug(
-                            f"Cluster "
-                            f"{self.metadata.cluster_seed}_a"
-                            f"{self.metadata.orbit_semi_major_axis}_e"
-                            f"{self.metadata.orbit_eccentricity}: "
-                            f"current_t = {current_time:.2f}"
-                        )
-                        self._save_to_file()
-                        break
-
-                    logger.debug(
-                        f"Cluster "
-                        f"{self.metadata.cluster_seed}_a"
-                        f"{self.metadata.orbit_semi_major_axis}_e"
-                        f"{self.metadata.orbit_eccentricity}: "
-                        f"next_orbit_completion_time = "
-                        f"{next_orbit_completion_time:.2f}, "
-                        f"current_t = {current_time:.2f}"
-                    )
-
-                    next_orbit_tracking_start = (
-                        current_time
-                        + (
-                            ORBIT_TRACKING_START
-                            * theoretical_orbit_period
-                        )
-                    )
-
-            if current_time >= orbit_timeout:
-                logger.warning(
-                    f"Cluster "
-                    f"{self.metadata.cluster_seed}_a"
-                    f"{self.metadata.orbit_semi_major_axis}_e"
-                    f"{self.metadata.orbit_eccentricity}: "
-                    f"Orbit timeout after "
-                    f"{ORBIT_TIMEOUT_FACTOR * theoretical_orbit_period:.2f} "
-                    f"time units. "
-                    f"Completed {last_logged_orbits}/"
-                    f"{self.metadata.number_of_orbits} orbits."
-                )
-                self._save_to_file()
-                break
-
-        logger.info(
-            f"\033[94mCluster "
-            f"{self.metadata.cluster_seed}_a"
-            f"{self.metadata.orbit_semi_major_axis}_e"
-            f"{self.metadata.orbit_eccentricity}: "
-            f"Done.\033[0m"
-        )
+                if self.simulation.rebound_handle.t >= _next_snapshot_time:
+                    self._save_snapshot()
+                    self._save_isolated_snapshot()
+                    _next_snapshot_time += self.galactic_tidal_stripping_configuration.snapshot_interval
+            self._save_snapshot()
+            _computing_time = time.perf_counter() - _computing_time
+            print(f"Simulation {self.simulation_name}: Done simulating in {_computing_time} seconds.")
+            #self.simulation.diagnostics.print_diagnostics()
+        finally:
+            File_Handle.close_json_snapshot(self.json_file_descriptor)
+            File_Handle.close_json_snapshot(self.isolated_json_file_descriptor)
