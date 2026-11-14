@@ -1,0 +1,24 @@
+\begin{flushright}
+	\textit{“The Galaxy is nothing else but a countless number
+		of stars scattered in clusters.”}
+	\vspace{0.2cm}
+	Galileo Galilei, \textit{Sidereus Nuncius}, 1610
+\end{flushright}
+
+\vspace{0.5cm}
+\phantomsection
+\addcontentsline{toc}{chapter}{Abstract}
+
+\chapter*{Abstract} % unnumbered
+\label{sommario}
+Star clusters are gravitationally bound systems whose evolution can be profoundly influenced by the galactic environment in which they are located. In particular, interaction with the gravitational field of the galaxy can cause a progressive loss of stars, a phenomenon known as galactic tidal stripping, which in the most extreme cases can lead to the complete dissolution of the cluster.\\
+Studying these processes requires numerical simulations of many-body systems, whose computational cost can become significant when numerous initial configurations need to be analyzed.
+This motivates the use of machine learning techniques, which can derive useful relationships from simulation results to make new predictions.\\
+
+\noindent The aim of this work is to study how initial orbital parameters influence the survival of star clusters and to use simulation results to train models capable of predicting their evolutionary outcomes. In particular, the orbital parameters considered are the semi-major axis and eccentricity of the cluster's orbit. The Plummer model was adopted to describe the system, both to generate the initial distribution of stellar positions and velocities and to represent the galactic gravitational potential. The velocities were then rescaled to obtain configurations close to virial equilibrium. The defined equations of motion include gravitational interactions between the stars and the influence of the galactic field. Procedures were also developed to calculate diagnostic quantities, including the bound mass fraction and the half-mass radius, which are necessary to describe the state of the clusters at the end of the simulations.\\
+
+\noindent To construct the \emph{dataset}, 1140 orbital configurations were considered, obtained by combining 30 values of the semi-major axis and 38 values of the eccentricity. Each configuration was simulated using 15 different initial realizations of the cluster, for a total of 17100 simulations. Analysis of the results made it possible to observe the relationship between orbital parameters and cluster mass loss, showing that survival depends on both the semi-major axis and eccentricity.\\ The collected data were subsequently used to formulate a binary classification problem, distinguishing surviving clusters from dissolved ones based on their final diagnostic quantities. The semi-major axis and eccentricity were selected as the input variables for the learning models, while model performance was evaluated using the \emph{F1-score}, with the \emph{dataset} divided into a training set and a test set.\\
+
+\noindent Two classifiers were implemented and compared: a \emph{Support Vector Classifier} and a \emph{Multi-Layer Perceptron} neural network. Both achieved high and very similar performance. The decision boundaries identified by the two models closely follow the separation between survival and dissolution observed in the distribution of simulation results. The main classification difficulties are concentrated in the transition region between the two regions, where clusters with the same orbital parameters can reach different outcomes depending on their initial realization.\\
+
+\noindent The results show that machine learning techniques can effectively describe the relationship between initial orbital conditions and the final state of star clusters, offering a possible alternative to numerical simulations for making predictions about new configurations. The work also highlights several directions for future development, including extending the range of orbital parameters studied, increasing the number of stars and initial realizations, and assessing the models' ability to predict outcomes for configurations not included in the training set.%

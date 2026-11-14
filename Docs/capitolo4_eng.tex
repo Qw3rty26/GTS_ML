@@ -1,0 +1,35 @@
+\chapter{Software Implementation}
+\label{cha:implementazione-software}
+The simulation implementation was developed using the Python programming language \cite{vanrossum2009python} and the REBOUND library \cite{rein2012rebound}, version 5.0.0, for the numerical integration of gravitational $N$-body systems. REBOUND provides the tools required to manage particles and integrate their respective equations of motion. NumPy (2.0.2) \cite{harris2020array} and SciPy (1.18.0) \cite{virtanen2020scipy} were used for numerical operations, while Numba (0.60.0) \cite{lam2015numba} was employed to accelerate the computation of galactic accelerations through \emph{just-in-time} compilation.\\
+Project-specific features, including the generation of clusters according to the Plummer model, the definition of the galactic potential, and the calculation of diagnostic quantities, were implemented using dedicated modules. Their main functionalities are summarized in Table~\ref{tab:moduli-software}.
+\begin{table}[H]
+	\centering
+	\small
+	\caption{Software modules developed and their respective functionalities.}
+	\label{tab:moduli-software}
+	\begin{tabular}{p{0.28\textwidth}p{0.66\textwidth}}
+		\hline
+		\textbf{Module} & \textbf{Functionality} \\
+		\hline
+		\texttt{plummer.py} &
+		Generation of initial positions and velocities and construction of star clusters. \\
+		\hline
+		\texttt{galaxy.py} &
+		Definition of the galactic potential, calculation of the gravitational acceleration exerted by the galaxy on the stars, and determination of the initial orbital conditions. \\
+		\hline
+		\texttt{simulation.py} &
+		Interface with REBOUND and management of stars, integration parameters, and dynamical evolution. \\
+		\hline
+		\texttt{cluster\_generation.py} &
+		Coordination of cluster generation and creation of the corresponding REBOUND simulation, integrating the functionalities of \texttt{plummer.py} and \texttt{simulation.py}. \\
+		\hline
+		\texttt{galactic\_tidal\_stripping.py} &
+		Coordination of the galactic system configuration and orbital conditions with the creation and execution of the simulation, integrating the functionalities of \texttt{galaxy.py} and \texttt{cluster\_generation.py}. \\
+		\hline
+		\texttt{cluster\_diagnostics.py}, \texttt{galactic\_diagnostics.py} &
+		Calculation of energies, the virial ratio, bound stars, the bound mass fraction, and the half-mass radius. \\
+		\hline
+	\end{tabular}
+\end{table}
+\noindent At the end of the simulations, the dataset used for the analyses was generated in CSV (\emph{Comma-Separated Values}) format \cite{shafranovich2005rfc4180}. The analyses were carried out separately from the simulator code, using Jupyter \emph{notebooks} \cite{kluyver2016jupyter} running in the Google Colab \emph{cloud} environment \cite{googlecolab}. The runtime used provided NumPy (2.1.3), pandas (2.2.3) \cite{mckinney2010data}, and Matplotlib (3.10.0) \cite{hunter2007matplotlib} for numerical operations, data manipulation, and plot generation. The training and evaluation of the SVC and MLP classifiers were performed using scikit-learn (1.6.1) \cite{pedregosa2011scikit}.
+\newline The source code, configuration files, \emph{notebooks}, and execution instructions are available in the project's public GitHub repository, in the ``Final public release'' \emph{release} \cite{asaro2026gtsml}, accessible at: \url{https://github.com/Qw3rty26/GTS_ML/}.%
