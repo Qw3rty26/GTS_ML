@@ -1,173 +1,223 @@
 # GTS_ML
+### Galactic Tidal Stripping Simulations with Machine Learning
 
-**Galactic Tidal Stripping Simulations with Machine Learning**
+GTS_ML is a Python project for simulating the tidal stripping of stellar clusters in a galactic potential and using the resulting simulations to train machine-learning models.
 
-A Python project for simulating the dynamical evolution of stellar clusters in a galactic tidal field and predicting their final state using machine learning.
-
-## Overview
-
-GTS_ML studies the effects of galactic tidal stripping on stellar clusters through numerical N-body simulations. The simulations follow the gravitational interactions between stars while accounting for the external gravitational potential of the host galaxy.
-
-The results are used to investigate how the initial orbital parameters affect cluster survival and to train machine learning models capable of predicting whether a cluster survives or dissolves, without having to run a new N-body simulation for every configuration.
+The project combines numerical N-body simulations, dataset generation, and classification to study how the initial orbital parameters of a stellar cluster influence its survival.
 
 ## Physical model
 
-Both the stellar cluster and the host galaxy are described using a Plummer model.
+Both the stellar cluster and the galaxy are modelled as Plummer spheres. The simulations are performed using [REBOUND](https://rebound.readthedocs.io/), an N-body simulation package.
 
-The cluster is represented as a self-gravitating system of point-mass particles. Each star interacts gravitationally with the other cluster members, while the entire system evolves in the external galactic potential.
+Each simulation starts from a generated stellar cluster placed on an orbit around the galactic potential. The main orbital parameters are:
 
-The initial orbit is defined by two parameters:
+- `orbit_semi_major_axis`: orbital semi-major axis.
+- `orbit_eccentricity`: orbital eccentricity.
 
-- **Semi-major axis** (`orbit_semi_major_axis`)
-- **Eccentricity** (`orbit_eccentricity`)
-
-The equations of motion are numerically integrated using [REBOUND](https://rebound.readthedocs.io/), with the Leapfrog integrator.
+During the simulation, the evolution of the cluster is tracked through several physical quantities, including its bound mass fraction and half-mass radius.
 
 ## Example simulations
 
-The following images show two possible outcomes for the same initial cluster configuration under different orbital conditions.
+The following examples show two different outcomes of the tidal stripping process. The simulations are visualized using [OVITO](https://www.ovito.org/).
 
 | Surviving cluster | Dissolved cluster |
 |:---:|:---:|
 | ![Surviving cluster](Docs/images/cluster_alive.png) | ![Dissolved cluster](Docs/images/cluster_dead.png) |
-| a = 300.0, e = 0.5 | a = 140.0, e = 0.8 |
-| Bound mass fraction: 0.93 | Bound mass fraction: 0.065 |
-| Relative half-mass radius: 1.002 | Relative half-mass radius: 0.246 |
+| `a = 300.0`, `e = 0.5` | `a = 140.0`, `e = 0.8` |
+| Bound mass fraction: `0.93` | Bound mass fraction: `0.065` |
+| Relative half-mass radius: `1.002` | Relative half-mass radius: `0.246` |
 
 ## Requirements
 
-The simulation environment uses Python and the packages listed in `requirements.txt`.
+The project requires Python and the packages listed in `requirements.txt`:
 
-Install the dependencies with:
+- NumPy
+- SciPy
+- Numba
+- REBOUND
 
-```bash
-pip install -r requirements.txt
-```
+## Installation and execution
 
-Main dependencies:
+Two scripts are provided to run the project:
 
-- [REBOUND](https://rebound.readthedocs.io/) — N-body simulations
-- [NumPy](https://numpy.org/) — numerical operations
-- [SciPy](https://scipy.org/) — scientific computing
-- [Numba](https://numba.pydata.org/) — just-in-time compilation
-
-## Configuration
-
-Simulation parameters are defined in `configuration.json`.
-
-The configuration file controls:
-
-- Simulation settings, including the integration timestep and integrator.
-- Cluster generation, including the number of stars, cluster radius and random seed.
-- Galactic potential, including galaxy mass and scale radius.
-- Orbital parameters, including semi-major axis and eccentricity.
-- Simulation duration and snapshot frequency.
-- Number of CPU cores and output directory.
-
-Multiple orbital configurations and initial cluster realizations can be specified in the configuration file.
-
-## Running the simulations
-
-### Linux
+**Linux**
 
 ```bash
 ./run.sh
 ```
 
-### NixOS
+**NixOS**
 
 ```bash
 ./nixrun.sh
 ```
 
-Both scripts use `configuration.json` by default.
-
-Additional command-line options are available:
-
-```text
---config <path>
---verbose
---debug
-```
-
-For example:
+Both scripts use `configuration.json` by default. A different configuration file can be specified with `--config`, while `--debug` enables debug-level logging.
 
 ```bash
-./nixrun.sh --debug --config configuration.json
+./run.sh --config path/to/configuration.json
+./run.sh --debug
 ```
 
-## Simulation diagnostics
+The execution consists of three stages:
 
-During the simulations, diagnostic quantities are computed to follow the structural evolution of each cluster.
+1. **Cluster generation** — generates initial stellar clusters using the Plummer model and saves their snapshots.
+2. **Galactic tidal stripping** — simulates each cluster in the galactic potential, tracking its evolution over time.
+3. **Dataset generation** — extracts selected initial and final diagnostics from the simulations and saves them in a CSV file.
 
-The main quantities include:
+The output directory and the locations of the generated files are printed during execution.
 
-- **Bound mass fraction** — the fraction of the initial cluster mass that remains gravitationally bound.
-- **Half-mass radius** — the radius enclosing half of the bound mass.
-- **Virial ratio** — used to monitor the initial dynamical equilibrium.
-- **Energy variation** — used to monitor the numerical integration.
+## Configuration
 
-These quantities provide a description of mass loss and structural evolution throughout the simulations.
+Simulation parameters are defined in `configuration.json`.
+
+### Simulation configuration
+
+| Parameter | Description |
+|---|---|
+| `dt` | Integration timestep. |
+| `t` | Initial simulation time. |
+| `G` | Gravitational constant. |
+| `softening` | Gravitational softening length. |
+| `integrator` | REBOUND integration method. |
+
+### Cluster generation
+
+| Parameter | Description |
+|---|---|
+| `master_seed` | Seed used to generate the cluster realizations. |
+| `number_of_clusters` | Number of initial cluster realizations. |
+| `number_of_particles` | Number of stars in each cluster. |
+| `cluster_radius` | Initial Plummer scale radius. |
+| `snapshot_interval` | Time interval between saved snapshots. |
+
+### Galactic tidal stripping
+
+| Parameter | Description |
+|---|---|
+| `galaxy_mass` | Mass of the galactic Plummer model. |
+| `galaxy_radius` | Scale radius of the galactic Plummer model. |
+| `orbit_semi_major_axis` | List of orbital semi-major axes to simulate. |
+| `orbit_eccentricity` | List of orbital eccentricities to simulate. |
+| `number_of_orbits` | Maximum number of completed orbits. |
+| `end_time` | Maximum simulation time. |
+| `snapshot_interval` | Time interval between saved snapshots. |
+| `simulate_isolated_cluster` | Whether to run a corresponding isolated-cluster simulation. |
+
+At least one of `number_of_orbits` and `end_time` must be enabled. Setting either parameter to `-1` disables that stopping condition. If both are enabled, the simulation stops when the first condition is reached.
+
+### Other parameters
+
+| Parameter | Description |
+|---|---|
+| `cores_used` | Number of CPU cores used for parallel simulations. |
+| `output_directory` | Directory where simulation results are stored. |
+
+## Simulation output
+
+Each execution creates a `run_###/` directory inside the configured output directory. Its contents are organized as follows:
+
+```text
+run_###/
+├── GEN/
+│   └── ...                  # Initial cluster snapshots
+├── GTS/
+│   └── ...                  # Galactic and isolated simulations
+└── machine_learning_dataset.csv
+```
+
+The `GEN/` directory contains the generated initial cluster realizations. The `GTS/` directory contains the galactic tidal stripping simulations and, when enabled, their isolated counterparts.
+
+Simulation snapshots are saved in JSON format. Particle positions and velocities can also be stored in XYZV format for visualization with OVITO. Diagnostic data are saved as comma-separated CSV files.
+
+The diagnostics include:
+
+- Bound mass fraction.
+- Half-mass radius and its relative value.
+- Kinetic and potential energies.
+- Virial ratio.
+- Relative energy error.
+- Angular momentum.
+- Number of completed orbits.
+
+When isolated-cluster simulations are enabled, their diagnostic CSV files are saved separately and excluded from the machine-learning dataset.
 
 ## Dataset and machine learning
 
-Simulation results are collected and organized into a dataset for subsequent analysis.
+The dataset is generated from the initial and final diagnostics of the galactic simulations. Each row represents one simulation and contains its initial orbital parameters and selected physical quantities.
 
-The dataset used in the thesis comprises **17,100 simulations**, obtained from 1,140 orbital configurations, each evaluated using 15 different initial cluster realizations.
+The dataset used in the thesis contains **17,100 simulations**, corresponding to **1,140 orbital configurations** and **15 initial cluster realizations** per configuration.
 
-The classification task uses two orbital parameters as input features:
+The classification task is to predict whether a stellar cluster survives or dissolves. The input features are:
 
-- Semi-major axis.
+- Orbital semi-major axis.
 - Orbital eccentricity.
 
-Each simulation is classified according to its final bound mass fraction and relative half-mass radius:
+A cluster is classified as surviving when both conditions are satisfied:
 
-- **Surviving:** bound mass fraction greater than 0.1 and relative half-mass radius greater than 0.2.
-- **Dissolved:** either quantity is less than or equal to its respective threshold.
+- Bound mass fraction greater than `0.1`.
+- Relative half-mass radius greater than `0.2`.
 
-Two classifiers are implemented and compared:
+Two classifiers were evaluated:
 
-- **Support Vector Classifier (SVC):** uses a second-degree polynomial kernel.
-- **Multi-Layer Perceptron (MLP):** a neural network with two hidden layers containing 16 and 8 neurons.
+- **Support Vector Classifier (SVC)** with a degree-2 polynomial kernel.
+- **Multi-Layer Perceptron (MLP)** with two hidden layers containing 16 and 8 neurons.
 
-The models are evaluated using a stratified 80/20 training-test split and the weighted F1-score.
+The dataset was split into training and test sets using an 80/20 stratified split.
 
-Results obtained in the thesis:
-
-| Classifier | Weighted F1-score |
-|:---|---:|
+| Model | Weighted F1-score |
+|---|---:|
 | SVC | 0.9644 |
 | MLP | 0.9642 |
 
+The generated dataset is saved as `machine_learning_dataset.csv` in the root of each `run_###/` directory.
+
+## Thesis and presentation
+
+The bachelor's thesis and its accompanying presentation are available in the `Docs/` directory:
+
+```text
+Docs/
+├── asaro_valerio_laurea_26.pdf
+├── asaro_valerio_laurea_26_eng.pdf
+└── presentation/
+    └── ...
+```
+
+- `asaro_valerio_laurea_26.pdf` — bachelor's thesis in Italian.
+- `asaro_valerio_laurea_26_eng.pdf` — English translation of the thesis.
+- `presentation/` — presentation slides, available in Italian only.
+
 ## Documentation and analysis
 
-The `Docs/` directory contains the thesis, figures and analysis materials.
+Additional material is organized in the following directories:
 
-- `Docs/asaro_valerio_laurea_26.pdf` — thesis document.
-- `Docs/jupyter-notebooks/` — Jupyter notebooks used for data analysis, model training and figure generation.
-- `Docs/plots/` — generated figures and associated data.
-- `Docs/plots/commands/` — Python scripts used to generate selected figures.
-- `Docs/images/` — images used in the thesis and documentation.
-
-The notebooks are designed to run in [Google Colab](https://colab.research.google.com/).
+```text
+Docs/
+├── images/              # Images used in the documentation
+├── plots/               # Plots generated during the analysis
+└── jupyter-notebooks/   # Notebooks for data analysis and model evaluation
+```
 
 ## Project structure
 
 ```text
 GTS_ML/
-├── py/                  # Simulation source code
+├── py/                         # Python source code
 ├── Docs/
-│   ├── images/          # Images
-│   ├── jupyter-notebooks/ # Analysis and ML notebooks
-│   ├── plots/           # Generated figures and data
-│   │   └── commands/    # Figure generation scripts
-│   └── asaro_valerio_laurea_26.pdf
-├── configuration.json   # Simulation configuration
-├── requirements.txt     # Python dependencies
-├── run.sh               # Linux execution script
-└── nixrun.sh             # NixOS execution script
+│   ├── images/
+│   ├── plots/
+│   ├── jupyter-notebooks/
+│   ├── presentation/
+│   ├── asaro_valerio_laurea_26.pdf
+│   └── asaro_valerio_laurea_26_eng.pdf
+├── configuration.json
+├── requirements.txt
+├── run.sh
+├── nixrun.sh
+└── README.md
 ```
 
-## Author
+## Release
 
-**Valerio Asaro** — [@Qw3rty26](https://github.com/Qw3rty26)
+**Final public release**

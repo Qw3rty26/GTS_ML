@@ -1,5 +1,7 @@
+
 import os
 import time
+import logging
 import numpy as np
 import rebound
 from dataclasses import dataclass
@@ -28,7 +30,7 @@ class Cluster_Generation:
 
         self.xyzv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.xyzv")
 
-        self.tsv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.tsv")
+        self.csv_file_path = os.path.join(self.cluster_configuration.snapshot_file_path, f"{self.cluster_configuration.cluster_seed}.csv")
 
         self._create_simulation()
 
@@ -49,8 +51,8 @@ class Cluster_Generation:
         #    particle_positions,
         #    particle_velocities
         #)
-        #File_Handle.save_tsv_snapshot(
-        #    self.tsv_file_path,
+        #File_Handle.save_csv_snapshot(
+        #    self.csv_file_path,
         #    cluster_diagnostics
         #)
 
@@ -58,12 +60,12 @@ class Cluster_Generation:
 
         PARTICLE_MASS = 1.0 / self.cluster_configuration.number_of_particles
 
-        print(f"Cluster {self.cluster_configuration.cluster_seed}: Creating plummer_handle")
+        logging.debug("Cluster %s: Creating Plummer model", self.cluster_configuration.cluster_seed)
         self.plummer_handle = Plummer(self.cluster_configuration.number_of_particles, self.cluster_configuration.cluster_radius, self.cluster_configuration.cluster_seed)
 
         particle_positions, particle_velocities = self.plummer_handle.generate_particles()
 
-        print(f"Cluster {self.cluster_configuration.cluster_seed}: Adding the particles to rebound")
+        logging.debug("Cluster %s: Adding particles to REBOUND", self.cluster_configuration.cluster_seed)
         self.simulation = Simulation(self.cluster_configuration.simulation_configuration)
         for particle_name, (particle_position, particle_velocity) in enumerate(zip(particle_positions, particle_velocities)):
             particle = rebound.Particle(
@@ -83,7 +85,7 @@ class Cluster_Generation:
     def run(self):
         try:
             END_TIME = self.plummer_handle.get_kepler_time()
-            print(f"Cluster {self.cluster_configuration.cluster_seed}: Running generation in the void until {END_TIME}")
+            logging.info("Cluster %s: Starting generation until t = %s", self.cluster_configuration.cluster_seed, END_TIME)
             _computing_time = time.perf_counter()
             _next_snapshot_time = self.simulation.rebound_handle.t + self.cluster_configuration.snapshot_interval
             self._save_snapshot()
@@ -95,10 +97,7 @@ class Cluster_Generation:
                     _next_snapshot_time += self.cluster_configuration.snapshot_interval
             self._save_snapshot()
             _computing_time = time.perf_counter() - _computing_time
-            print(f"Cluster {self.cluster_configuration.cluster_seed}: Done simulating in {_computing_time} seconds.")
+            logging.info("Cluster %s: Generation completed in %.3f seconds", self.cluster_configuration.cluster_seed, _computing_time)
             #self.simulation.diagnostics.print_diagnostics()
         finally:
             File_Handle.close_json_snapshot(self.json_file_descriptor)
-
-
-
